@@ -88,6 +88,9 @@ int afreq;
 int ktip_threshold;
 bool prune_bridges = false;
 
+std::string overlap_graph_filename;
+bool skip_overlap_detection;
+
 /*! Don't perform alignments if this flag is set */
 bool noAlign = false;
 
@@ -152,6 +155,15 @@ PairwiseAlignment(std::shared_ptr<DistributedFastaData>     dfd,
                   const std::shared_ptr<ParallelOps>&       parops,
                   const std::shared_ptr<TimePod>&           tp,
                   TraceUtils&                               tu);
+
+void
+ReadOverlapGraph(const char *filename,
+                 std::shared_ptr<DistributedFastaData> dfd,
+                 PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+                 const std::shared_ptr<CommGrid>& commgrid,
+                 const std::shared_ptr<ParallelOps>& parops,
+                 const std::shared_ptr<TimePod>& tp,
+                 TraceUtils& tu);
 
 int main(int argc, char **argv)
 {
@@ -235,18 +247,28 @@ int main(int argc, char **argv)
   /* allocates dfd  (shared ptr) */
   dfd = ParallelFastaParser(input_file.c_str(), idx_map_file.c_str(), parops, tp, tu);
 
-  /* allocates Amat
-   * allocates ATmat */
-  GenerateKmerByReadMatrix(dfd, Amat, ATmat, parops, tp, tu);
+  if (skip_overlap_detection)
+  {
+    Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(parops->grid);
+    Rmat->ReadDistribute(overlap_graph_filename.c_str(), 0, false, ReadOverlapDiskHandler());
+  }
+  else
+  {
+    /* allocates Amat
+     * allocates ATmat */
+    GenerateKmerByReadMatrix(dfd, Amat, ATmat, parops, tp, tu);
+  
+    /* allocates Bmat
+     * deletes Amat
+     * deletes ATmat */
+    OverlapDetection(dfd, Bmat, Amat, ATmat, tp, tu);
+  
+    /* allocates Rmat
+     * deletes Bmat */
+    PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
+  }
 
-  /* allocates Bmat
-   * deletes Amat
-   * deletes ATmat */
-  OverlapDetection(dfd, Bmat, Amat, ATmat, tp, tu);
-
-  /* allocates Rmat
-   * deletes Bmat */
-  PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
+  Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
 
   //////////////////////////////////////////////////////////////////////////////////////
   // TRANSITIVE REDUCTION                                                             //
@@ -372,6 +394,8 @@ int parse_args(int argc, char **argv)
      cxxopts::value<int>())
     (CMD_OPTION_GAP_EXT, CMD_OPTION_DESCRIPTION_GAP_EXT,
      cxxopts::value<int>())
+    (CMD_OPTION_OVERLAP_GRAPH, CMD_OPTION_DESCRIPTION_OVERLAP_GRAPH,
+     cxxopts::value<std::string>())
     (CMD_OPTION_KTIP_THRESHOLD, CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD,
      cxxopts::value<int>())
     (CMD_OPTION_PRUNE_BRIDGES, CMD_OPTION_DESCRIPTION_PRUNE_BRIDGES)
@@ -465,6 +489,13 @@ int parse_args(int argc, char **argv)
     gap_ext = result[CMD_OPTION_GAP_EXT].as<int>();
   } else {
     gap_ext = -1;
+  }
+
+  if (result.count(CMD_OPTION_OVERLAP_GRAPH)) {
+    overlap_graph_filename = result[CMD_OPTION_OVERLAP_GRAPH].as<std::string>();
+    skip_overlap_detection = true;
+  } else {
+    skip_overlap_detection = false;
   }
 
   if (result.count(CMD_OPTION_KTIP_THRESHOLD)) {
@@ -570,6 +601,7 @@ void pretty_print_config(std::string &append_to) {
     "Xdrop align (--xa)",
     "Index map (--idxmap)",
     "Alphabet (--alph)",
+    "Overlap graph (--overlaps)",
     "K-tip threshold (--tip)",
     "Prune bridge vertices (--pb)"
   };
@@ -593,6 +625,7 @@ void pretty_print_config(std::string &append_to) {
     bool_to_str(xdropAlign)  + (xdropAlign  ? " | xdrop: " + std::to_string(xdrop) : ""),
     !idx_map_file.empty() ? idx_map_file : "None",
     std::to_string(alph_t),
+    skip_overlap_detection? overlap_graph_filename : "None",
     std::to_string(ktip_threshold),
     bool_to_str(prune_bridges)
   };
@@ -687,7 +720,7 @@ void OverlapDetection(std::shared_ptr<DistributedFastaData> dfd,
 
     // @GGGG-TODO: check vector version (new one stack error)
     Bmat = new PSpMat<elba::CommonKmers>::MPI_DCCols(Mult_AnXBn_DoubleBuff<KmerIntersectSR_t, elba::CommonKmers, PSpMat<elba::CommonKmers>::DCCols>(*Amat, *ATmat));
-    Bmat->Prune([](const elba::CommonKmers& ck) { return ck.count < 2; }, true);
+    //Bmat->Prune([](const elba::CommonKmers& ck) { return ck.count < 2; }, true);
 
     delete Amat;
     delete ATmat;
@@ -776,4 +809,10 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   //Rmat->ParallelWriteMM("alignment.mtx", true, ReadOverlapGraphHandler());
 
   delete Bmat;
+}
+
+void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<CommGrid>& commgrid, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
+{
+    Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(commgrid);
+    Rmat->ReadDistribute(filename, 0, false, ReadOverlapDiskHandler());
 }

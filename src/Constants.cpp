@@ -25,6 +25,9 @@ const char *CMD_OPTION_DESCRIPTION_GAP_OPEN = "Gap open penalty (negative value)
 const char *CMD_OPTION_GAP_EXT = "e";
 const char *CMD_OPTION_DESCRIPTION_GAP_EXT = "Gap extension penalty (negative value).";
 
+const char *CMD_OPTION_OVERLAP_GRAPH = "overlaps";
+const char *CMD_OPTION_DESCRIPTION_OVERLAP_GRAPH = "Previously computed overlap graph filename to skip overlap detection.";
+
 const char *CMD_OPTION_KTIP_THRESHOLD = "tip";
 const char *CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD = "Tip length to prune iteratively.";
 

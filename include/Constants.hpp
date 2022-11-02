@@ -34,6 +34,9 @@ extern const char *CMD_OPTION_DESCRIPTION_GAP_OPEN;
 extern const char *CMD_OPTION_GAP_EXT;
 extern const char *CMD_OPTION_DESCRIPTION_GAP_EXT;
 
+extern const char *CMD_OPTION_OVERLAP_GRAPH;
+extern const char *CMD_OPTION_DESCRIPTION_OVERLAP_GRAPH;
+
 extern const char *CMD_OPTION_KTIP_THRESHOLD;
 extern const char *CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD;
 
