@@ -25,6 +25,12 @@ const char *CMD_OPTION_DESCRIPTION_GAP_OPEN = "Gap open penalty (negative value)
 const char *CMD_OPTION_GAP_EXT = "e";
 const char *CMD_OPTION_DESCRIPTION_GAP_EXT = "Gap extension penalty (negative value).";
 
+const char *CMD_OPTION_KTIP_THRESHOLD = "tip";
+const char *CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD = "Tip length to prune iteratively.";
+
+const char *CMD_OPTION_PRUNE_BRIDGES = "pb";
+const char *CMD_OPTION_DESCRIPTION_PRUNE_BRIDGES =  "Flag to indicate bridges should be pruned.";
+
 const char *CMD_OPTION_KMER_LENGTH = "k";
 const char *CMD_OPTION_DESCRIPTION_KMER_LENGTH = "Kmer length.";
 

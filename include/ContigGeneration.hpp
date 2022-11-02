@@ -20,6 +20,9 @@ typedef int64_t IType; /* index type used in this file */
 
 constexpr MPI_Count max_int = std::numeric_limits<int>::max();
 
+extern int ktip_threshold;
+extern bool prune_bridges;
+
 struct DistReadInfo
 {
 public:
@@ -411,24 +414,30 @@ IType GetRead2Contigs(SpParMat<IType,ReadOverlap,SpDCCols<IType,ReadOverlap>>& G
 
     tu.print_str("GetRead2Contigs :: Calculated vertex degrees\n");
 
-    IType ktip_edges_removed;
-    do
+    if (ktip_threshold > 0)
     {
-        SpParMat<IType,bool,SpDCCols<IType,bool>> D1 = A;
-        FullyDistVec<IType,IType> degs1(A.getcommgrid());
-        D1.Reduce(degs1, Row, std::plus<IType>(), static_cast<IType>(0));
-        ktip_edges_removed = KTipsRemoval(A, degs1, 1, tu);
+        IType ktip_edges_removed;
+        do
+        {
+            SpParMat<IType,bool,SpDCCols<IType,bool>> D1 = A;
+            FullyDistVec<IType,IType> degs1(A.getcommgrid());
+            D1.Reduce(degs1, Row, std::plus<IType>(), static_cast<IType>(0));
+            ktip_edges_removed = KTipsRemoval(A, degs1, ktip_threshold, tu);
+            std::ostringstream oss;
+            oss << "GetRead2Contigs :: Found " << ktip_edges_removed  << " k-tip edges\n";
+            tu.print_str(oss.str());
+        } while (ktip_edges_removed > 0);
+
+        tu.print_str("GetRead2Contigs :: Removed k-tips\n");
+    }
+
+    if (prune_bridges)
+    {
+        IType bridge_vertices_removed = RemoveBridgeVertices(A);
         std::ostringstream oss;
-        oss << "GetRead2Contigs :: Found " << ktip_edges_removed  << " k-tip edges\n";
+        oss << "GetRead2Contigs :: Removed " << bridge_vertices_removed << " bridge vertices\n";
         tu.print_str(oss.str());
-    } while (ktip_edges_removed > 0);
-
-    tu.print_str("GetRead2Contigs :: Removed k-tips\n");
-
-    IType bridge_vertices_removed = RemoveBridgeVertices(A);
-    std::ostringstream oss;
-    oss << "GetRead2Contigs :: Removed " << bridge_vertices_removed << " bridge vertices\n";
-    tu.print_str(oss.str());
+    }
 
     D2 = A;
     D2.Reduce(degs2, Row, std::plus<IType>(), static_cast<IType>(0));
