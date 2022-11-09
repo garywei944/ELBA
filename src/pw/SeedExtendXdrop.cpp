@@ -178,6 +178,242 @@ void SeedExtendXdrop::apply(
   }
 }
 
+struct XSeed
+{
+    int begpH, endpH, begpV, endpV, begpHbest, endpHbest, begpVbest, endpVbest;
+    XSeed(int begpH, int begpV, int seedlen) : begpH(begpH), begpV(begpV), endpH(begpH + seedlen), endpV(begpV + seedlen)
+    {
+        begpHbest = begpH;
+        begpVbest = begpV;
+        endpHbest = endpH;
+        endpVbest = endpV;
+    }
+
+    XSeed(const TSeed& seed) : begpH(beginPositionH(seed)), begpV(beginPositionV(seed)), endpH(endPositionH(seed)), endpV(endPositionV(seed))
+    {
+        begpHbest = begpH;
+        begpVbest = begpV;
+        endpHbest = endpH;
+        endpVbest = endpV;
+    }
+};
+
+int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extleft, int mat, int mis, int gap, int xdrop, XSeed& seed)
+{
+    int cols = querySeq.size() + 1;
+    int rows = dbSeq.size() + 1;
+
+    if (rows == 1 || cols == 1) return 0;
+
+    int len = 2 * std::max(cols, rows);
+    int minErrScore = std::numeric_limits<int>::min() / len;
+    gap = std::max(gap, minErrScore);
+    mis = std::max(mis, minErrScore);
+    int undefined = std::numeric_limits<int>::min() - gap;
+
+    std::vector<int> antiDiag1;
+    std::vector<int> antiDiag2;
+    std::vector<int> antiDiag3;
+
+    int minCol = 1;
+    int maxCol = 2;
+    int offset1 = 0;
+    int offset2 = 0;
+    int offset3 = 0;
+
+    antiDiag2.resize(1);
+    antiDiag2[0] = 0;
+
+    antiDiag3.resize(2);
+    if (-gap > xdrop)
+    {
+        antiDiag3[0] = undefined;
+        antiDiag3[1] = undefined;
+    }
+    else
+    {
+        antiDiag3[0] = gap;
+        antiDiag3[1] = gap;
+    }
+
+    int antiDiagNo = 1;
+    int best = 0;
+
+    int bestExtensionCol;
+    int bestExtensionRow;
+    int bestExtensionScore;
+
+    while (minCol < maxCol)
+    {
+        ++antiDiagNo;
+        std::vector<int> temp = std::move(antiDiag1);
+        antiDiag1 = std::move(antiDiag2);
+        antiDiag2 = std::move(antiDiag3);
+        antiDiag3 = std::move(temp);
+
+        offset1 = offset2;
+        offset2 = offset3;
+        offset3 = minCol - 1;
+
+        antiDiag3.resize(maxCol+1-offset3);
+        antiDiag3[0] = undefined;
+        antiDiag3[maxCol - offset3] = undefined;
+
+        if (antiDiagNo * gap > best - xdrop)
+        {
+            if (offset3 == 0) antiDiag3[0] = antiDiagNo * gap;
+            if (antiDiagNo - maxCol == 0) antiDiag3[maxCol - offset3] = antiDiagNo * gap;
+        }
+
+        int antiDiagBest = antiDiagNo * gap;
+        for (int col = minCol; col < maxCol; ++col)
+        {
+            int i3 = col - offset3;
+            int i2 = col - offset2;
+            int i1 = col - offset1;
+
+            int queryPos, dbPos;
+
+            if (!extleft)
+            {
+                queryPos = col - 1;
+                dbPos = antiDiagNo - col - 1;
+            }
+            else
+            {
+                queryPos = cols - 1 - col;
+                dbPos = rows - 1 + col - antiDiagNo;
+            }
+
+
+            int tmp = std::max(antiDiag2[i2-1], antiDiag2[i2]) + gap;
+            tmp = std::max(tmp, antiDiag1[i1-1] + (querySeq[queryPos]==dbSeq[dbPos]? mat : mis));
+
+
+            if (tmp < best - xdrop)
+            {
+                antiDiag3[i3] = undefined;
+            }
+            else
+            {
+                antiDiag3[i3] = tmp;
+                antiDiagBest = std::max(antiDiagBest, tmp);
+            }
+
+            if (tmp > best)
+            {
+                bestExtensionCol = col;
+                bestExtensionRow = antiDiagNo - bestExtensionCol;
+                bestExtensionScore = antiDiag3[bestExtensionCol - offset3];
+                assert((bestExtensionScore == tmp));
+            }
+        }
+
+        best = std::max(best, antiDiagBest);
+
+        while (minCol - offset3 < antiDiag3.size() && antiDiag3[minCol-offset3] == undefined &&
+               minCol - offset2 - 1 < antiDiag2.size() && antiDiag2[minCol - offset2 - 1] == undefined)
+        {
+            ++minCol;
+        }
+
+        while (maxCol - offset3 > 0 && (antiDiag3[maxCol - offset3 - 1] == undefined) &&
+                                       (antiDiag2[maxCol - offset2 - 1] == undefined))
+        {
+            --maxCol;
+        }
+
+        ++maxCol;
+
+        minCol = std::max(minCol, antiDiagNo + 2 - rows);
+        maxCol = std::min(maxCol, cols);
+    }
+
+    int longestExtensionCol = antiDiag3.size() + offset3 - 2;
+    int longestExtensionRow = antiDiagNo - longestExtensionCol;
+    int longestExtensionScore = antiDiag3[longestExtensionCol - offset3];
+
+    if (longestExtensionScore == undefined)
+    {
+        if (antiDiag2[antiDiag2.size()-2] != undefined)
+        {
+            longestExtensionCol = antiDiag2.size() + offset2 - 2;
+            longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
+            longestExtensionScore = antiDiag2[longestExtensionCol - offset2];
+        }
+        else if (antiDiag2.size() > 2 && antiDiag2[antiDiag2.size()-3] != undefined)
+        {
+            longestExtensionCol = antiDiag2.size() + offset2 - 3;
+            longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
+            longestExtensionScore = antiDiag2[longestExtensionCol - offset2];
+        }
+    }
+
+    if (longestExtensionScore == undefined)
+    {
+        for (int i = 0; i < antiDiag1.size(); ++i)
+        {
+            if (antiDiag1[i] > longestExtensionScore)
+            {
+                longestExtensionScore = antiDiag1[i];
+                longestExtensionCol = i + offset1;
+                longestExtensionRow = antiDiagNo - 2 - longestExtensionCol;
+            }
+        }
+    }
+
+    if (longestExtensionScore != undefined)
+    {
+        if (extleft)
+        {
+            seed.begpH -= longestExtensionRow;
+            seed.begpV -= longestExtensionCol;
+        }
+        else
+        {
+            seed.endpH += longestExtensionRow;
+            seed.endpV += longestExtensionCol;
+        }
+    }
+
+    if (bestExtensionScore != undefined)
+    {
+        if (extleft)
+        {
+            seed.begpHbest -= bestExtensionRow;
+            seed.begpVbest -= bestExtensionCol;
+        }
+        else
+        {
+            seed.endpHbest += bestExtensionRow;
+            seed.endpVbest += bestExtensionCol;
+        }
+    }
+
+    return bestExtensionScore;
+}
+
+int extend_seed(const seqan::Dna5String& dbSeq, const seqan::Dna5String& querySeq, int mat, int mis, int gap, int xdrop, XSeed& seed)
+{
+    seqan::String<char, seqan::CStyle> d = dbSeq;
+    seqan::String<char, seqan::CStyle> q = querySeq;
+
+    std::string ds(d);
+    std::string qs(q);
+
+    std::string databasePrefix = ds.substr(0, seed.begpH);
+    std::string queryPrefix = qs.substr(0, seed.begpV);
+
+    int lscore = extend_seed_one_direction(databasePrefix, queryPrefix, true, mat, mis, gap, xdrop, seed);
+
+    std::string databaseSuffix = ds.substr(seed.endpH, ds.size());
+    std::string querySuffix = qs.substr(seed.endpV, qs.size());
+
+    int rscore = extend_seed_one_direction(databaseSuffix, querySuffix, false, mat, mis, gap, xdrop, seed);
+
+    return lscore + rscore;
+}
+
 // @NOTE This is hard-coded to the number of seeds being <= 2
 void
 SeedExtendXdrop::apply_batch
@@ -271,14 +507,20 @@ SeedExtendXdrop::apply_batch
 
 			seqan::Dna5StringReverseComplement twin(seedH);
 
-            if (twin == seedV || seedH == seedV)
-                seed_fstream << row_offset+hidx+1 << "\t" << col_offset+vidx+1 << "\t" << beginPositionV(seed) << "\t" << beginPositionH(seed) << "\n";
+            //if (twin == seedV || seedH == seedV)
+            //    seed_fstream << row_offset+hidx+1 << "\t" << col_offset+vidx+1 << "\t" << beginPositionV(seed) << "\t" << beginPositionH(seed) << "\n";
+
+            int mat = seqan::scoreMatch(scoring_scheme);
+            int mis = seqan::scoreMismatch(scoring_scheme);
+            int gap = seqan::scoreGap(scoring_scheme);
 
 			if(twin == seedV)
 			{
 				strands[i] = true;
 				seqan::Dna5String twinseqH = seqan::source(seqsh[i]);
-				seqan::Dna5StringReverseComplement twinRead(twinseqH);
+                seqan::Dna5String twinRead(twinseqH);
+                seqan::reverseComplement(twinRead);
+				//seqan::Dna5StringReverseComplement twinRead(twinseqH);
 				LocalSeedHOffset = length(twinseqH) - LocalSeedHOffset - seed_length;
 
 				setBeginPositionH(seed, LocalSeedHOffset);
@@ -286,16 +528,29 @@ SeedExtendXdrop::apply_batch
 				setEndPositionH(seed, LocalSeedHOffset + seed_length);
 				setEndPositionV(seed, LocalSeedVOffset + seed_length);
 
+                XSeed xseed(seed);
+
 				if(!noAlign)
 				{
 					/* Perform match extension */
 					start_time = std::chrono::system_clock::now();
-					xscores[i] = extendSeed(seed, twinRead, seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme,
-							xdrop, (int)k,
-							seqan::GappedXDrop());
+                    xscores[i] = extend_seed(twinRead, seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
+					//xscores[i] = extendSeed(seed, twinRead, seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
+
+                    //seqan::String<char, seqan::CStyle> t = twinRead;
+                    //seqan::String<char, seqan::CStyle> s = seqan::source(seqsv[i]);
+                    //std::string twin_read(t);
+                    //std::string source_read(s);
+                    //extend_seed(twin_read, source_read, seqan::scoreMatch(scoring_scheme), seqan::scoreMismatch(scoring_scheme), seqan::scoreGap(scoring_scheme), xdrop, xseed);
+
+                    setBeginPositionH(seed, xseed.begpHbest);
+                    setBeginPositionV(seed, xseed.begpVbest);
+                    setEndPositionH(seed, xseed.endpHbest);
+                    setEndPositionV(seed, xseed.endpVbest);
+
 				}
 				else
 				{
@@ -306,14 +561,20 @@ SeedExtendXdrop::apply_batch
 			else if (seedH == seedV)
 			{
 				strands[i] = false;
+                XSeed xseed(seed);
+
 				if(!noAlign)
 				{
 					start_time = std::chrono::system_clock::now();
-					xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme,
-							xdrop, (int)k,
-							seqan::GappedXDrop());
+                    xscores[i] = extend_seed(seqan::source(seqsh[i]), seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
+					//xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
+
+                    setBeginPositionH(seed, xseed.begpHbest);
+                    setBeginPositionV(seed, xseed.begpVbest);
+                    setEndPositionH(seed, xseed.endpHbest);
+                    setEndPositionV(seed, xseed.endpVbest);
 
 				}
 				else
