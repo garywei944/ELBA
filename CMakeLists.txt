@@ -26,7 +26,7 @@ else()
   set(libc "")
 endif()
 
-#set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -fpermissive -w -O1 -g -fsanitize=address -fno-omit-frame-pointer -DSEQAN_ENABLE_DEBUG=0 -mavx2")
+#set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -fpermissive -w -O1 -g -fsanitize=address -fno-omit-frame-pointer -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 #set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -w -O3 -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -w -O3 -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 
@@ -86,6 +86,10 @@ add_executable(elba
         include/TransitiveReduction.hpp
         include/CC.h
         include/ContigGeneration.hpp
+        src/ReadOverlap.cpp
+        include/ReadOverlap.hpp
+        src/PruneChimeras.cpp
+        include/PruneChimeras.hpp
 	)
 
 set(LOWER_KMER_FREQ 20

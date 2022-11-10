@@ -533,8 +533,8 @@ SeedExtendXdrop::apply_batch
                     int tlen = length(seqan::source(seqsv[i]));
                     int qlen = length(twinRead);
 
-                    seed_fstream << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t-\t" << col_offset+vidx+1 << "\t"
-                                                              << qlen << "\t" << qlen - xseed.endpHbest << "\t" << qlen - xseed.begpHbest << std::endl;
+                    //seed_fstream << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t-\t" << col_offset+vidx+1 << "\t"
+                    //                                          << qlen << "\t" << qlen - xseed.endpHbest << "\t" << qlen - xseed.begpHbest << std::endl;
 
                     //seqan::String<char, seqan::CStyle> t = twinRead;
                     //seqan::String<char, seqan::CStyle> s = seqan::source(seqsv[i]);
@@ -567,8 +567,8 @@ SeedExtendXdrop::apply_batch
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
-                    seed_fstream << row_offset+hidx+1 << "\t" << length(seqan::source(seqsv[i])) << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << col_offset+vidx+1 << "\t"
-                                                              << length(seqan::source(seqsh[i])) << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
+                    //seed_fstream << row_offset+hidx+1 << "\t" << length(seqan::source(seqsv[i])) << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << col_offset+vidx+1 << "\t"
+                    //                                          << length(seqan::source(seqsh[i])) << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);

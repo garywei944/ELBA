@@ -228,16 +228,19 @@ DistributedPairwiseRunner::run_batch
 	uint64_t z = 0;
 	auto dcsc = spSeq->GetDCSC();
 
-	for (uint64_t i = 0; i < dcsc->nzc; ++i)
-	{
-		for (uint64_t j = dcsc->cp[i]; j < dcsc->cp[i+1]; ++j)
-		{
-			std::get<0>(mattuples[z]) = dcsc->ir[j];
-			std::get<1>(mattuples[z]) = dcsc->jc[i];
-			std::get<2>(mattuples[z]) = &(dcsc->numx[j]);
-			++z;
-		}
-	}
+    if (dcsc)
+    {
+        for (uint64_t i = 0; i < dcsc->nzc; ++i)
+        {
+            for (uint64_t j = dcsc->cp[i]; j < dcsc->cp[i+1]; ++j)
+            {
+                std::get<0>(mattuples[z]) = dcsc->ir[j];
+                std::get<1>(mattuples[z]) = dcsc->jc[i];
+                std::get<2>(mattuples[z]) = &(dcsc->numx[j]);
+                ++z;
+            }
+        }
+    }
 
 	assert (z == local_nnz_count);
 		

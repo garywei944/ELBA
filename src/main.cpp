@@ -837,7 +837,21 @@ void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap
 {
     std::vector<PileupVector> pileups = GetReadPileup(dfd, Rmat, parops);
 
-    ReportChimeras(dfd, pileups);
+    if (Rmat->getcommgrid()->GetRank() == 0)
+    {
+        for (int i = 0; i < pileups.size(); ++i)
+        {
+            std::cout << i+1 << ": ";
+            for (int j = 0; j < pileups[i].Length(); ++j)
+            {
+                std::cout << pileups[i].pileup[j] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    if (Rmat->getcommgrid()->GetRankInProcCol() == 0)
+        ReportChimeras(dfd, pileups);
 }
 
 void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<CommGrid>& commgrid, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)

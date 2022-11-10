@@ -1,14 +1,9 @@
 #ifndef READ_OVERLAPS_H_
 #define READ_OVERLAPS_H_
 
-#include <limits>
-#include <cassert>
-#include <iostream>
 #include "kmer/CommonKmers.hpp"
 
 using namespace elba;
-
-static constexpr int MAX_INT = std::numeric_limits<int>::max();
 
 struct ReadOverlap
 {
@@ -17,59 +12,17 @@ struct ReadOverlap
     bool transpose, rc;
     int score;
 
-    void SetPathInf() { sfxpath[0] = sfxpath[1] = sfxpath[2] = sfxpath[3] = MAX_INT; }
+    void SetPathInf();
+    ReadOverlap();
 
-    ReadOverlap() : sfx(0), dir(-1), score(-1), transpose(false)
-    {
-        SetPathInf();
-    }
+    ReadOverlap(const ReadOverlap& rhs);
+    ReadOverlap(const CommonKmers& cks);
 
-    ReadOverlap(const ReadOverlap& rhs)
-        : sfx(rhs.sfx), sfxT(rhs.sfxT), dir(rhs.dir), dirT(rhs.dirT), transpose(rhs.transpose), rc(rhs.rc), score(rhs.score)
-    {
-        b[0] = rhs.b[0]; b[1] = rhs.b[1];
-        e[0] = rhs.e[0]; e[1] = rhs.e[1];
-        l[0] = rhs.l[0]; l[1] = rhs.l[1];
+    bool is_invalid() const;
 
-        coords[0] = rhs.coords[0];
-        coords[1] = rhs.coords[1];
+    bool arrows(int& t, int& h) const;
 
-        for (int i = 0; i < 4; ++i)
-            sfxpath[i] = rhs.sfxpath[i];
-    }
-
-    ReadOverlap(const CommonKmers& cks) : transpose(false), score(static_cast<int>(cks.score))
-    {
-        b[0] = cks.first.first;  b[1] = cks.second.first;
-        e[0] = cks.first.second; e[1] = cks.second.second;
-        l[0] = cks.lenv;         l[1] = cks.lenh;
-
-        rc = cks.rc;
-
-        sfx  = cks.sfx;
-        sfxT = cks.sfxT;
-        dir  = cks.dir;
-        dirT = cks.dirT;
-
-        SetPathInf();
-
-        sfxpath[dir] = sfx;
-    }
-
-    bool is_invalid() const { return (dir == -1); }
-
-    bool arrows(int& t, int& h) const
-    {
-        if (is_invalid())
-            return false;
-
-        t = (dir>>1)&1;
-        h = dir&1;
-
-        return true;
-    }
-
-    operator bool() const { return true; } /* for T = R in transitive reduction */
+    operator bool() const { return true; } /* For T = R in transitive reduction */
 
     friend bool operator==(const ReadOverlap& lhs, const ReadOverlap& rhs)
     {
@@ -78,17 +31,14 @@ struct ReadOverlap
 
     ReadOverlap operator+(const ReadOverlap& b)
     {
-        ReadOverlap myobj = b;
-        return myobj;
+        ReadOverlap o = b;
+        return o;
     }
 };
 
-int intplus(int a, int b)
-{
-    return (a == MAX_INT || b == MAX_INT) ? MAX_INT : a + b;
-}
+int intplus(int a, int b);
 
-struct Tupleize : unary_function<ReadOverlap, ReadOverlap>
+struct Tupleize : std::unary_function<ReadOverlap, ReadOverlap>
 {
     ReadOverlap operator() (ReadOverlap& e)
     {
