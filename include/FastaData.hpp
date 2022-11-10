@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <memory>
 #include <vector>
+#include <string>
 #include "Types.hpp"
 #include "TraceUtils.hpp"
 
@@ -73,6 +74,10 @@ public:
   char *get_sequence_id(uint64_t idx, ushort &len,
                         uint64_t &start_offset,
                         uint64_t &end_offset_inclusive);
+
+  int get_sequence_len(uint64_t idx);
+
+  std::string get_sequence_name(uint64_t idx);
 
   /*!
    * Sets the sub buffer size for sequences starting at

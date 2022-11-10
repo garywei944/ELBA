@@ -35,7 +35,7 @@ struct ReadOverlap
         coords[1] = rhs.coords[1];
 
         for (int i = 0; i < 4; ++i)
-            sfxpath[i] = rhs.sfxpath[i]; 
+            sfxpath[i] = rhs.sfxpath[i];
     }
 
     ReadOverlap(const CommonKmers& cks) : transpose(false), score(static_cast<int>(cks.score))
@@ -99,12 +99,12 @@ struct Tupleize : unary_function<ReadOverlap, ReadOverlap>
                 out.coords[1] = e.l[1] - e.b[1];
                 break;
             case 1:
-                out.coords[0] = (e.transpose)? (e.l[0] - e.e[0]) : e.b[0];
-                out.coords[1] = (e.transpose)? (e.l[1] - e.e[1]) : e.b[1];
+                out.coords[0] = e.transpose? e.l[0] - e.e[0] : e.b[0];
+                out.coords[1] = e.transpose? e.l[1] - e.e[1] : e.b[1];
                 break;
             case 2:
-                out.coords[0] = (e.transpose)? (e.l[0] - e.b[0]) : e.e[0];
-                out.coords[1] = (e.transpose)? (e.l[1] - e.b[1]) : e.e[1];
+                out.coords[0] = e.transpose? e.l[0] - e.b[0] : e.e[0];
+                out.coords[1] = e.transpose? e.l[1] - e.b[1] : e.e[1];
                 break;
             case 3:
                 out.coords[0] = e.e[0];
@@ -132,22 +132,22 @@ struct ReadOverlapDiskHandler
     /* The read overlap disk handler should only be called on an overlap graph
      * which has not been symmetricized yet. That is, the adjacency matrix is
      * upper triangular. */
-    
+
     ReadOverlap getNoNum(int64_t row, int64_t col) { return ReadOverlap(); }
-    
+
     template <typename c, typename t>
     ReadOverlap read(std::basic_istream<c,t>& is, int64_t row, int64_t col)
     {
         ReadOverlap e;
         e.transpose = false;
-    
+
         int rc;
         is >> rc >> e.dir >> e.dirT >> e.sfx >> e.sfxT >> e.b[0] >> e.e[0] >> e.b[1] >> e.e[1] >> e.l[0] >> e.l[1];
         e.rc = static_cast<bool>(rc);
-    
+
         e.SetPathInf();
         e.sfxpath[e.dir] = e.sfx;
-    
+
         return e;
     }
 

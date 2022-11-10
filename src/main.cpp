@@ -28,6 +28,7 @@ derivative works, and perform publicly and display publicly, and to permit other
 #include "../include/ContigGeneration.hpp"
 #include "../include/ReadOverlap.hpp"
 #include "../include/TransitiveReduction.hpp"
+#include "../include/PruneChimeras.hpp"
 
 #include "seqan/score/score_matrix_data.h"
 
@@ -125,45 +126,64 @@ int ckthr = 1;
 /*! Score threshold */
 bool aln_score_thr = false; // GGGG: Currently not used
 
-std::shared_ptr<DistributedFastaData>
-ParallelFastaParser(const char*                         input_file,
-                    const char*                         idx_map_file,
-                    const std::shared_ptr<ParallelOps>& parops,
-                    const std::shared_ptr<TimePod>&     tp,
-                    TraceUtils&                         tu);
+std::shared_ptr<DistributedFastaData> ParallelFastaParser
+(
+    const char* input_file,
+    const char* idx_map_file,
+    const std::shared_ptr<ParallelOps>& parops,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
 
-void
-GenerateKmerByReadMatrix(std::shared_ptr<DistributedFastaData> dfd,
-                         PSpMat<PosInRead>::MPI_DCCols*&       Amat,
-                         PSpMat<PosInRead>::MPI_DCCols*&       ATmat,
-                         const std::shared_ptr<ParallelOps>&   parops,
-                         const std::shared_ptr<TimePod>&       tp,
-                         TraceUtils&                           tu);
+void GenerateKmerByReadMatrix
+(
+    std::shared_ptr<DistributedFastaData> dfd,
+    PSpMat<PosInRead>::MPI_DCCols*& Amat,
+    PSpMat<PosInRead>::MPI_DCCols*& ATmat,
+    const std::shared_ptr<ParallelOps>& parops,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
 
-void
-OverlapDetection(std::shared_ptr<DistributedFastaData>      dfd,
-                 PSpMat<elba::CommonKmers>::MPI_DCCols*& Bmat,
-                 PSpMat<PosInRead>::MPI_DCCols*             Amat,
-                 PSpMat<PosInRead>::MPI_DCCols*             ATmat,
-                 const std::shared_ptr<TimePod>&            tp,
-                 TraceUtils&                                tu);
+void OverlapDetection
+(
+    std::shared_ptr<DistributedFastaData> dfd,
+    PSpMat<elba::CommonKmers>::MPI_DCCols*& Bmat,
+    PSpMat<PosInRead>::MPI_DCCols* Amat,
+    PSpMat<PosInRead>::MPI_DCCols* ATmat,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
 
-void
-PairwiseAlignment(std::shared_ptr<DistributedFastaData>     dfd,
-                  PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat,
-                  PSpMat<ReadOverlap>::MPI_DCCols*&         Rmat,
-                  const std::shared_ptr<ParallelOps>&       parops,
-                  const std::shared_ptr<TimePod>&           tp,
-                  TraceUtils&                               tu);
+void PairwiseAlignment
+(
+    std::shared_ptr<DistributedFastaData> dfd,
+    PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat,
+    PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+    const std::shared_ptr<ParallelOps>& parops,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
 
-void
-ReadOverlapGraph(const char *filename,
-                 std::shared_ptr<DistributedFastaData> dfd,
-                 PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
-                 const std::shared_ptr<CommGrid>& commgrid,
-                 const std::shared_ptr<ParallelOps>& parops,
-                 const std::shared_ptr<TimePod>& tp,
-                 TraceUtils& tu);
+void PruneChimeras
+(
+    std::shared_ptr<DistributedFastaData> dfd,
+    PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+    const std::shared_ptr<ParallelOps>& parops,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
+
+void ReadOverlapGraph
+(
+    const char *filename,
+    std::shared_ptr<DistributedFastaData> dfd,
+    PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+    const std::shared_ptr<CommGrid>& commgrid,
+    const std::shared_ptr<ParallelOps>& parops,
+    const std::shared_ptr<TimePod>& tp,
+    TraceUtils& tu
+);
 
 int main(int argc, char **argv)
 {
@@ -257,18 +277,20 @@ int main(int argc, char **argv)
     /* allocates Amat
      * allocates ATmat */
     GenerateKmerByReadMatrix(dfd, Amat, ATmat, parops, tp, tu);
-  
+
     /* allocates Bmat
      * deletes Amat
      * deletes ATmat */
     OverlapDetection(dfd, Bmat, Amat, ATmat, tp, tu);
-  
+
     /* allocates Rmat
      * deletes Bmat */
     PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
   }
 
-  Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
+  PruneChimeras(dfd, Rmat, parops, tp, tu);
+
+  // Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
 
   //////////////////////////////////////////////////////////////////////////////////////
   // TRANSITIVE REDUCTION                                                             //
@@ -667,9 +689,9 @@ ParallelFastaParser(const char *input_file, const char *idx_map_file, const std:
 
     std::shared_ptr<DistributedFastaData> dfd = std::make_shared<DistributedFastaData>(
         input_file, idx_map_file, input_overlap, klength, parops, tp, tu);
-    
+
     tp->times["EndMain:newDFD()"] = std::chrono::system_clock::now();
-    
+
     if (dfd->global_count() != seq_count)
     {
         uint64_t final_seq_count = dfd->global_count();
@@ -679,12 +701,12 @@ ParallelFastaParser(const char *input_file, const char *idx_map_file, const std:
                  .append(" (")
                  .append(std::to_string((((seq_count - final_seq_count) * 100.0) / seq_count)))
                  .append("% removed)");
-        
+
         seq_count = dfd->global_count();
         print_str += "\n";
         tu.print_str(print_str);
     }
-    return dfd;  
+    return dfd;
 }
 
 void GenerateKmerByReadMatrix(std::shared_ptr<DistributedFastaData> dfd, PSpMat<PosInRead>::MPI_DCCols*& Amat, PSpMat<PosInRead>::MPI_DCCols*& ATmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
@@ -809,6 +831,13 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   //Rmat->ParallelWriteMM("alignment.mtx", true, ReadOverlapGraphHandler());
 
   delete Bmat;
+}
+
+void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
+{
+    std::vector<PileupVector> pileups = GetReadPileup(dfd, Rmat, parops);
+
+    ReportChimeras(dfd, pileups);
 }
 
 void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<CommGrid>& commgrid, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)

@@ -181,21 +181,11 @@ void SeedExtendXdrop::apply(
 struct XSeed
 {
     int begpH, endpH, begpV, endpV, begpHbest, endpHbest, begpVbest, endpVbest;
-    XSeed(int begpH, int begpV, int seedlen) : begpH(begpH), begpV(begpV), endpH(begpH + seedlen), endpV(begpV + seedlen)
-    {
-        begpHbest = begpH;
-        begpVbest = begpV;
-        endpHbest = endpH;
-        endpVbest = endpV;
-    }
+    XSeed(int _begpH, int _begpV, int seedlen) : begpH(_begpH), begpV(_begpV), endpH(_begpH + seedlen), endpV(_begpV + seedlen),
+                                                 begpHbest(_begpH), begpVbest(_begpV), endpHbest(_begpH + seedlen), endpVbest(_begpV + seedlen) {}
 
-    XSeed(const TSeed& seed) : begpH(beginPositionH(seed)), begpV(beginPositionV(seed)), endpH(endPositionH(seed)), endpV(endPositionV(seed))
-    {
-        begpHbest = begpH;
-        begpVbest = begpV;
-        endpHbest = endpH;
-        endpVbest = endpV;
-    }
+    XSeed(const TSeed& seed) : begpH(beginPositionH(seed)), begpV(beginPositionV(seed)), endpH(endPositionH(seed)), endpV(endPositionV(seed)),
+                               begpHbest(beginPositionH(seed)), begpVbest(beginPositionV(seed)), endpHbest(endPositionH(seed)), endpVbest(endPositionV(seed)) {}
 };
 
 int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extleft, int mat, int mis, int gap, int xdrop, XSeed& seed)
@@ -507,8 +497,8 @@ SeedExtendXdrop::apply_batch
 
 			seqan::Dna5StringReverseComplement twin(seedH);
 
-            //if (twin == seedV || seedH == seedV)
-            //    seed_fstream << row_offset+hidx+1 << "\t" << col_offset+vidx+1 << "\t" << beginPositionV(seed) << "\t" << beginPositionH(seed) << "\n";
+            // if (twin == seedV || seedH == seedV)
+               // seed_fstream << row_offset+hidx+1 << "\t" << col_offset+vidx+1 << "\t" << beginPositionV(seed) << "\t" << beginPositionH(seed) << "\n";
 
             int mat = seqan::scoreMatch(scoring_scheme);
             int mis = seqan::scoreMismatch(scoring_scheme);
@@ -540,6 +530,12 @@ SeedExtendXdrop::apply_batch
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
+                    int tlen = length(seqan::source(seqsv[i]));
+                    int qlen = length(twinRead);
+
+                    seed_fstream << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t-\t" << col_offset+vidx+1 << "\t"
+                                                              << qlen << "\t" << qlen - xseed.endpHbest << "\t" << qlen - xseed.begpHbest << std::endl;
+
                     //seqan::String<char, seqan::CStyle> t = twinRead;
                     //seqan::String<char, seqan::CStyle> s = seqan::source(seqsv[i]);
                     //std::string twin_read(t);
@@ -570,6 +566,9 @@ SeedExtendXdrop::apply_batch
 					//xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
+
+                    seed_fstream << row_offset+hidx+1 << "\t" << length(seqan::source(seqsv[i])) << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << col_offset+vidx+1 << "\t"
+                                                              << length(seqan::source(seqsh[i])) << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);

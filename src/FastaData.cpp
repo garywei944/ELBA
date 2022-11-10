@@ -183,6 +183,26 @@ char *FastaData::get_sequence_id(uint64_t idx, ushort &len,
   return buff;
 }
 
+std::string FastaData::get_sequence_name(uint64_t idx)
+{
+    if (idx > l_seq_count)
+    {
+        int myrank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+        std::cout << myrank << ":: PROBLEM " << idx << "\t" << l_seq_count << std::endl;
+    }
+
+    ushort len;
+    uint64_t start_offset, end_offset_inclusive;
+    char *buffer = get_sequence_id(idx, len, start_offset, end_offset_inclusive);
+    return std::string{buffer + start_offset, buffer + end_offset_inclusive + 1};
+}
+
+int FastaData::get_sequence_len(uint64_t idx)
+{
+    return static_cast<int>(((*seq_starts)[idx] - 1) - (*id_starts)[idx]);
+}
+
 uvec_64 * FastaData::deleted_indices(){
     return del_idxs;
 }
