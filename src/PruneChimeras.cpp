@@ -22,22 +22,46 @@ void PileupVector::AddInterval(int begin, int end)
     for (int i = begin; i < end; ++i) pileup[i]++;
 }
 
-std::vector<int> PackPileupVector(const std::vector<PileupVector>& pvs, std::vector<int>& lens, int& size)
+int PackPileupVector(const std::vector<PileupVector>& pvs, std::vector<int>& packed, std::vector<int>& lens)
 {
-    size = 0;
-    lens.clear();
-    std::vector<int> packed;
-    for (int i = 0; i < pvs.size(); ++i)
+    int pv_size = pvs.size();
+    int packed_size = 0;
+    packed.clear();
+
+    lens.reserve(pv_size);
+
+    for (int i = 0; i < pv_size; ++i)
     {
         int len = pvs[i].Length();
         lens.push_back(len);
-        size += len;
-        for (int j = 0; j < len; ++j)
-            packed.push_back(pvs[i].pileup[j]);
+        packed_size += len;
     }
 
-    return packed;
+    packed.reserve(packed_size);
+
+    for (int i = 0; i < pv_size; ++i)
+        for (int j = 0; j < lens[i]; ++j)
+            packed.push_back(pvs[i].pileup[j]);
+
+    return pv_size;
 }
+
+// std::vector<int> PackPileupVector(const std::vector<PileupVector>& pvs, std::vector<int>& lens, int& size)
+// {
+    // size = 0;
+    // lens.clear();
+    // std::vector<int> packed;
+    // for (int i = 0; i < pvs.size(); ++i)
+    // {
+        // int len = pvs[i].Length();
+        // lens.push_back(len);
+        // size += len;
+        // for (int j = 0; j < len; ++j)
+            // packed.push_back(pvs[i].pileup[j]);
+    // }
+
+    // return packed;
+// }
 
 std::vector<PileupVector> UnpackPileupVector(const std::vector<int>& packed, const std::vector<int>& lens)
 {
@@ -53,28 +77,28 @@ std::vector<PileupVector> UnpackPileupVector(const std::vector<int>& packed, con
     return pvs;
 }
 
-std::vector<PileupVector> AddPileups(const std::vector<PileupVector>& pv1, const std::vector<PileupVector>& pv2)
-{
-    int len = pv1.size();
-    assert(len == static_cast<int>(pv2.size()));
+// std::vector<PileupVector> AddPileups(const std::vector<PileupVector>& pv1, const std::vector<PileupVector>& pv2)
+// {
+    // int len = pv1.size();
+    // assert(len == static_cast<int>(pv2.size()));
 
-    std::vector<PileupVector> pv;
+    // std::vector<PileupVector> pv;
 
-    for (int k = 0; k < len; ++k)
-    {
-        int plen = pv1[k].Length();
-        assert(plen == pv2[k].Length());
+    // for (int k = 0; k < len; ++k)
+    // {
+        // int plen = pv1[k].Length();
+        // assert(plen == pv2[k].Length());
 
-        pv.emplace_back(plen);
+        // pv.emplace_back(plen);
 
-        for (int i = 0; i < plen; ++i)
-        {
-            pv[k].pileup[i] = pv1[k].pileup[i] + pv2[k].pileup[i];
-        }
-    }
+        // for (int i = 0; i < plen; ++i)
+        // {
+            // pv[k].pileup[i] = pv1[k].pileup[i] + pv2[k].pileup[i];
+        // }
+    // }
 
-    return pv;
-}
+    // return pv;
+// }
 
 
 void add_gaps(int begin, int end, int length, std::vector<std::tuple<int, int>>& middle, std::vector<std::tuple<int, int>>& extremity)
@@ -133,72 +157,73 @@ void ReportChimeras(std::shared_ptr<DistributedFastaData> dfd, const std::vector
     }
 }
 
-std::vector<PileupVector> GetReadPileup2(std:;shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, std::vector<PileupVector>& row_pvs, std::vector<PileupVector>& col_pvs)
-{
-    auto commgrid = Rmat->getcommgrid();
-    int myrank = commgrid->GetRank();
-    auto spSeq = Rmat->seq();
-
-    std::vector<PileupVector> row_pileups, col_pileups;
-    uint64_t ncols = spSeq.getncols();
-    uint64_t nrows = spseq.getnrows();
-
-    for (uint64_t i = 0; i < nrows; ++i)
-    {
-        int read_length = length(*dfd->row_seq(i));
-        row_pileups.emplace_back(read_length);
-    }
-
-    for (uint64_t j = 0; i < ncols; ++i)
-    {
-        int read_length = length(*dfd->col_seq(j));
-        col_pileups.emplace_back(read_length);
-    }
-
-    for (auto colit = spSeq.begol(); colit != spSeq.endcol(); ++colit)
-    {
-        int colid = colit.colid();
-
-        for (auto nzit = spSeq.begnz(colit); nzit != spSeq.endnz(colit); ++nzit)
-        {
-
-            int rowid = nzit.rowid();
-            ReadOverlap o = nzit.value();
-            
-            row_pileups[rowid].AddInterval(o.b[0], o.e[0]);
-
-            if (!o.rc) col_pileups[colid].AddInterval(o.b[1], o.e[1]);
-            else col_pileups[colid].AddInterval(o.l[1] - o.e[1], o.l[1] - o.b[1]);
-        }
-    }
-
-    int rowsize, colsize;
-    std::vector<int> rowlens, collens;
-    std::vector<int> rowpacked = PackPileupVector(row_pileups, rowlens, rowsize);
-    std::vector<int> colpacked = PackPileupVector(col_pileups, collens, colsize);
-
-    MPI_Allreduce(MPI_IN_PLACE, rowpacked.data(), rowsize, MPI_INT, MPI_SUM, commgrid->GetRowWorld());
-    MPI_Allreduce(MPI_IN_PLACE, colpacked.data(), colsize, MPI_INT, MPI_SUM, commgrid->GetColWorld());
-
-    row_pvs = UnpackPileupVector(rowpacked, rowlens);
-    col_pvs = UnpackPileupVector(colpacked, collens);
-
-    if (commgrid->GetRankInProcRow() != commgrid->GetRankInProcCol())
-    {
-        
-    }
-
-    //int size;
-    //std::vector<int> lens;
-    //std::vector<int> packed = PackPileupVector(local_pileups, lens, size);
-
-    //assert(static_cast<int>(packed.size()) == size);
-
-    //MPI_Allreduce(MPI_IN_PLACE, packed.data(), size, MPI_INT, MPI_SUM, commgrid->GetColWorld());
-
-    //return UnpackPileupVector(packed, lens);
-
-}
+//std::vector<PileupVector> GetReadPileup2(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, std::vector<PileupVector>& row_pvs, std::vector<PileupVector>& col_pvs)
+//{
+//    auto commgrid = Rmat->getcommgrid();
+//    int myrank = commgrid->GetRank();
+//    auto spSeq = Rmat->seq();
+//
+//    std::vector<PileupVector> row_pileups, col_pileups;
+//    uint64_t ncols = spSeq.getncol();
+//    uint64_t nrows = spSeq.getnrow();
+//
+//    for (uint64_t i = 0; i < nrows; ++i)
+//    {
+//        int read_length = length(*dfd->row_seq(i));
+//        row_pileups.emplace_back(read_length);
+//    }
+//
+//    for (uint64_t j = 0; j < ncols; ++j)
+//    {
+//        int read_length = length(*dfd->col_seq(j));
+//        col_pileups.emplace_back(read_length);
+//    }
+//
+//    for (auto colit = spSeq.begcol(); colit != spSeq.endcol(); ++colit)
+//    {
+//        int colid = colit.colid();
+//
+//        for (auto nzit = spSeq.begnz(colit); nzit != spSeq.endnz(colit); ++nzit)
+//        {
+//
+//            int rowid = nzit.rowid();
+//            ReadOverlap o = nzit.value();
+//
+//            row_pileups[rowid].AddInterval(o.b[0], o.e[0]);
+//
+//            if (!o.rc) col_pileups[colid].AddInterval(o.b[1], o.e[1]);
+//            else col_pileups[colid].AddInterval(o.l[1] - o.e[1], o.l[1] - o.b[1]);
+//        }
+//    }
+//
+//    int rowsize, colsize;
+//    std::vector<int> rowlens, collens;
+//    std::vector<int> rowpacked = PackPileupVector(row_pileups, rowlens, rowsize);
+//    std::vector<int> colpacked = PackPileupVector(col_pileups, collens, colsize);
+//
+//    MPI_Allreduce(MPI_IN_PLACE, rowpacked.data(), rowsize, MPI_INT, MPI_SUM, commgrid->GetRowWorld());
+//    MPI_Allreduce(MPI_IN_PLACE, colpacked.data(), colsize, MPI_INT, MPI_SUM, commgrid->GetColWorld());
+//
+//    // row_pvs = UnpackPileupVector(rowpacked, rowlens);
+//    // col_pvs = UnpackPileupVector(colpacked, collens);
+//
+//    // if (commgrid->GetRankInProcRow() == commgrid->GetRankInProcCol())
+//    // {
+//        // pvs = row_pvs + col_pvs;
+//        // broadcast()
+//    // }
+//
+//    //int size;
+//    //std::vector<int> lens;
+//    //std::vector<int> packed = PackPileupVector(local_pileups, lens, size);
+//
+//    //assert(static_cast<int>(packed.size()) == size);
+//
+//    //MPI_Allreduce(MPI_IN_PLACE, packed.data(), size, MPI_INT, MPI_SUM, commgrid->GetColWorld());
+//
+//    //return UnpackPileupVector(packed, lens);
+//
+//}
 
 std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops)
 {
