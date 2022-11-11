@@ -86,6 +86,7 @@ add_executable(elba
         include/TransitiveReduction.hpp
         include/CC.h
         include/ContigGeneration.hpp
+        src/ContigGeneration.cpp
         src/ReadOverlap.cpp
         include/ReadOverlap.hpp
         src/PruneChimeras.cpp

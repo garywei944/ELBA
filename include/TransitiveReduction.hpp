@@ -96,7 +96,7 @@ struct TransitiveRemoval : binary_function<ReadOverlap, int, ReadOverlap>
 {
     ReadOverlap operator() (ReadOverlap& x, const int& y)
     {
-        if (!y) 
+        if (!y)
         {
             x.dir = -1; /* GGGG: This used to be !y and is wrong, we want to removed stuff from R that is set to true in T, not to false */
         }
@@ -105,7 +105,7 @@ struct TransitiveRemoval : binary_function<ReadOverlap, int, ReadOverlap>
     }
 };
 
-struct ZeroPrune  { bool operator() (const bool& x) { /* If something is a nonzero inherited from R, just prune it! */ return true; } }; 
+struct ZeroPrune  { bool operator() (const bool& x) { /* If something is a nonzero inherited from R, just prune it! */ return true; } };
 struct BoolPrune  { bool operator() (const bool& x) { return !x; } };
 
 /* TODO replace OverlapPath */
@@ -166,7 +166,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
     if (!(RT == R)) /* symmetricize */
     {
         R += RT;
-    }    
+    }
 
     R.ParallelWriteMM("overlap.mtx", true, ReadOverlapGraphHandler());
 
@@ -176,7 +176,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 
     /* create an empty boolean matrix using the same proc grid as R */
     //PSpMat<bool>::MPI_DCCols T = R; //(R.getcommgrid()); /* T is going to store transitive edges to be removed from R in the end */
-    //T.Prune(ZeroPrune()); /* GGGG: there's a better way, TODO for myself */    
+    //T.Prune(ZeroPrune()); /* GGGG: there's a better way, TODO for myself */
 
     int64_t nrow = R.getnrow();
     int64_t ncol = R.getncol();
@@ -185,8 +185,8 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 
     FullyDistVec<int64_t, int64_t> initvec(R.getcommgrid(), nrow, static_cast<int64_t>(0));
     PSpMat<int>::MPI_DCCols T(nrow, ncol, initvec, initvec, static_cast<int>(0), false);
-    
-    /* create a copy of R and add a FUZZ constant to it so it's more robust to error in the sequences/alignment */ 
+
+    /* create a copy of R and add a FUZZ constant to it so it's more robust to error in the sequences/alignment */
     PSpMat<ReadOverlap>::MPI_DCCols F = R;
     F.Apply(PlusFuzzSRing());
 
@@ -196,9 +196,9 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 
     uint cur, prev;
 
-    uint count = 0;     
-    uint countidle = 0; 
-    
+    uint count = 0;
+    uint countidle = 0;
+
     bool isLogicalNot = false;
     bool bId = false;
 
@@ -212,9 +212,9 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
     /* Gonna iterate on T until there are no more transitive edges to remove */
     do
     {
-        prev = T.getnnz();      
+        prev = T.getnnz();
     #ifdef PDEBUG
-        if (!myrank) std::cout << prev << " prev" << std::endl; 
+        if (!myrank) std::cout << prev << " prev" << std::endl;
     #endif
         /* Computer N (neighbor matrix)
          * N = P*R
@@ -236,7 +236,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 
     #ifdef PDEBUG
         if (!myrank) std::cout << "N info: " << std::endl;
-        N.PrintInfo();  
+        N.PrintInfo();
     #endif
 
         P = N;
@@ -261,14 +261,14 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
         I.Prune(BoolPrune(), true); /* GGGG: this is needed to remove entries in N that were smaller than F and thus resulted in an actual 0 in F */
         //tu.print_str("I.Prune(BoolPrine())\n");
         //I.ParallelWriteMM(iss.str() + "post-prune.mtx", true);
-        
+
     #ifdef PDEBUG
-        I.PrintInfo();  
+        I.PrintInfo();
         tu.print_str("\n");
     #endif
 
         /* GGGG: make sure every transitive edge is correctly removed in the upper/lower triangular entry, too
-            this would happen naturally on an error-free dataset 
+            this would happen naturally on an error-free dataset
             */
 
         /* I has some 1 entries, now IT has them, too */
@@ -280,12 +280,12 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
         {
             I += IT;
             //tu.print_str("I += IT\n");
-        }  
+        }
         //I.ParallelWriteMM(iss.str() + "post-symmetricize.mtx", true);
 
         timeI += MPI_Wtime() - start;
     #ifdef PDEBUG
-        I.PrintInfo();  
+        I.PrintInfo();
     #endif
 
 
@@ -300,16 +300,16 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
         timeT += MPI_Wtime() - start;
 
     #ifdef PDEBUG
-        T.PrintInfo();  
+        T.PrintInfo();
         //tu.print_str("\n");
     #endif
 
-        /* GGGG: if nonzeros in T don't change for MAXITER iterations, then exit the loop 
+        /* GGGG: if nonzeros in T don't change for MAXITER iterations, then exit the loop
             If in the test run this creates isses, e.g. it doesn't terminate, let's put a stricter exit condition */
     #ifdef BECONSERVATIVE
         if(cur == prev)
         {
-            countidle++; 
+            countidle++;
         }
         else if(countidle > 0)
         {
@@ -332,7 +332,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
     tu.print_str(iss.str());
 
 #ifdef PDEBUG
-    T.PrintInfo();  
+    T.PrintInfo();
     T.ParallelWriteMM("transitive-matrix.mm", true);
 #endif
 
@@ -340,12 +340,12 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
     R.PrintInfo();
 
     double start = MPI_Wtime();
-    isLogicalNot = true; /* GGGG: I want the ones to be removed to be set to false, so I use the logical negation */ 
+    isLogicalNot = true; /* GGGG: I want the ones to be removed to be set to false, so I use the logical negation */
     bId = true; /* GGGG: this is critical, if this would be false, everything that would survive the EWIseApply would have dir == -1 as well and it's wrong
                     A non-transitive edge should keep its original direction! */
     R = EWiseApply<ReadOverlap, SpDCCols<int64_t, ReadOverlap>>(R, T, TransitiveRemoval(), isLogicalNot, static_cast<int>(1));
 
-#ifdef PDEBUG   
+#ifdef PDEBUG
     tu.print_str("Matrix S, i.e. AAt post transitive reduction---BEFORE InvalidSRing Prune: ");
     R.PrintInfo();
 
