@@ -159,14 +159,14 @@ struct MinPlusSR
 
 void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 {
-    PSpMat<ReadOverlap>::MPI_DCCols RT = R; /* copies everything */
-    RT.Transpose();
-    RT.Apply(TransposeSRing()); /* flips all the coordinates */
+    //PSpMat<ReadOverlap>::MPI_DCCols RT = R; /* copies everything */
+    //RT.Transpose();
+    //RT.Apply(TransposeSRing()); /* flips all the coordinates */
 
-    if (!(RT == R)) /* symmetricize */
-    {
-        R += RT;
-    }
+    //if (!(RT == R)) /* symmetricize */
+    //{
+    //    R += RT;
+    //}
 
     R.ParallelWriteMM("overlap.mtx", true, ReadOverlapGraphHandler());
 

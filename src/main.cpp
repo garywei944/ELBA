@@ -828,7 +828,14 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
 
   Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Bmat);
 
-  //Rmat->ParallelWriteMM("alignment.mtx", true, ReadOverlapGraphHandler());
+  PSpMat<ReadOverlap>::MPI_DCCols RT = *Rmat;
+  RT.Transpose();
+  RT.Apply(TransposeSRing());
+
+  if (!(RT == *Rmat))
+  {
+    *Rmat += RT;
+  }
 
   delete Bmat;
 }
