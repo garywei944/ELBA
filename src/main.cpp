@@ -168,7 +168,7 @@ void PairwiseAlignment
 void PruneChimeras
 (
     std::shared_ptr<DistributedFastaData> dfd,
-    PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+    PSpMat<ReadOverlap>::MPI_DCCols *Rmat,
     const std::shared_ptr<ParallelOps>& parops,
     const std::shared_ptr<TimePod>& tp,
     TraceUtils& tu
@@ -288,24 +288,25 @@ int main(int argc, char **argv)
     PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
   }
 
-  PSpMat<ReadOverlap>::MPI_DCCols *Pmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Rmat);
-  Pmat->ParallelWriteMM("elba1.paf", true, PafHandler());
-  Pmat->Apply(HandleRCs());
-  Pmat->ParallelWriteMM("elba2.paf", true, PafHandler());
+  PruneChimeras(dfd, Rmat, parops, tp, tu);
 
-  PSpMat<ReadOverlap>::MPI_DCCols *PTmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Pmat);
-  PTmat->Transpose();
-  PTmat->Apply(TransposeSRing());
-  if (!(*PTmat == *Pmat))
-  {
-    *Pmat += *PTmat;
-  }
 
-  delete PTmat;
+  //PSpMat<ReadOverlap>::MPI_DCCols *Pmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Rmat);
+  //Pmat->ParallelWriteMM("elba.paf", true, PafHandler());
+  //Pmat->Apply(HandleRCs());
+  //PSpMat<ReadOverlap>::MPI_DCCols *PTmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Pmat);
+  //PTmat->Transpose();
+  //PTmat->Apply(TransposeSRing());
+  //if (!(*PTmat == *Pmat))
+  //{
+  //  *Pmat += *PTmat;
+  //}
 
-  PruneChimeras(dfd, Pmat, parops, tp, tu);
+  //delete PTmat;
 
-  delete Pmat;
+  //FullyDistVec<IT, IT> PruneChimeras(dfd, Pmat, parops, tp, tu);
+
+  //delete Pmat;
 
   // Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
 
@@ -861,10 +862,22 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   delete Bmat;
 }
 
-void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
+void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols *Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
-    std::vector<PileupVector> pileups = GetReadPileup(dfd, Rmat, parops);
-    ReportChimeras(Rmat->getcommgrid(), dfd, pileups);
+    PSpMat<ReadOverlap>::MPI_DCCols Pmat(*Rmat);
+    Pmat.Apply(HandleRCs());
+
+    PSpMat<ReadOverlap>::MPI_DCCols PTmat(Pmat);
+    PTmat.Transpose();
+    PTmat.Apply(TransposeSRing());
+
+    if (!(PTmat == Pmat)) Pmat += PTmat;
+
+    std::vector<PileupVector> pileups = GetReadPileup(dfd, Pmat, parops);
+
+    FullyDistVec<int64_t, int64_t> chimeras = GetChimeras<int64_t>(Pmat.getcommgrid(), dfd, pileups, 0);
+
+    chimeras.DebugPrint();
 }
 
 void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<CommGrid>& commgrid, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)

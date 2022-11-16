@@ -438,12 +438,6 @@ SeedExtendXdrop::apply_batch
 {
 	seqan::ExecutionPolicy<seqan::Parallel, seqan::Vectorial> exec_policy;
 
-    int myrank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-    std::stringstream seed_fname;
-    seed_fname << "seeds_rank_" << myrank << ".txt";
-    std::ofstream seed_fstream(seed_fname.str());
-
 	int numThreads = 1;
 	#ifdef THREADED
 	#pragma omp parallel
@@ -533,18 +527,11 @@ SeedExtendXdrop::apply_batch
 				{
 					/* Perform match extension */
 					start_time = std::chrono::system_clock::now();
-                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1-" << "\n";
                     xscores[i] = extend_seed(twinRead, seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
-                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2-" << std::endl;
 					//xscores[i] = extendSeed(seed, twinRead, seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
-
-                    int tlen = length(seqan::source(seqsh[i]));
-                    int qlen = length(twinRead);
-
-                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest <<  "\t-\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << "\tscore=" << xscores[i] << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);
@@ -566,16 +553,10 @@ SeedExtendXdrop::apply_batch
 				if(!noAlign)
 				{
 					start_time = std::chrono::system_clock::now();
-                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1+" << "\n";
                     xscores[i] = extend_seed(seqan::source(seqsh[i]), seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
-                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2+" << std::endl;
 					//xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
-
-                    int tlen = length(seqan::source(seqsh[i]));
-                    int qlen = length(seqan::source(seqsv[i]));
-                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << "\tscore=" << xscores[i] << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);
@@ -641,8 +622,6 @@ SeedExtendXdrop::apply_batch
 		end_time = std::chrono::system_clock::now();
     	add_time("XA:ComputeStats", (ms_t(end_time - start_time)).count());
 	}
-
-    seed_fstream.close();
 
 	delete [] seedlens;
 	delete [] xscores;

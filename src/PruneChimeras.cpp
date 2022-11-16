@@ -6,6 +6,7 @@
 #include <mpi.h>
 
 using namespace elba;
+using namespace combblas;
 
 PileupVector::PileupVector(int read_length) : pileup(read_length, 0) {}
 PileupVector::PileupVector(const std::vector<int>& v, int offset, int size) : pileup(size, 0)
@@ -68,59 +69,67 @@ void add_gaps(int begin, int end, int length, std::vector<std::tuple<int, int>>&
     }
 }
 
-void ReportChimeras(const std::shared_ptr<CommGrid>& commgrid, std::shared_ptr<DistributedFastaData> dfd, const std::vector<PileupVector>& pileups)
+template <class IT>
+FullyDistVec<IT, IT> GetChimeras(const std::shared_ptr<CommGrid>& commgrid, std::shared_ptr<DistributedFastaData> dfd, const std::vector<PileupVector>& pileups, int coverage_min)
 {
-    static const int coverage_min = 0;
+    std::vector<int64_t> chimeras;
+    chimeras.reserve((pileups.size() / 10) + 1);
 
-    uint64_t col_seq_start_idx = dfd->col_seq_start_idx;
-
-    int myrank;
-    MPI_Comm_rank(commgrid->GetWorld(), &myrank);
-
-    for (int i = 0; i < pileups.size(); ++i)
+    if (commgrid->GetRankInProcCol() == 0)
     {
-        const PileupVector& pv = pileups[i];
+        uint64_t col_seq_start_idx = dfd->col_seq_start_idx;
 
-        std::vector<std::tuple<int, int>> middle, extremity;
+        int myrank;
+        MPI_Comm_rank(commgrid->GetWorld(), &myrank);
 
-        bool in_gap = true;
-        int begin = 0, end = 0;
-
-        for (int j = 0; j < pv.Length(); ++j)
+        for (int i = 0; i < pileups.size(); ++i)
         {
-            if (pv.pileup[j] <= coverage_min && !in_gap)
+            const PileupVector& pv = pileups[i];
+
+            std::vector<std::tuple<int, int>> middle, extremity;
+
+            bool in_gap = true;
+            int begin = 0, end = 0;
+
+            for (int j = 0; j < pv.Length(); ++j)
             {
-                end = 0, begin = j;
-                in_gap = true;
+                if (pv.pileup[j] <= coverage_min && !in_gap)
+                {
+                    end = 0, begin = j;
+                    in_gap = true;
+                }
+
+                if (pv.pileup[j] > coverage_min && in_gap)
+                {
+                    end = j;
+                    in_gap = false;
+                    add_gaps(begin, end, pv.Length(), middle, extremity);
+                }
             }
 
-            if (pv.pileup[j] > coverage_min && in_gap)
+            if (in_gap)
             {
-                end = j;
-                in_gap = false;
+                end = pv.Length();
                 add_gaps(begin, end, pv.Length(), middle, extremity);
             }
-        }
 
-        if (in_gap)
-        {
-            end = pv.Length();
-            add_gaps(begin, end, pv.Length(), middle, extremity);
-        }
-
-        if (middle.size() > 0)
-        {
-            std::cout << myrank << ":: chimeric: " << (i+col_seq_start_idx+1) << std::endl;
+            if (middle.size() > 0)
+            {
+                chimeras.push_back(i+col_seq_start_idx);
+                //std::cout << myrank << ":: chimeric: " << (i+col_seq_start_idx+1) << std::endl;
+            }
         }
     }
+
+    return FullyDistVec<IT, IT>(chimeras, commgrid);
 }
 
-std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops)
+std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols& Rmat, const std::shared_ptr<ParallelOps>& parops)
 {
-    auto commgrid = Rmat->getcommgrid();
+    auto commgrid = Rmat.getcommgrid();
     int myrank = commgrid->GetRank();
 
-    auto spSeq = Rmat->seq();
+    auto spSeq = Rmat.seq();
 
     /* Want to calculate pileup vectors for each read. Do this by first
      * computing the pileup vectors for reads in the column range of the local
@@ -137,12 +146,6 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
         local_pileups.emplace_back(read_length);
     }
 
-    std::stringstream stream_name;
-    stream_name << "elba_rank_" << myrank << ".paf";
-    std::ofstream paf_stream(stream_name.str());
-
-    std::stringstream line;
-
     /* iterate over every local column */
     for (auto colit = spSeq.begcol(); colit != spSeq.endcol(); ++colit)
     {
@@ -153,14 +156,9 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
         {
             ReadOverlap o = nzit.value();
             int rowid = nzit.rowid();
-            //std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 1 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
             local_pileups[colid].AddInterval(o.b[1], o.e[1]);
-            //std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 2 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
         }
     }
-
-
-    paf_stream.close();
 
     std::vector<int> lens;
     std::vector<int> packed;

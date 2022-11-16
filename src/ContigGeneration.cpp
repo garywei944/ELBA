@@ -52,96 +52,62 @@ int DistReadInfo::GetReadOwner(IType gidx)
 
 std::vector<std::string> CreateContig(SpParMat<IType,ReadOverlap,SpDCCols<IType,ReadOverlap>>& G, std::shared_ptr<DistributedFastaData> dfd, std::string& myoutput, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
-    float balance = G.LoadImbalance();
-    int64_t nnz   = G.getnnz();
-
+    float balance;
+    int64_t nnz;
+    const char *charbuf;
+    std::vector<std::string> contigs;
+    std::vector<std::tuple<IType, IType>> AllContigSizesSorted;
+    std::vector<IType> LocalRead2Procs, AllContig2Procs, LocalContigReadIdxs;
+    std::unordered_map<IType, std::tuple<IType, ushort>> charbuf_info;
     std::ostringstream outs;
+    IType NumContigs, NumUsedContigs, max_contig_size;
+    SpDCCols<IType, ReadOverlap> ContigChainDCC;
+    FullyDistVec<IType, IType> ContigSizes, Read2Contigs;
+
+    balance = G.LoadImbalance();
+    nnz = G.getnnz();
+
     outs << "CreateContig :: string graph has " << nnz << " nonzeros" << std::endl;
     tu.print_str(outs.str());
     outs.str("");
 
     DistReadInfo di(G.getcommgrid(), dfd->lfd());
 
-    IType NumContigs;
-    FullyDistVec<IType,IType> Read2Contigs;
-    FullyDistVec<IType,IType> ContigSizes;
-
     tp->times["StartCreateContig:GetRead2Contigs()"] = std::chrono::system_clock::now();
-    NumContigs  = GetRead2Contigs(G, Read2Contigs, di, tu);
+    NumContigs = GetRead2Contigs(G, Read2Contigs, di, tu);
     tp->times["EndCreateContig:GetRead2Contigs()"] = std::chrono::system_clock::now();
-    tu.print_str("CreateContig :: after GetRead2Contigs\n");
-
-    Read2Contigs.ParallelWrite("contig-assignment.txt", true);
 
     tp->times["StartCreateContig:GetRead2ProcAssignments()"] = std::chrono::system_clock::now();
+
     ContigSizes = GetContigSizes(Read2Contigs, NumContigs, di);
-
-    IType NumUsedContigs;
-    std::vector<std::tuple<IType, IType>> AllContigSizesSorted;
-    std::vector<IType> LocalRead2Procs;
-    std::vector<IType> AllContig2Procs;
-
     AllContigSizesSorted = GetAllContigSizesSorted(ContigSizes, NumUsedContigs, 2, di, tu);
-
-    if (!di.myrank)
-    {
-        std::ofstream file;
-        //file.open("contig_sizes.txt");
-
-        //file << "large_contig_id\tcontig_size" << std::endl;
-        for (auto itr = AllContigSizesSorted.begin(); itr != AllContigSizesSorted.end(); ++itr)
-        {
-            //file << std::get<0>(*itr) << "\t" << std::get<1>(*itr) << std::endl;
-        }
-        //file.close();
-    }
-
     LocalRead2Procs = GetLocalRead2Procs(Read2Contigs, AllContigSizesSorted, NumUsedContigs, di, tu);
 
-    IType max_contig_size = ContigSizes.Reduce(combblas::maximum<IType>(), static_cast<IType>(0));
-    outs << "CreateContig::NumContigs: " << NumUsedContigs << std::endl;
-    outs << "CreateContig::MaxContigSize: " << max_contig_size << std::endl;
+    max_contig_size = ContigSizes.Reduce(combblas::maximum<IType>(), static_cast<IType>(0));
+    outs << "   CreateContig::NumContigs: " << NumUsedContigs << std::endl;
+    outs << "   CreateContig::MaxContigSize: " << max_contig_size << std::endl;
     tu.print_str(outs.str());
     outs.str("");
 
     FullyDistVec<IType,IType> Read2Procs(LocalRead2Procs, G.getcommgrid());
     tp->times["EndCreateContig:GetRead2ProcAssignments()"] = std::chrono::system_clock::now();
-    tu.print_str("CreateContig :: Created distributed assignments vector\n");
-
-    std::vector<IType> LocalContigReadIdxs;
 
     tp->times["StartCreateContig:InducedSubgraphs2Procs()"] = std::chrono::system_clock::now();
     SpDCCols<IType,ReadOverlap> ContigChainsDCC = G.InducedSubgraphs2Procs(Read2Procs, LocalContigReadIdxs);
     tp->times["EndCreateContig:InducedSubgraphs2Procs()"] = std::chrono::system_clock::now();
-    tu.print_str("CreateContig :: after InducedSubgraphs2Procs\n");
 
     tp->times["StartCreateContig:BuildContigChains()"] = std::chrono::system_clock::now();
     SpCCols<IType,ReadOverlap> ContigChains(ContigChainsDCC);
     ContigChains.Transpose();
     tp->times["EndCreateContig:BuildContigChains()"] = std::chrono::system_clock::now();
 
-    std::unordered_map<IType, std::tuple<IType, ushort>> charbuf_info;
     tp->times["StartCreateContig:ReadExchange()"] = std::chrono::system_clock::now();
-    const char *charbuf = ReadExchange(LocalRead2Procs, charbuf_info, di, tu);
+    charbuf = ReadExchange(LocalRead2Procs, charbuf_info, di, tu);
     tp->times["EndCreateContig:ReadExchange()"] = std::chrono::system_clock::now();
-    tu.print_str("CreateContig :: after ReadExchange\n");
 
     tp->times["StartCreateContig:LocalAssembly()"] = std::chrono::system_clock::now();
-    double duration = MPI_Wtime();
-    std::vector<std::string> contigs = LocalAssembly(ContigChains, LocalContigReadIdxs, charbuf, charbuf_info, di);
-    duration = MPI_Wtime() - duration;
+    contigs = LocalAssembly(ContigChains, LocalContigReadIdxs, charbuf, charbuf_info, di);
     tp->times["EndCreateContig:LocalAssembly()"] = std::chrono::system_clock::now();
-
-    double maxtime;
-    MPI_Barrier(di.world);
-    MPI_Reduce(&duration, &maxtime, 1, MPI_DOUBLE, MPI_MAX, 0, di.world);
-
-    if (!di.myrank)
-    {
-        std::cout << "LocalAssembly() time = " << maxtime << std::endl;
-    }
-
-    tu.print_str("CreateContig :: after LocalAssembly\n");
     delete [] charbuf;
 
     return contigs;
