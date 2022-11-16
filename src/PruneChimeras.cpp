@@ -143,19 +143,6 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
 
     std::stringstream line;
 
-    //if (myrank == 0)
-    //{
-    //    for (auto colit = spSeq.begcol(); colit != spSeq.endcol(); ++colit)
-    //    {
-    //        int colid = colit.colid();
-
-    //        for (auto nzit = spSeq.begnz(colit); nzit != spSeq.endnz(colit); ++nzit)
-    //        {
-    //            std::cout << "AA\t" << rowid << "\t" << colid << "|t" 
-    //        }
-    //    }
-    //}
-
     /* iterate over every local column */
     for (auto colit = spSeq.begcol(); colit != spSeq.endcol(); ++colit)
     {
@@ -166,9 +153,9 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
         {
             ReadOverlap o = nzit.value();
             int rowid = nzit.rowid();
-            std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 1 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
+            //std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 1 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
             local_pileups[colid].AddInterval(o.b[1], o.e[1]);
-            std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 2 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
+            //std::cout << "myrank=" << Rmat->getcommgrid()->GetRank() << "; 2 :: local_pileups[" << colid+1 << "].AddInterval(" << o.b[1] << ", " << o.e[1] << ") (" << rowid+1 << ") " << std::endl;
         }
     }
 

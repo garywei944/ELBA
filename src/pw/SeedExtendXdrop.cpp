@@ -365,11 +365,6 @@ int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extl
         }
     }
 
-    if (seed.begpH == 3 && seed.endpH == 34 && seed.begpV == 13507 && seed.endpV == 13538)
-    {
-        std::cout << seed << "\tWW\t" << longestExtensionRow << "\t" << longestExtensionCol << "\t" << bestExtensionRow << "\t" << bestExtensionCol << "\t" << static_cast<int>(extleft) << std::endl;
-    }
-
     if (longestExtensionScore != undefined)
     {
         if (extleft)
@@ -538,9 +533,9 @@ SeedExtendXdrop::apply_batch
 				{
 					/* Perform match extension */
 					start_time = std::chrono::system_clock::now();
-                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1-" << "\n";
+                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1-" << "\n";
                     xscores[i] = extend_seed(twinRead, seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
-                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2-" << std::endl;
+                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2-" << std::endl;
 					//xscores[i] = extendSeed(seed, twinRead, seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 
 					end_time = std::chrono::system_clock::now();
@@ -571,9 +566,9 @@ SeedExtendXdrop::apply_batch
 				if(!noAlign)
 				{
 					start_time = std::chrono::system_clock::now();
-                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1+" << "\n";
+                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1+" << "\n";
                     xscores[i] = extend_seed(seqan::source(seqsh[i]), seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
-                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2+" << std::endl;
+                    //std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2+" << std::endl;
 					//xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
