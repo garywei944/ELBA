@@ -41,16 +41,37 @@ struct NoPathSRing : unary_function<ReadOverlap, ReadOverlap>
     }
 };
 
+struct HandleRCs : unary_function<ReadOverlap, ReadOverlap>
+{
+    ReadOverlap operator() (const ReadOverlap& x) const
+    {
+        ReadOverlap xNew(x);
+
+        if (xNew.rc)
+        {
+            xNew.b[1] = x.l[1] - x.e[1];
+            xNew.e[1] = x.l[1] - x.b[1];
+        }
+
+        return xNew;
+    }
+};
+
 struct TransposeSRing : unary_function <ReadOverlap, ReadOverlap>
 {
     ReadOverlap operator() (const ReadOverlap& x) const
     {
         ReadOverlap xT = x;
 
-        xT.b[0] = x.l[1] - x.e[1];
-        xT.e[0] = x.l[1] - x.b[1];
-        xT.b[1] = x.l[0] - x.e[0];
-        xT.e[1] = x.l[0] - x.b[0];
+        xT.b[0] = x.b[1];
+        xT.e[0] = x.e[1];
+        xT.b[1] = x.b[0];
+        xT.e[1] = x.e[0];
+
+        //xT.b[0] = x.l[1] - x.e[1];
+        //xT.e[0] = x.l[1] - x.b[1];
+        //xT.b[1] = x.l[0] - x.e[0];
+        //xT.e[1] = x.l[0] - x.b[0];
 
         xT.l[0] = x.l[1];
         xT.l[1] = x.l[0];
@@ -159,14 +180,14 @@ struct MinPlusSR
 
 void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
 {
-    //PSpMat<ReadOverlap>::MPI_DCCols RT = R; /* copies everything */
-    //RT.Transpose();
-    //RT.Apply(TransposeSRing()); /* flips all the coordinates */
+    PSpMat<ReadOverlap>::MPI_DCCols RT = R; /* copies everything */
+    RT.Transpose();
+    RT.Apply(TransposeSRing()); /* flips all the coordinates */
 
-    //if (!(RT == R)) /* symmetricize */
-    //{
-    //    R += RT;
-    //}
+    if (!(RT == R)) /* symmetricize */
+    {
+        R += RT;
+    }
 
     R.ParallelWriteMM("overlap.mtx", true, ReadOverlapGraphHandler());
 

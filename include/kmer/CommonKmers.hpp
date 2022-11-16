@@ -220,7 +220,7 @@ struct CommonKmersGraphHandler
     template <typename c, typename t>
     void save(std::basic_ostream<c,t>& os, const elba::CommonKmers& v, int64_t row, int64_t col)
     {
-        os << v.score << "\t" << v.lenv << "\t" << v.lenh << "\t" << v.rc;
+        os << row << "\t" << v.lenv << "\t" << v.first.first << "\t" << v.first.first+31 << "\t" << (v.rc? "-" : "+") << "\t" << v.lenh << "\t" << v.second.first << "\t" << v.second.first+31;
     }
 };
 

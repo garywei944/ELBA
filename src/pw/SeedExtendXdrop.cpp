@@ -428,7 +428,7 @@ SeedExtendXdrop::apply_batch
     int myrank;
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     std::stringstream seed_fname;
-    seed_fname << "seeds_rank_" << myrank+1 << ".txt";
+    seed_fname << "seeds_rank_" << myrank << ".txt";
     std::ofstream seed_fstream(seed_fname.str());
 
 	int numThreads = 1;
@@ -492,13 +492,10 @@ SeedExtendXdrop::apply_batch
 			seedV = infix(seqan::source(seqsv[i]), beginPositionV(seed), endPositionV(seed)); // seed on argA == row == seqV
 			seedH = infix(seqan::source(seqsh[i]), beginPositionH(seed), endPositionH(seed)); // seed on argB == col == seqH
 
-            int64_t hidx = std::get<0>(mattuples[lids[i]]);
-            int64_t vidx = std::get<1>(mattuples[lids[i]]);
+            int64_t vidx = std::get<0>(mattuples[lids[i]]);
+            int64_t hidx = std::get<1>(mattuples[lids[i]]);
 
 			seqan::Dna5StringReverseComplement twin(seedH);
-
-            // if (twin == seedV || seedH == seedV)
-               // seed_fstream << row_offset+hidx+1 << "\t" << col_offset+vidx+1 << "\t" << beginPositionV(seed) << "\t" << beginPositionH(seed) << "\n";
 
             int mat = seqan::scoreMatch(scoring_scheme);
             int mis = seqan::scoreMismatch(scoring_scheme);
@@ -510,7 +507,6 @@ SeedExtendXdrop::apply_batch
 				seqan::Dna5String twinseqH = seqan::source(seqsh[i]);
                 seqan::Dna5String twinRead(twinseqH);
                 seqan::reverseComplement(twinRead);
-				//seqan::Dna5StringReverseComplement twinRead(twinseqH);
 				LocalSeedHOffset = length(twinseqH) - LocalSeedHOffset - seed_length;
 
 				setBeginPositionH(seed, LocalSeedHOffset);
@@ -530,17 +526,10 @@ SeedExtendXdrop::apply_batch
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
-                    int tlen = length(seqan::source(seqsv[i]));
+                    int tlen = length(seqan::source(seqsh[i]));
                     int qlen = length(twinRead);
 
-                    //seed_fstream << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t-\t" << col_offset+vidx+1 << "\t"
-                    //                                          << qlen << "\t" << qlen - xseed.endpHbest << "\t" << qlen - xseed.begpHbest << std::endl;
-
-                    //seqan::String<char, seqan::CStyle> t = twinRead;
-                    //seqan::String<char, seqan::CStyle> s = seqan::source(seqsv[i]);
-                    //std::string twin_read(t);
-                    //std::string source_read(s);
-                    //extend_seed(twin_read, source_read, seqan::scoreMatch(scoring_scheme), seqan::scoreMismatch(scoring_scheme), seqan::scoreGap(scoring_scheme), xdrop, xseed);
+                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest <<  "\t-\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);
@@ -567,8 +556,9 @@ SeedExtendXdrop::apply_batch
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
-                    //seed_fstream << row_offset+hidx+1 << "\t" << length(seqan::source(seqsv[i])) << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << col_offset+vidx+1 << "\t"
-                    //                                          << length(seqan::source(seqsh[i])) << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
+                    int tlen = length(seqan::source(seqsh[i]));
+                    int qlen = length(seqan::source(seqsv[i]));
+                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);

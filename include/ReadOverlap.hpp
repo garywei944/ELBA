@@ -49,12 +49,16 @@ struct Tupleize : std::unary_function<ReadOverlap, ReadOverlap>
                 out.coords[1] = e.l[1] - e.b[1];
                 break;
             case 1:
-                out.coords[0] = e.transpose? e.l[0] - e.e[0] : e.b[0];
-                out.coords[1] = e.transpose? e.l[1] - e.e[1] : e.b[1];
+                //out.coords[0] = e.transpose? e.l[0] - e.e[0] : e.b[0];
+                //out.coords[1] = e.transpose? e.l[1] - e.e[1] : e.b[1];
+                out.coords[0] = e.b[0];
+                out.coords[1] = e.b[1];
                 break;
             case 2:
-                out.coords[0] = e.transpose? e.l[0] - e.b[0] : e.e[0];
-                out.coords[1] = e.transpose? e.l[1] - e.b[1] : e.e[1];
+                //out.coords[0] = e.transpose? e.l[0] - e.b[0] : e.e[0];
+                //out.coords[1] = e.transpose? e.l[1] - e.b[1] : e.e[1];
+                out.coords[0] = e.e[0];
+                out.coords[1] = e.e[1];
                 break;
             case 3:
                 out.coords[0] = e.e[0];
@@ -76,6 +80,16 @@ struct ReadOverlapGraphHandler
     }
 };
 
+
+struct PafHandler
+{
+    template <typename c, typename t>
+    void save(std::basic_ostream<c,t>& os, const ReadOverlap& e, int64_t row, int64_t col)
+    {
+        char strand = e.rc? '-' : '+';
+        os << row << "\t" << e.l[0] << "\t" << e.b[0] << "\t" << e.e[0] << "\t" << strand << "\t" << col << "\t" << e.l[1] << "\t" << (e.rc? e.l[1]-e.e[1] : e.b[1]) << "\t" << (e.rc? e.l[1]-e.b[1] : e.e[1]);
+    }
+};
 
 struct ReadOverlapDiskHandler
 {
