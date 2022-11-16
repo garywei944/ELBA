@@ -186,6 +186,19 @@ struct XSeed
 
     XSeed(const TSeed& seed) : begpH(beginPositionH(seed)), begpV(beginPositionV(seed)), endpH(endPositionH(seed)), endpV(endPositionV(seed)),
                                begpHbest(beginPositionH(seed)), begpVbest(beginPositionV(seed)), endpHbest(endPositionH(seed)), endpVbest(endPositionV(seed)) {}
+
+    friend std::ostream& operator<<(std::ostream& os, XSeed seed)
+    {
+        os << "begpH=" << seed.begpH << ", "
+           << "endpH=" << seed.endpH << ", "
+           << "begpV=" << seed.begpV << ", "
+           << "endpV=" << seed.endpV << ", "
+           << "begpHbest=" << seed.begpHbest << ", "
+           << "endpHbest=" << seed.endpHbest << ", "
+           << "begpVbest=" << seed.begpVbest << ", "
+           << "endpVbest=" << seed.endpVbest << ", ";
+        return os;
+    }
 };
 
 int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extleft, int mat, int mis, int gap, int xdrop, XSeed& seed)
@@ -214,6 +227,10 @@ int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extl
     antiDiag2.resize(1);
     antiDiag2[0] = 0;
 
+    int bestExtensionCol = 0;
+    int bestExtensionRow = 0;
+    int bestExtensionScore = 0;
+
     antiDiag3.resize(2);
     if (-gap > xdrop)
     {
@@ -228,10 +245,6 @@ int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extl
 
     int antiDiagNo = 1;
     int best = 0;
-
-    int bestExtensionCol;
-    int bestExtensionRow;
-    int bestExtensionScore;
 
     while (minCol < maxCol)
     {
@@ -350,6 +363,11 @@ int extend_seed_one_direction(std::string dbSeq, std::string querySeq, bool extl
                 longestExtensionRow = antiDiagNo - 2 - longestExtensionCol;
             }
         }
+    }
+
+    if (seed.begpH == 3 && seed.endpH == 34 && seed.begpV == 13507 && seed.endpV == 13538)
+    {
+        std::cout << seed << "\tWW\t" << longestExtensionRow << "\t" << longestExtensionCol << "\t" << bestExtensionRow << "\t" << bestExtensionCol << "\t" << static_cast<int>(extleft) << std::endl;
     }
 
     if (longestExtensionScore != undefined)
@@ -520,7 +538,9 @@ SeedExtendXdrop::apply_batch
 				{
 					/* Perform match extension */
 					start_time = std::chrono::system_clock::now();
+                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1-" << "\n";
                     xscores[i] = extend_seed(twinRead, seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
+                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2-" << std::endl;
 					//xscores[i] = extendSeed(seed, twinRead, seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 
 					end_time = std::chrono::system_clock::now();
@@ -529,7 +549,7 @@ SeedExtendXdrop::apply_batch
                     int tlen = length(seqan::source(seqsh[i]));
                     int qlen = length(twinRead);
 
-                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest <<  "\t-\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
+                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest <<  "\t-\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << "\tscore=" << xscores[i] << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);
@@ -551,14 +571,16 @@ SeedExtendXdrop::apply_batch
 				if(!noAlign)
 				{
 					start_time = std::chrono::system_clock::now();
+                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 1+" << "\n";
                     xscores[i] = extend_seed(seqan::source(seqsh[i]), seqan::source(seqsv[i]), mat, mis, gap, xdrop, xseed);
+                    std::cout << col_offset+vidx+1 << "\t" << row_offset+hidx+1 << "\t" << xseed << " 2+" << std::endl;
 					//xscores[i] = extendSeed(seed, seqan::source(seqsh[i]), seqan::source(seqsv[i]), seqan::EXTEND_BOTH, scoring_scheme, xdrop, (int)k, seqan::GappedXDrop());
 					end_time = std::chrono::system_clock::now();
 					add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
                     int tlen = length(seqan::source(seqsh[i]));
                     int qlen = length(seqan::source(seqsv[i]));
-                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << std::endl;
+                    seed_fstream << col_offset+vidx+1 << "\t" << qlen << "\t" << xseed.begpVbest << "\t" << xseed.endpVbest << "\t+\t" << row_offset+hidx+1 << "\t" << tlen << "\t" << xseed.begpHbest << "\t" << xseed.endpHbest << "\tscore=" << xscores[i] << std::endl;
 
                     setBeginPositionH(seed, xseed.begpHbest);
                     setBeginPositionV(seed, xseed.begpVbest);
