@@ -88,6 +88,7 @@ int afreq;
 
 int ktip_threshold;
 bool prune_bridges = false;
+int coverage_min;
 
 std::string overlap_graph_filename;
 bool skip_overlap_detection;
@@ -169,6 +170,7 @@ void PruneChimeras
 (
     std::shared_ptr<DistributedFastaData> dfd,
     PSpMat<ReadOverlap>::MPI_DCCols *Rmat,
+    int coverage_min,
     const std::shared_ptr<ParallelOps>& parops,
     const std::shared_ptr<TimePod>& tp,
     TraceUtils& tu
@@ -288,25 +290,10 @@ int main(int argc, char **argv)
     PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
   }
 
-  PruneChimeras(dfd, Rmat, parops, tp, tu);
-
-
-  //PSpMat<ReadOverlap>::MPI_DCCols *Pmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Rmat);
-  //Pmat->ParallelWriteMM("elba.paf", true, PafHandler());
-  //Pmat->Apply(HandleRCs());
-  //PSpMat<ReadOverlap>::MPI_DCCols *PTmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Pmat);
-  //PTmat->Transpose();
-  //PTmat->Apply(TransposeSRing());
-  //if (!(*PTmat == *Pmat))
-  //{
-  //  *Pmat += *PTmat;
-  //}
-
-  //delete PTmat;
-
-  //FullyDistVec<IT, IT> PruneChimeras(dfd, Pmat, parops, tp, tu);
-
-  //delete Pmat;
+  if (coverage_min >= 0)
+  {
+    PruneChimeras(dfd, Rmat, coverage_min, parops, tp, tu);
+  }
 
   // Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
 
@@ -438,6 +425,8 @@ int parse_args(int argc, char **argv)
      cxxopts::value<std::string>())
     (CMD_OPTION_KTIP_THRESHOLD, CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD,
      cxxopts::value<int>())
+    (CMD_OPTION_CHIMERA_COVERAGE_MIN, CMD_OPTION_DESCRIPTION_CHIMERA_COVERAGE_MIN,
+     cxxopts::value<int>())
     (CMD_OPTION_PRUNE_BRIDGES, CMD_OPTION_DESCRIPTION_PRUNE_BRIDGES)
     (CMD_OPTION_KMER_LENGTH, CMD_OPTION_DESCRIPTION_KMER_LENGTH,
      cxxopts::value<int>())
@@ -548,6 +537,12 @@ int parse_args(int argc, char **argv)
     prune_bridges = true;
   }
 
+  if (result.count(CMD_OPTION_CHIMERA_COVERAGE_MIN)) {
+    coverage_min = result[CMD_OPTION_CHIMERA_COVERAGE_MIN].as<int>();
+  } else {
+    coverage_min = -1;
+  }
+
   if (result.count(CMD_OPTION_KMER_LENGTH)) {
     klength = result[CMD_OPTION_KMER_LENGTH].as<int>();
   } else {
@@ -643,7 +638,8 @@ void pretty_print_config(std::string &append_to) {
     "Alphabet (--alph)",
     "Overlap graph (--overlaps)",
     "K-tip threshold (--tip)",
-    "Prune bridge vertices (--pb)"
+    "Prune bridge vertices (--pb)",
+    "Chimera min coverage (--ch)"
   };
 
   std::vector<std::string> vals = {
@@ -667,7 +663,8 @@ void pretty_print_config(std::string &append_to) {
     std::to_string(alph_t),
     skip_overlap_detection? overlap_graph_filename : "None",
     std::to_string(ktip_threshold),
-    bool_to_str(prune_bridges)
+    bool_to_str(prune_bridges),
+    std::to_string(coverage_min)
   };
 
   ushort max_length = 0;
@@ -820,13 +817,13 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   {
     pf = new SeedExtendXdrop (scoring_scheme, klength, xdrop, seed_count);
     dpr.run_batch(pf, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
-	  local_alignments = static_cast<SeedExtendXdrop*>(pf)->nalignments;
+    local_alignments = static_cast<SeedExtendXdrop*>(pf)->nalignments;
   }
   else if(fullAlign)
   {
     pf = new FullAligner(scoring_scheme);
     dpr.run_batch(pf, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
-	  local_alignments = static_cast<FullAligner*>(pf)->nalignments;
+    local_alignments = static_cast<FullAligner*>(pf)->nalignments;
   }
 
   tp->times["EndMain:DprAlign()"] = std::chrono::system_clock::now();
@@ -848,21 +845,10 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
 
   Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Bmat);
 
-  //PSpMat<ReadOverlap>::MPI_DCCols RT = *Rmat;
-  //RT.Transpose();
-  //RT.Apply(TransposeSRing());
-
-  //if (!(RT == *Rmat))
-  //{
-  //  *Rmat += RT;
-  //}
-
-  //Rmat->ParallelWriteMM("elba.overlaps.paf", true, PafHandler());
-
   delete Bmat;
 }
 
-void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols *Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
+void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols *Rmat, int coverage_min, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
     PSpMat<ReadOverlap>::MPI_DCCols Pmat(*Rmat);
     Pmat.Apply(HandleRCs());
@@ -875,9 +861,14 @@ void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap
 
     std::vector<PileupVector> pileups = GetReadPileup(dfd, Pmat, parops);
 
-    FullyDistVec<int64_t, int64_t> chimeras = GetChimeras<int64_t>(Pmat.getcommgrid(), dfd, pileups, 0);
+    FullyDistVec<int64_t, int64_t> chimeras = GetChimeras(Pmat.getcommgrid(), dfd, pileups, coverage_min);
 
-    chimeras.DebugPrint();
+    Rmat->PruneFull(chimeras, chimeras);
+
+    std::stringstream outs;
+    outs << "PruneChimeras :: Pruned " << chimeras.TotalLength() << " chimeric reads" << std::endl;
+    tu.print_str(outs.str());
+    outs.str("");
 }
 
 void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<CommGrid>& commgrid, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)

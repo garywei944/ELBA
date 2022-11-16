@@ -63,15 +63,10 @@ struct TransposeSRing : unary_function <ReadOverlap, ReadOverlap>
     {
         ReadOverlap xT = x;
 
-        xT.b[0] = x.b[1];
-        xT.e[0] = x.e[1];
-        xT.b[1] = x.b[0];
-        xT.e[1] = x.e[0];
-
-        //xT.b[0] = x.l[1] - x.e[1];
-        //xT.e[0] = x.l[1] - x.b[1];
-        //xT.b[1] = x.l[0] - x.e[0];
-        //xT.e[1] = x.l[0] - x.b[0];
+        xT.b[0] = x.l[1] - x.e[1];
+        xT.e[0] = x.l[1] - x.b[1];
+        xT.b[1] = x.l[0] - x.e[0];
+        xT.e[1] = x.l[0] - x.b[0];
 
         xT.l[0] = x.l[1];
         xT.l[1] = x.l[0];
@@ -189,7 +184,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
         R += RT;
     }
 
-    R.ParallelWriteMM("overlap.mtx", true, ReadOverlapGraphHandler());
+    //R.ParallelWriteMM("overlap.mtx", true, ReadOverlapGraphHandler());
 
     /* TODO replace OverlapPath */
     /* implicitly will call OverlapPath(const ReadOverlap& e) constructor */
@@ -395,7 +390,7 @@ void TransitiveReduction(PSpMat<ReadOverlap>::MPI_DCCols& R, TraceUtils tu)
     tu.print_str(tiss.str());
  #endif
 
-    R.ParallelWriteMM("string.mtx", true, ReadOverlapGraphHandler());
+    //R.ParallelWriteMM("string.mtx", true, ReadOverlapGraphHandler());
 }
 
 #endif

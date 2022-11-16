@@ -49,16 +49,12 @@ struct Tupleize : std::unary_function<ReadOverlap, ReadOverlap>
                 out.coords[1] = e.l[1] - e.b[1];
                 break;
             case 1:
-                //out.coords[0] = e.transpose? e.l[0] - e.e[0] : e.b[0];
-                //out.coords[1] = e.transpose? e.l[1] - e.e[1] : e.b[1];
-                out.coords[0] = e.b[0];
-                out.coords[1] = e.b[1];
+                out.coords[0] = e.transpose? e.l[0] - e.e[0] : e.b[0];
+                out.coords[1] = e.transpose? e.l[1] - e.e[1] : e.b[1];
                 break;
             case 2:
-                //out.coords[0] = e.transpose? e.l[0] - e.b[0] : e.e[0];
-                //out.coords[1] = e.transpose? e.l[1] - e.b[1] : e.e[1];
-                out.coords[0] = e.e[0];
-                out.coords[1] = e.e[1];
+                out.coords[0] = e.transpose? e.l[0] - e.b[0] : e.e[0];
+                out.coords[1] = e.transpose? e.l[1] - e.b[1] : e.e[1];
                 break;
             case 3:
                 out.coords[0] = e.e[0];

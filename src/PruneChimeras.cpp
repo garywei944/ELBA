@@ -69,8 +69,7 @@ void add_gaps(int begin, int end, int length, std::vector<std::tuple<int, int>>&
     }
 }
 
-template <class IT>
-FullyDistVec<IT, IT> GetChimeras(const std::shared_ptr<CommGrid>& commgrid, std::shared_ptr<DistributedFastaData> dfd, const std::vector<PileupVector>& pileups, int coverage_min)
+FullyDistVec<int64_t, int64_t> GetChimeras(const std::shared_ptr<CommGrid>& commgrid, std::shared_ptr<DistributedFastaData> dfd, const std::vector<PileupVector>& pileups, int coverage_min)
 {
     std::vector<int64_t> chimeras;
     chimeras.reserve((pileups.size() / 10) + 1);
@@ -121,7 +120,7 @@ FullyDistVec<IT, IT> GetChimeras(const std::shared_ptr<CommGrid>& commgrid, std:
         }
     }
 
-    return FullyDistVec<IT, IT>(chimeras, commgrid);
+    return FullyDistVec<int64_t, int64_t>(chimeras, commgrid);
 }
 
 std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols& Rmat, const std::shared_ptr<ParallelOps>& parops)

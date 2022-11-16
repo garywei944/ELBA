@@ -34,6 +34,9 @@ const char *CMD_OPTION_DESCRIPTION_KTIP_THRESHOLD = "Tip length to prune iterati
 const char *CMD_OPTION_PRUNE_BRIDGES = "pb";
 const char *CMD_OPTION_DESCRIPTION_PRUNE_BRIDGES =  "Flag to indicate bridges should be pruned.";
 
+const char *CMD_OPTION_CHIMERA_COVERAGE_MIN = "ch";
+const char *CMD_OPTION_DESCRIPTION_CHIMERA_COVERAGE_MIN = "Chimera detection min coverage.";
+
 const char *CMD_OPTION_KMER_LENGTH = "k";
 const char *CMD_OPTION_DESCRIPTION_KMER_LENGTH = "Kmer length.";
 
