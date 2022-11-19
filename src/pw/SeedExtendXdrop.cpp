@@ -499,14 +499,19 @@ SeedExtendXdrop::apply_batch
 			seedV = infix(seqan::source(seqsv[i]), beginPositionV(seed), endPositionV(seed)); // seed on argA == row == seqV
 			seedH = infix(seqan::source(seqsh[i]), beginPositionH(seed), endPositionH(seed)); // seed on argB == col == seqH
 
-            int64_t vidx = std::get<0>(mattuples[lids[i]]);
-            int64_t hidx = std::get<1>(mattuples[lids[i]]);
+            int64_t vidx = std::get<0>(mattuples[lids[i]]) + row_offset;
+            int64_t hidx = std::get<1>(mattuples[lids[i]]) + col_offset;
 
 			seqan::Dna5StringReverseComplement twin(seedH);
 
             int mat = seqan::scoreMatch(scoring_scheme);
             int mis = seqan::scoreMismatch(scoring_scheme);
             int gap = seqan::scoreGap(scoring_scheme);
+
+            if (twin == seedV && seedH == seedV)
+            {
+                std::cout << "Palindrome\t" << vidx << "\t" << hidx << "\t" << twin << std::endl;
+            }
 
 			if(twin == seedV)
 			{

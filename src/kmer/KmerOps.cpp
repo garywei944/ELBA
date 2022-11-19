@@ -38,7 +38,7 @@ extern "C" {
 #define HIGH_NUM_BINS ((COUNT_THRESHOLD_HIGH-COUNT_THRESHOLD)/HIGH_BIN)
 
 /* If this flag set, it writes readname to disk through independent I/O */
-#define READNAME
+//#define READNAME
 
 KmerCountsType *kmercounts = NULL;
 

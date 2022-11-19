@@ -8,6 +8,13 @@
 using namespace elba;
 using namespace combblas;
 
+template <class T, class T1, class T2>
+T myabsdiff(T1 a, T2 b)
+{
+    return a < b? static_cast<T>(b - a) : static_cast<T>(b - a);
+}
+
+
 PileupVector::PileupVector(int read_length) : pileup(read_length, 0) {}
 PileupVector::PileupVector(const std::vector<int>& v, int offset, int size) : pileup(size, 0)
 {
@@ -115,7 +122,15 @@ FullyDistVec<int64_t, int64_t> GetChimeras(const std::shared_ptr<CommGrid>& comm
             if (middle.size() > 0)
             {
                 chimeras.push_back(i+col_seq_start_idx);
-                //std::cout << myrank << ":: chimeric: " << (i+col_seq_start_idx+1) << std::endl;
+                std::cout << "Chimeric\t" << (i+col_seq_start_idx+1) << "\t";
+
+                for (int idx = 0; idx < middle.size(); ++idx)
+                {
+                    int g1 = std::get<0>(middle[idx]);
+                    int g2 = std::get<1>(middle[idx]);
+                    std::cout << myabsdiff<int, int, int>(g1, g2) << "," << g1 << "," << g2 << ";";
+                }
+                std::cout << std::endl;
             }
         }
     }
@@ -145,6 +160,12 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
         local_pileups.emplace_back(read_length);
     }
 
+    int64_t col_offset = commgrid->GetRankInProcRow() * (Rmat.getncol() / commgrid->GetGridCols());
+
+    std::stringstream ss;
+    ss << "intervals_rank_" << myrank << ".txt";
+    std::ofstream interval_stream(ss.str());
+
     /* iterate over every local column */
     for (auto colit = spSeq.begcol(); colit != spSeq.endcol(); ++colit)
     {
@@ -156,8 +177,11 @@ std::vector<PileupVector> GetReadPileup(std::shared_ptr<DistributedFastaData> df
             ReadOverlap o = nzit.value();
             int rowid = nzit.rowid();
             local_pileups[colid].AddInterval(o.b[1], o.e[1]);
+            interval_stream << (col_offset+colid+1) << "\t" << o.l[1] << "\t" << o.b[1] << "\t" << o.e[1] << std::endl;
         }
     }
+
+    interval_stream.close();
 
     std::vector<int> lens;
     std::vector<int> packed;

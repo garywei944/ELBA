@@ -10,6 +10,9 @@ extern const char *PROGRAM_NAME;
 extern const char *CMD_OPTION_INPUT;
 extern const char *CMD_OPTION_DESCRIPTION_INPUT;
 
+extern const char *CMD_OPTION_OUTPUT;
+extern const char *CMD_OPTION_DESCRIPTION_OUTPUT;
+
 extern const char *CMD_OPTION_INPUT_SEQ_COUNT;
 extern const char *CMD_OPTION_DESCRIPTION_INPUT_SEQ_COUNT;
 

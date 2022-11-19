@@ -454,13 +454,6 @@ std::vector<IType> GetLocalRead2Procs(FullyDistVec<IType,IType>& Read2Contigs, s
             for (auto itr = mypartition.begin(); itr != mypartition.end(); ++itr)
                 AllContig2Procs[*itr] = i;
         }
-
-        std::ofstream file;
-        file.open("small_to_large_contig_map.txt");
-        file << "small_idx\tlarge_idx" << std::endl;
-        for (IType i = 0; i < SmallToLargeMap.size(); ++i)
-            file << i << "\t" << SmallToLargeMap[i] << std::endl;
-        file.close();
     }
 
     tu.print_str("GetLocalRead2Procs :: Root process finished multiway partitioning for contig load-balancing\n");
@@ -581,7 +574,28 @@ const char * ReadExchange(std::vector<IType>& LocalRead2Procs, std::unordered_ma
 
     tu.print_str("ReadExchange :: Filled char buffers\n");
 
-    MPI_Alltoallv_str(char_send, char_sendcounts, char_sdispls, char_recv, char_recvcounts, char_rdispls, di.world);
+
+    int *str_sendcounts = new int[di.nprocs];
+    int *str_recvcounts = new int[di.nprocs];
+    int *str_rdispls = new int[di.nprocs];
+    int *str_sdispls = new int[di.nprocs];
+
+    for (int i = 0; i < di.nprocs; ++i)
+    {
+        str_sendcounts[i] = static_cast<int>(char_sendcounts[i]);
+        str_recvcounts[i] = static_cast<int>(char_recvcounts[i]);
+        str_sdispls[i] = static_cast<int>(char_sdispls[i]);
+        str_rdispls[i] = static_cast<int>(char_rdispls[i]);
+    }
+
+    MPI_Alltoallv(char_send, str_sendcounts, str_sdispls, MPI_CHAR, char_recv, str_recvcounts, str_rdispls, MPI_CHAR, di.world);
+    //MPI_Alltoallv_str(char_send, char_sendcounts, char_sdispls, char_recv, char_recvcounts, char_rdispls, di.world);
+
+    delete [] str_sendcounts;
+    delete [] str_recvcounts;
+    delete [] str_rdispls;
+    delete [] str_sdispls;
+    
     tu.print_str("ReadExchange :: Completed custom all-to-all using derived datatypes and Isend/Irecv calls\n");
 
     /* TODO: inefficient */
@@ -642,11 +656,6 @@ std::vector<std::string> LocalAssembly(SpCCols<IType,ReadOverlap>& ContigChains,
 {
     int myrank;
     MPI_Comm_rank(di.world, &myrank);
-
-    std::ofstream contiglog;
-    std::stringstream contiglog_name;
-    contiglog_name << "contiglog_rank" << myrank << ".txt";
-    contiglog.open(contiglog_name.str());
 
     /* local fasta buffer for sequences already on my processor */
     const char *lfd_buffer = di.lfd->buffer();
@@ -729,8 +738,6 @@ std::vector<std::string> LocalAssembly(SpCCols<IType,ReadOverlap>& ContigChains,
             IType seq_end   = std::get<1>(contig_vector[i]);
             IType idx       = std::get<2>(contig_vector[i]);
 
-            contiglog << myrank << "\t" << contig_id << "\t" << i << "\t" << idx << "\t" << seq_start << "\t" << seq_end << std::endl;
-
             auto segment_info_itr = charbuf_info.find(idx);
             uint64_t read_offset, end_offset;
             ushort readlen;
@@ -748,8 +755,6 @@ std::vector<std::string> LocalAssembly(SpCCols<IType,ReadOverlap>& ContigChains,
         contig_id++;
     }
 
-    contiglog.close();
-
     delete [] visited;
 
     return contigs;
@@ -758,16 +763,11 @@ std::vector<std::string> LocalAssembly(SpCCols<IType,ReadOverlap>& ContigChains,
 int MPI_Alltoallv_str(const char *sendbuf, const std::vector<IType>& sendcounts, const std::vector<IType>& sdispls,
                             char *recvbuf, const std::vector<IType>& recvcounts, const std::vector<IType>& rdispls, MPI_Comm comm)
 {
-    assert((sizeof(void*)==8));
+    static_assert(sizeof(void*)==8);
 
     int nprocs, myrank;
     MPI_Comm_rank(comm, &myrank);
     MPI_Comm_size(comm, &nprocs);
-
-    if (!myrank)
-    {
-        std::cout << "MPI_Alltoallv_str was called!!" << std::endl;
-    }
 
     MPI_Request *reqs = new MPI_Request[2*nprocs];
 

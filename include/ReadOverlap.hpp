@@ -2,8 +2,10 @@
 #define READ_OVERLAPS_H_
 
 #include "kmer/CommonKmers.hpp"
+#include "DistributedFastaData.hpp"
 
 using namespace elba;
+using namespace combblas;
 
 struct ReadOverlap
 {
@@ -83,7 +85,7 @@ struct PafHandler
     void save(std::basic_ostream<c,t>& os, const ReadOverlap& e, int64_t row, int64_t col)
     {
         char strand = e.rc? '-' : '+';
-        os << row << "\t" << e.l[0] << "\t" << e.b[0] << "\t" << e.e[0] << "\t" << strand << "\t" << col << "\t" << e.l[1] << "\t" << (e.rc? e.l[1]-e.e[1] : e.b[1]) << "\t" << (e.rc? e.l[1]-e.b[1] : e.e[1]);
+        os << (row+1) << "\t" << e.l[0] << "\t" << e.b[0] << "\t" << e.e[0] << "\t" << strand << "\t" << (col+1) << "\t" << e.l[1] << "\t" << (e.rc? e.l[1]-e.e[1] : e.b[1]) << "\t" << (e.rc? e.l[1]-e.b[1] : e.e[1]);
     }
 };
 

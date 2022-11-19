@@ -66,6 +66,7 @@ std::string get_padding(ushort count, std::string prefix);
 /*! Global variables */
 std::shared_ptr<ParallelOps> parops;
 std::string input_file;
+std::string output_file;
 uint64_t input_overlap;
 uint64_t seq_count;
 int xdrop;
@@ -348,7 +349,7 @@ int main(int argc, char **argv)
     contig_filecontents << ">contig" << i+contigs_offset << "\tmyrank=" << myrank << "\tmyoffset=" << i << "\n" << myContigSet[i] << "\n";
 
   MPI_File cfh;
-  MPI_File_open(MPI_COMM_WORLD, "elba.contigs.fa", MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &cfh);
+  MPI_File_open(MPI_COMM_WORLD, output_file.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &cfh);
 
   std::string cfs = contig_filecontents.str();
   const char *strout = cfs.c_str();
@@ -407,6 +408,8 @@ int parse_args(int argc, char **argv)
   options.add_options()
     (CMD_OPTION_INPUT, CMD_OPTION_DESCRIPTION_INPUT,
      cxxopts::value<std::string>())
+    (CMD_OPTION_OUTPUT, CMD_OPTION_DESCRIPTION_OUTPUT,
+     cxxopts::value<std::string>())
     (CMD_OPTION_INPUT_SEQ_COUNT, CMD_OPTION_DESCRIPTION_INPUT_SEQ_COUNT,
      cxxopts::value<int>())
     (CMD_OPTION_INPUT_OVERLAP, CMD_OPTION_DESCRIPTION_INPUT_OVERLAP,
@@ -461,6 +464,15 @@ int parse_args(int argc, char **argv)
   } else {
     if (is_world_rank0) {
       std::cout << "ERROR: Input file not specified" << std::endl;
+    }
+    return -1;
+  }
+
+  if (result.count(CMD_OPTION_OUTPUT)) {
+    output_file = result[CMD_OPTION_OUTPUT].as<std::string>();
+  } else {
+    if (is_world_rank0) {
+      std::cout << "ERROR: Output file not specified" << std::endl;
     }
     return -1;
   }
@@ -619,6 +631,7 @@ auto bool_to_str = [](bool b){
 void pretty_print_config(std::string &append_to) {
   std::vector<std::string> params = {
     "Input file (-i)",
+    "Output file (-o)",
     "Original sequence count (-c)",
     "Kmer length (k)",
     "Kmer stride (s)",
@@ -644,6 +657,7 @@ void pretty_print_config(std::string &append_to) {
 
   std::vector<std::string> vals = {
     input_file,
+    output_file,
     std::to_string(seq_count),
     std::to_string(klength),
     std::to_string(kstride),
@@ -780,8 +794,6 @@ void OverlapDetection(std::shared_ptr<DistributedFastaData> dfd,
       dfd->wait();
     }
     tp->times["EndMain:DfdWait()"] = std::chrono::system_clock::now();
-
-    Bmat->ParallelWriteMM("cks.paf", true, CommonKmersGraphHandler());
 }
 
 void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
@@ -851,8 +863,8 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
 void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols *Rmat, int coverage_min, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
     PSpMat<ReadOverlap>::MPI_DCCols Pmat(*Rmat);
+    Pmat.ParallelWriteGeneric("elba.paf", PafHandler());
     Pmat.Apply(HandleRCs());
-
     PSpMat<ReadOverlap>::MPI_DCCols PTmat(Pmat);
     PTmat.Transpose();
     PTmat.Apply(TransposeSRing());
@@ -864,6 +876,7 @@ void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap
     FullyDistVec<int64_t, int64_t> chimeras = GetChimeras(Pmat.getcommgrid(), dfd, pileups, coverage_min);
 
     Rmat->PruneFull(chimeras, chimeras);
+    Rmat->ParallelWriteGeneric("elba2.paf", PafHandler());
 
     std::stringstream outs;
     outs << "PruneChimeras :: Pruned " << chimeras.TotalLength() << " chimeric reads" << std::endl;
