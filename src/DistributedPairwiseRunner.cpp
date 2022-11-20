@@ -1,7 +1,7 @@
 //
 // Created by Saliya Ekanayake on 2019-02-19
-// Modified by Aydin Buluc on 2019-12-29 
-// Modified by Gilia Guidi on 2021-03-09 
+// Modified by Aydin Buluc on 2019-12-29
+// Modified by Gilia Guidi on 2021-03-09
 //
 
 #include "../include/DistributedPairwiseRunner.hpp"
@@ -119,16 +119,16 @@ void DistributedPairwiseRunner::run(PairwiseFunction *pf, const char* file, std:
   std::atomic<uint64_t> line_count(0);
   uint64_t nalignments = 0;
   PSpMat<elba::CommonKmers>::Tuples mattuples(*spSeq);
-  
+
   #pragma omp parallel for reduction(+:nalignments)
   for(uint64_t i=0; i< local_nnz_count; i++)
   {
 	auto l_row_idx = mattuples.rowindex(i);
 	auto l_col_idx = mattuples.colindex(i);
 	uint64_t g_col_idx = l_col_idx + col_offset;
-	uint64_t g_row_idx = l_row_idx + row_offset;		  
+	uint64_t g_row_idx = l_row_idx + row_offset;
 
-	seqan::Dna5String *seq_h = dfd->col_seq(l_col_idx);  
+	seqan::Dna5String *seq_h = dfd->col_seq(l_col_idx);
 	seqan::Dna5String *seq_v = dfd->row_seq(l_row_idx);
 
 	current_nnz_count++;
@@ -141,7 +141,7 @@ void DistributedPairwiseRunner::run(PairwiseFunction *pf, const char* file, std:
 			  << "% done. " << std::ctime(&t);
 			  lfs.flush();
 		}
-	}	
+	}
 
 	/*!
 	 * Note. the cells means the process grid cells.
@@ -185,7 +185,7 @@ void DistributedPairwiseRunner::run(PairwiseFunction *pf, const char* file, std:
 	lfs << "#alignments run " << nalignments << std::endl;
 
 	pf->print_avg_times(parops, lfs);
-	
+
 	for(int i=0; i< numThreads; ++i)
 	{
 		af_stream << ss[i].str();
@@ -211,7 +211,7 @@ DistributedPairwiseRunner::run_batch
 )
 {
 	uint64_t	local_nnz_count = spSeq->getnnz();
-	
+
 	int myrank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
@@ -243,7 +243,7 @@ DistributedPairwiseRunner::run_batch
     }
 
 	assert (z == local_nnz_count);
-		
+
 	lfs << "Local nnz count: " << local_nnz_count << std::endl;
 
 	int numThreads = 1;
@@ -259,8 +259,8 @@ DistributedPairwiseRunner::run_batch
 
 	// GGGG: local vector containing global indexes of sequences whose nonzeros should be removed because contained vertex
 	std::vector<std::vector<int64_t>> ContainedSeqPerBatch(batch_cnt);
-	
-	while (batch_idx < batch_cnt) 
+
+	while (batch_idx < batch_cnt)
 	{
 		uint64_t beg = batch_idx * batch_size;
 		uint64_t end = ((batch_idx + 1) * batch_size > local_nnz_count) ? local_nnz_count : ((batch_idx + 1) * batch_size);
@@ -273,7 +273,7 @@ DistributedPairwiseRunner::run_batch
 		memset(algn_cnts, 0, sizeof(*algn_cnts) * (numThreads + 1));
 
 		uint64_t nelims_ckthr_cur = 0;
-		
+
 		// Count number of alignments in this batch
 		#pragma omp parallel reduction(+:nelims_ckthr_cur)
 		{
@@ -296,7 +296,7 @@ DistributedPairwiseRunner::run_batch
 
 				elba::CommonKmers *cks = std::get<2>(mattuples[i]);
 
-				if ((cks->count >= ckthr) 	 	&& 
+				if ((cks->count >= ckthr) 	 	&&
 					(l_col_idx >= l_row_idx) 	&&
 					(l_col_idx != l_row_idx  || g_col_idx > g_row_idx))
 				{
@@ -312,18 +312,18 @@ DistributedPairwiseRunner::run_batch
 			algn_cnts[tid + 1] = algn_cnt;
 		}
 
-		nelims_ckthr += nelims_ckthr_cur;	
+		nelims_ckthr += nelims_ckthr_cur;
 
 		for (int i = 1; i < numThreads + 1; ++i) algn_cnts[i] += algn_cnts[i - 1];
 
 		nalignments += algn_cnts[numThreads];
 
 		if (algn_cnts[numThreads] == 0)
-		{	
+		{
 			++batch_idx;
 			continue;
 		}
-		
+
 		// allocate StringSet
 		seqan::StringSet<seqan::Gaps<seqan::Dna5String>> seqsh;
 		seqan::StringSet<seqan::Gaps<seqan::Dna5String>> seqsv;
@@ -331,7 +331,7 @@ DistributedPairwiseRunner::run_batch
 		resize(seqsv, algn_cnts[numThreads], seqan::Exact{});
 
 		uint64_t *lids = new uint64_t[algn_cnts[numThreads]];
-		
+
 		// fill StringSet
 		#pragma omp parallel
 		{
@@ -348,7 +348,7 @@ DistributedPairwiseRunner::run_batch
 				auto		l_row_idx = std::get<0>(mattuples[i]);
 				auto		l_col_idx = std::get<1>(mattuples[i]);
 				uint64_t	g_col_idx = l_col_idx + col_offset;
-				uint64_t	g_row_idx = l_row_idx + row_offset; 
+				uint64_t	g_row_idx = l_row_idx + row_offset;
 
 				assert(l_row_idx >= 0 && l_col_idx >= 0 && g_col_idx >= 0 && g_row_idx >= 0);
 
@@ -375,20 +375,20 @@ DistributedPairwiseRunner::run_batch
 
 		// GGGG: fill ContainedSeqPerBatch
 		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx]);
-		
+
 		delete [] lids;
 		++batch_idx;
 	}
 
 	// lfs << "Before concatenation ContainedSeqPerBatch" << std::endl;
-	
+
 	int readcount = 0;
 	for(int b = 0; b < batch_cnt; ++b)
 	{
 		readcount += ContainedSeqPerBatch[b].size();
 	}
 
-	unsigned int readssofar = 0; 
+	unsigned int readssofar = 0;
 	std::vector<int64_t> ContainedSeqPerProc(readcount);
 
 	// Concatenate per-batch result
@@ -406,7 +406,7 @@ DistributedPairwiseRunner::run_batch
 	lfs << "Removed duplicates and sorted, contained readcount " << ContainedSeqPerProc.size() << " out of " << nreads << " sequences" << std::endl;
 
 	//////////////////////////////////////////////////////////////////////////////////////
-	// CONTAINED SEQRUENCES COMMUNICATION                                               // 
+	// CONTAINED SEQRUENCES COMMUNICATION                                               //
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	// Don't use boolean (it's bitmap not array of boolean, this messes up in communication)
@@ -420,14 +420,14 @@ DistributedPairwiseRunner::run_batch
 
 	// A vector of vector for communication
 	std::vector<std::vector<int64_t>> buffer(nprocs); // outer dim is the number of processes
-	
+
 	int * sendcnt = new int[nprocs](); // zero initialize
 	int * recvcnt = new int[nprocs];
 
 	// Each proc has a bunch of int64_t vectors with indexes (possible duplicates intra- and inter-proc)
 	for(int i = 0; i < ContainedSeqPerProc.size(); i++)
 	{
-		int64_t lid; 
+		int64_t lid;
 
 		//! Given global index gind,
 		//! Return the owner processor id, and
@@ -440,7 +440,7 @@ DistributedPairwiseRunner::run_batch
 		++sendcnt[owner];
 	}
 
-	// GGGG: Alltoall to share the count and Alltoallv for vector 
+	// GGGG: Alltoall to share the count and Alltoallv for vector
 	MPI_Alltoall(sendcnt, 1, MPI_INT, recvcnt, 1, MPI_INT, MPI_COMM_WORLD);
 
 	std::vector<int64_t> sendbuffer;
@@ -467,12 +467,12 @@ DistributedPairwiseRunner::run_batch
 
 	int64_t totrecv = std::accumulate(recvcnt, recvcnt + nprocs, static_cast<int64_t>(0));
 	recvbuffer.resize(totrecv);
-	
+
 	// GGGG: Alltoallv for vector
 	// Data is already in the right order (recepeint will receive from nrpocs processes)
 	MPI_Alltoallv(sendbuffer.data(), sendcnt, sdispls, MPI_LONG, recvbuffer.data(), recvcnt, rdispls, MPI_LONG, MPI_COMM_WORLD);
 	DeleteAll(sendcnt, recvcnt, sdispls, rdispls);
-	
+
 	// Go over recvbuffer and set elements to 1 in ContainedSeqPerGlobal
 	for(int k = 0; k < totrecv; k++)
 	{
@@ -486,14 +486,14 @@ DistributedPairwiseRunner::run_batch
 	// toerase.DebugPrint(); // 0 is here but it's not erase from the matrix
 
 	//////////////////////////////////////////////////////////////////////////////////////
-	// TOTAL ALIGNMENTES COMMUNICATION                                                  // 
+	// TOTAL ALIGNMENTES COMMUNICATION                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	if(noAlign) nalignments = 0;
 
 	pf->nalignments = nalignments;
 	pf->print_avg_times(parops, lfs);
- 
+
 	lfs << "#alignments run " << nalignments << std::endl;
 
 	// Compute statistics
@@ -516,31 +516,19 @@ DistributedPairwiseRunner::run_batch
 				 "Total nnzs in the output matrix " +
 				 std::to_string(gmat->getnnz()) +
 				 "\nTotal nnzs in strictly lower (or upper) mat " +
-				 std::to_string((gmat->getnnz()-gmat->getncol())/2) + 
+				 std::to_string((gmat->getnnz()-gmat->getncol())/2) +
 				 "\n  Total alignments run " + std::to_string(nalignments_tot) +
 				 "\n  Eliminated due to common k-mer threshold " +
 				 std::to_string(nelims_ckthr_tot) + "\n");
 
 	//////////////////////////////////////////////////////////////////////////////////////
-	// PRUNE MATRIX FROM SPURIOUS AND CONTAINED ALIGNMENT                               // 
+	// PRUNE MATRIX FROM SPURIOUS AND CONTAINED ALIGNMENT                               //
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	tu.print_str("\t* nnz before pruning " + std::to_string(gmat->getnnz()) + "\n");
 
-    //PSpMat<ReadOverlap>::MPI_DCCols* Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*gmat);
-    //Rmat->ParallelWriteMM("pre_alignment_pruning.mtx", true, ReadOverlapGraphHandler());
-    //delete Rmat;
-
-    //gmat->ParallelWriteMM("pre_alignment_pruning.mtx", true, CommonKmersGraphHandler());
-
-	// Prune pairs that do not meet score criteria
 	auto elim_score = [] (elba::CommonKmers &ck) { return ck.passed == false; };
-	gmat->Prune(elim_score); 
-
-    //Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*gmat);
-    //Rmat->ParallelWriteMM("post_alignment_pruning.mtx", true, ReadOverlapGraphHandler());
-    //delete Rmat;
-    //gmat->ParallelWriteMM("post_alignment_pruning.mtx", true, CommonKmersGraphHandler());
+    gmat->Prune(elim_score);
 
 	// GGGG: if noAlign == true, we remove only the contained overlaps as they are not useful for transitive reduction (next prune)
 	tu.print_str("\t* nnz after 1st pruning (score) " + std::to_string(gmat->getnnz()) + "\n");
@@ -550,13 +538,8 @@ DistributedPairwiseRunner::run_batch
 	// Prune pairs involving contained seqs
 	gmat->PruneFull(toerase, toerase);
 
-    //Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*gmat);
-    //Rmat->ParallelWriteMM("post_containment_pruning.mtx", true, ReadOverlapGraphHandler());
-    //delete Rmat;
-    //gmat->ParallelWriteMM("post_containment_pruning.mtx", true, CommonKmersGraphHandler());
-
 	tu.print_str("\t* nnz after 2nd pruning (contained) " + std::to_string(gmat->getnnz()) + "\n");
-	
+
 	delete [] algn_cnts;
 	delete [] mattuples;
 

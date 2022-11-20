@@ -26,7 +26,7 @@ else()
   set(libc "")
 endif()
 
-#set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -fpermissive -w -O3 -g -fsanitize=address -fno-omit-frame-pointer -DSEQAN_ENABLE_DEBUG=0 -mavx2")
+# set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -fpermissive -w -O0 -g -fsanitize=address -fno-omit-frame-pointer -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 #set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -w -O3 -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -w -O3 -DSEQAN_ENABLE_DEBUG=0 -mavx2")
 

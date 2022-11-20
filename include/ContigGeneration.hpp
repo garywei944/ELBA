@@ -265,4 +265,11 @@ std::vector<IType> ImposeMyReadDistribution
     DistReadInfo& di
 );
 
+void PruneTips
+(
+    SpParMat<IType,IType,SpDCCols<IType,IType>>& A,
+    int ktip,
+    TraceUtils& tu
+);
+
 #endif

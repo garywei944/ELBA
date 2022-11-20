@@ -17,7 +17,6 @@ def parse_paf(paf_filename):
             read_lengths[name] = length
             read_intervals[name] = []
         read_intervals[name].append((beg, end))
-        #sys.stdout.write("{}\t{}\t{}\t{}\n".format(name, length, beg, end))
         sys.stdout.flush()
 
     for line in open(paf_filename, "r"):
@@ -38,12 +37,6 @@ def find_chimera(paf_filename, coverage_min):
         for beg, end in read_intervals[name]:
             for i in range(beg, end):
                 coverage[i] += 1
-
-        #sys.stdout.write("{}: ".format(name))
-        #for i in range(len(coverage)):
-        #    sys.stdout.write("{} ".format(coverage[i]))
-        #sys.stdout.write("\n")
-        #sys.stdout.flush()
 
         in_gap = True
 

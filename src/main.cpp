@@ -291,6 +291,8 @@ int main(int argc, char **argv)
     PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
   }
 
+  Rmat->ParallelWriteGeneric("elba.overlap.paf", PafHandler());
+
   if (coverage_min >= 0)
   {
     PruneChimeras(dfd, Rmat, coverage_min, parops, tp, tu);
@@ -309,6 +311,8 @@ int main(int argc, char **argv)
   {
     TransitiveReduction(*Rmat, tu);
   }
+
+  Rmat->ParallelWriteGeneric("elba.string.paf", PafHandler());
 
   Rmat->Apply(Tupleize());
 
@@ -863,7 +867,6 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
 void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap>::MPI_DCCols *Rmat, int coverage_min, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
     PSpMat<ReadOverlap>::MPI_DCCols Pmat(*Rmat);
-    Pmat.ParallelWriteGeneric("elba.paf", PafHandler());
     Pmat.Apply(HandleRCs());
     PSpMat<ReadOverlap>::MPI_DCCols PTmat(Pmat);
     PTmat.Transpose();
@@ -876,7 +879,6 @@ void PruneChimeras(std::shared_ptr<DistributedFastaData> dfd, PSpMat<ReadOverlap
     FullyDistVec<int64_t, int64_t> chimeras = GetChimeras(Pmat.getcommgrid(), dfd, pileups, coverage_min);
 
     Rmat->PruneFull(chimeras, chimeras);
-    Rmat->ParallelWriteGeneric("elba2.paf", PafHandler());
 
     std::stringstream outs;
     outs << "PruneChimeras :: Pruned " << chimeras.TotalLength() << " chimeric reads" << std::endl;

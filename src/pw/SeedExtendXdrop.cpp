@@ -3,7 +3,7 @@
 #include "../../include/pw/SeedExtendXdrop.hpp"
 #include <unordered_set>
 
-uint minOverlapLen = 5000;
+uint minOverlapLen = 5000; /* GRGR: TODO: might need to play around with this */
 
 void SeedExtendXdrop::PostAlignDecision(const AlignmentInfo& ai, bool& passed, float& ratioScoreOverlap,
 	int& dir, int& dirT, int& sfx, int& sfxT, uint32_t& overlap, const bool noAlign, std::vector<int64_t>& ContainedSeqMyThread)
@@ -180,12 +180,16 @@ void SeedExtendXdrop::apply(
 
 struct XSeed
 {
-    int begpH, endpH, begpV, endpV, begpHbest, endpHbest, begpVbest, endpVbest;
+    int begpH, endpH, begpV, endpV, begpHbest, endpHbest, begpVbest, endpVbest, seedlen;
     XSeed(int _begpH, int _begpV, int seedlen) : begpH(_begpH), begpV(_begpV), endpH(_begpH + seedlen), endpV(_begpV + seedlen),
-                                                 begpHbest(_begpH), begpVbest(_begpV), endpHbest(_begpH + seedlen), endpVbest(_begpV + seedlen) {}
+                                                 begpHbest(_begpH), begpVbest(_begpV), endpHbest(_begpH + seedlen), endpVbest(_begpV + seedlen), seedlen(seedlen) {}
 
     XSeed(const TSeed& seed) : begpH(beginPositionH(seed)), begpV(beginPositionV(seed)), endpH(endPositionH(seed)), endpV(endPositionV(seed)),
-                               begpHbest(beginPositionH(seed)), begpVbest(beginPositionV(seed)), endpHbest(endPositionH(seed)), endpVbest(endPositionV(seed)) {}
+                               begpHbest(beginPositionH(seed)), begpVbest(beginPositionV(seed)), endpHbest(endPositionH(seed)), endpVbest(endPositionV(seed))
+    {
+        assert((endPositionH(seed) - beginPositionH(seed) == endPositionV(seed) - beginPositionV(seed)));
+        seedlen = endPositionH(seed) - beginPositionH(seed);
+    }
 
     friend std::ostream& operator<<(std::ostream& os, XSeed seed)
     {
@@ -414,7 +418,7 @@ int extend_seed(const seqan::Dna5String& dbSeq, const seqan::Dna5String& querySe
 
     int rscore = extend_seed_one_direction(databaseSuffix, querySuffix, false, mat, mis, gap, xdrop, seed);
 
-    return lscore + rscore;
+    return lscore + rscore + (mat*seed.seedlen);
 }
 
 // @NOTE This is hard-coded to the number of seeds being <= 2

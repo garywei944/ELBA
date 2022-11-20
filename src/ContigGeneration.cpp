@@ -283,26 +283,11 @@ IType GetRead2Contigs(SpParMat<IType,ReadOverlap,SpDCCols<IType,ReadOverlap>>& G
     SpParMat<IType,bool,SpDCCols<IType,bool>> D2;
     FullyDistVec<IType,IType> Branches;
 
-    FullyDistVec<IType,IType> degs2(A.getcommgrid());
+    FullyDistVec<IType,IType> degs(A.getcommgrid());
 
     tu.print_str("GetRead2Contigs :: Calculated vertex degrees\n");
 
-    if (ktip_threshold > 0)
-    {
-        IType ktip_edges_removed;
-        do
-        {
-            SpParMat<IType,bool,SpDCCols<IType,bool>> D1 = A;
-            FullyDistVec<IType,IType> degs1(A.getcommgrid());
-            D1.Reduce(degs1, Row, std::plus<IType>(), static_cast<IType>(0));
-            ktip_edges_removed = KTipsRemoval(A, degs1, ktip_threshold, tu);
-            std::ostringstream oss;
-            oss << "GetRead2Contigs :: Found " << ktip_edges_removed  << " k-tip edges\n";
-            tu.print_str(oss.str());
-        } while (ktip_edges_removed > 0);
-
-        tu.print_str("GetRead2Contigs :: Removed k-tips\n");
-    }
+    if (ktip_threshold > 0) PruneTips(A, ktip_threshold, tu);
 
     if (prune_bridges)
     {
@@ -313,10 +298,10 @@ IType GetRead2Contigs(SpParMat<IType,ReadOverlap,SpDCCols<IType,ReadOverlap>>& G
     }
 
     D2 = A;
-    D2.Reduce(degs2, Row, std::plus<IType>(), static_cast<IType>(0));
+    D2.Reduce(degs, Row, std::plus<IType>(), static_cast<IType>(0));
     tu.print_str("GetRead2Contigs :: Recalculate vertex degrees after k-tips and bridge vertices removed\n");
 
-    Branches = degs2.FindInds(bind2nd(std::greater<IType>(), 2));
+    Branches = degs.FindInds(bind2nd(std::greater<IType>(), 2));
     IType numbranches = Branches.TotalLength();
     iss << "GetRead2Contigs :: Found " << numbranches << " branching points\n";
     tu.print_str(iss.str());
@@ -820,4 +805,20 @@ int MPI_Alltoallv_str(const char *sendbuf, const std::vector<IType>& sendcounts,
     delete [] reqs;
 
     return MPI_SUCCESS;
+}
+
+void PruneTips(SpParMat<IType,IType,SpDCCols<IType,IType>>& A, int ktip, TraceUtils& tu)
+{
+    IType ktip_edges_removed;
+
+    do
+    {
+        SpParMat<IType, bool, SpDCCols<IType, bool>> D = A;
+        FullyDistVec<IType, IType> degs(A.getcommgrid());
+        D.Reduce(degs, Row, std::plus<IType>(), static_cast<IType>(0));
+        ktip_edges_removed = KTipsRemoval(A, degs, ktip, tu);
+        std::ostringstream oss;
+        oss << "GetRead2Contigs :: Found " << ktip_edges_removed  << " k-tip edges\n";
+        tu.print_str(oss.str());
+    } while (ktip_edges_removed > 0);
 }
