@@ -29,7 +29,12 @@ def get_vertices(fasta_fname):
     for i in range(len(read_names)):
         read_name = read_names[i]
         read_length = read_lengths[i]
-        name, comment = read_name.split(None, 1)
+        names = read_name.split(None, 1)
+        if len(names) == 2:
+            name, comment = names
+        else:
+            name = names[0]
+            comment = ""
         read_name_map[name] = i
         vertices.append({"name" : name, "comment" : comment, "length" : read_length})
     return vertices, read_name_map, read_lengths
