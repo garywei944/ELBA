@@ -33,7 +33,7 @@ def main(argc, argv):
     xdrop = 15
     on_mac = False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "c:pt:f:n:x:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "c:pMt:f:n:x:h")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
@@ -75,14 +75,20 @@ def main(argc, argv):
     if ktip_threshold != 0:
         elba_cmd += ["--tip", str(ktip_threshold)]
 
-    output_fname = path_prefix + ".out"
-    output_path = Path(output_fname).absolute().resolve()
+    #  output_fname = path_prefix + ".out"
+    #  output_path = Path(output_fname).absolute().resolve()
 
     sys.stdout.write(" ".join(elba_cmd) + "\n")
     sys.stdout.flush()
 
     p = sp.Popen(elba_cmd)
     p.wait()
+
+    for rankfile in Path.cwd().glob("elba_rank_*_log.txt"):
+        rankfile.unlink()
+
+    Path("elba.overlap.paf").rename(Path(path_prefix + ".overlap.paf"))
+    Path("elba.string.paf").rename(Path(path_prefix + ".string.paf"))
 
     #with open(str(output_path), "w") as f:
     #    p = sp.Popen(elba_cmd, stdout=f, stderr=sp.STDOUT)

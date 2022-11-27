@@ -66,7 +66,7 @@ def main(argc, argv):
     proc.wait()
 
     job_count = 64
-    if on_mac: job_count = 12 
+    if on_mac: job_count = 12
 
     combblas_build_cmd = ["make", "-j", str(job_count), "-C", str(combblas_build_path.absolute())]
     sys.stdout.write(" ".join(combblas_build_cmd) + "\n")
