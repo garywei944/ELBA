@@ -12,6 +12,7 @@ def usage():
     sys.stderr.write("    -U INT   prune k-mers above this bound [30]\n")
     sys.stderr.write("    -d FLOAT chernoff bound [0.1]\n")
     sys.stderr.write("    -p FILE  relative path to ELBA main directory [../]\n")
+    sys.stderr.write("    -M       on personal mac computer\n")
     return -1
 
 def main(argc, argv):
@@ -22,8 +23,9 @@ def main(argc, argv):
     lower_kmer_bound = 20
     upper_kmer_bound = 30
     delta_chernoff = 0.1
+    on_mac=False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "L:U:d:p:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "L:U:d:p:Mh")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
@@ -34,6 +36,7 @@ def main(argc, argv):
         elif o == "-U": upper_kmer_bound = int(a)
         elif o == "-d": delta_chernoff = float(a)
         elif o == "-p": elba_path = a
+        elif o == "-M": on_mac = True
 
     if len(args) != 1:
         return usage()
@@ -53,20 +56,24 @@ def main(argc, argv):
     combblas_build_path.mkdir(exist_ok=True)
     combblas_install_path.mkdir(exist_ok=True)
 
-    combblas_cmake_cmd = ["cmake", "-S", str(combblas_path.absolute()), "-B",
-                          str(combblas_build_path.absolute()), "-DCMAKE_C_COMPILER=gcc-11",
-                          "-DCMAKE_CXX_COMPILER=g++-11",
-                          "-DCMAKE_INSTALL_PREFIX={}".format(str(combblas_install_path.absolute()))]
+
+    combblas_cmake_cmd = ["cmake", "-S", str(combblas_path.absolute()), "-B", str(combblas_build_path.absolute()), "-DCMAKE_INSTALL_PREFIX={}".format(str(combblas_install_path.absolute()))]
+
+    if on_mac: combblas_cmake_cmd += ["-DCMAKE_CXX_COMPILER=g++-11", "-DCMAKE_C_COMPILER=gcc-11"]
+
     sys.stdout.write(" ".join(combblas_cmake_cmd) + "\n")
     proc = sp.Popen(combblas_cmake_cmd)
     proc.wait()
 
-    combblas_build_cmd = ["make", "-j", "12", "-C", str(combblas_build_path.absolute())]
+    job_count = 64
+    if on_mac: job_count = 12 
+
+    combblas_build_cmd = ["make", "-j", str(job_count), "-C", str(combblas_build_path.absolute())]
     sys.stdout.write(" ".join(combblas_build_cmd) + "\n")
     proc = sp.Popen(combblas_build_cmd)
     proc.wait()
 
-    combblas_install_cmd = ["make", "install", "-j", "12", "-C", str(combblas_build_path.absolute())]
+    combblas_install_cmd = ["make", "install", "-j", str(job_count), "-C", str(combblas_build_path.absolute())]
     sys.stdout.write(" ".join(combblas_install_cmd) + "\n")
     proc = sp.Popen(combblas_install_cmd)
     proc.wait()
@@ -74,14 +81,15 @@ def main(argc, argv):
     elba_cmake_cmd = ["cmake", "-S", str(elba_path.absolute()), "-B", str(build_path.absolute()),
                       "-DLOWER_KMER_FREQ={}".format(lower_kmer_bound),
                       "-DUPPER_KMER_FREQ={}".format(upper_kmer_bound),
-                      "-DDELTACHERNOFF={}".format(delta_chernoff),
-                      "-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
+                      "-DDELTACHERNOFF={}".format(delta_chernoff)]
+
+    if on_mac: elba_cmake_cmd += ["-DCMAKE_CXX_COMPILER=g++-11", "-DCMAKE_C_COMPILER=gcc-11"]
 
     sys.stdout.write(" ".join(elba_cmake_cmd) + "\n")
     proc = sp.Popen(elba_cmake_cmd)
     proc.wait()
 
-    elba_build_cmd = ["make", "-j", "12", "-C", str(build_path.absolute())]
+    elba_build_cmd = ["make", "-j", str(job_count), "-C", str(build_path.absolute())]
     sys.stdout.write(" ".join(elba_build_cmd) + "\n")
     proc = sp.Popen(elba_build_cmd)
     proc.wait()

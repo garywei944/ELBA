@@ -13,11 +13,12 @@ def usage():
     sys.stderr.write("Usage: python {} [options] <reads.fa> <elba>\n\n".format(sys.argv[0]))
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -c FILE  contig fasta filename [ctg.fa]\n")
-    sys.stderr.write("    -p       prune bridges\n")
     sys.stderr.write("    -t INT   ktip threshold [0]\n")
     sys.stderr.write("    -x INT   xdrop value [15]\n")
     sys.stderr.write("    -f STR   path prefixes [elba]\n")
     sys.stderr.write("    -n INT   number of processes [1]\n")
+    sys.stderr.write("    -p       prune bridges\n")
+    sys.stderr.write("    -M       run on personal computer\n")
     return -1
 
 def main(argc, argv):
@@ -30,6 +31,7 @@ def main(argc, argv):
     ktip_threshold = 0
     num_procs = 1
     xdrop = 15
+    on_mac = False
 
     try: opts, args = getopt.gnu_getopt(argv[1:], "c:pt:f:n:x:h")
     except getopt.GetoptError as err:
@@ -44,6 +46,7 @@ def main(argc, argv):
         elif o == "-f": path_prefix = a
         elif o == "-n": num_procs = int(a)
         elif o == "-x": xdrop = int(a)
+        elif o == "-M": on_mac = True
 
     if len(args) != 2:
         return usage()
@@ -54,7 +57,17 @@ def main(argc, argv):
 
     num_reads = get_num_reads(str(reads_path))
 
-    elba_cmd = ["mpirun", "-np", str(num_procs), str(elba_exepath), "-i", str(reads_path), "-o", str(contig_path), "--idxmap", "idmap", "-c", str(num_reads), "-k", "31", "--xa", str(xdrop), "-s", "1", "-O", "100000", "--afreq", "100000"]
+    elba_cmd = []
+
+    if on_mac: elba_cmd += ["mpirun", "-np"]
+    else: elba_cmd += ["srun", "-n"]
+
+    elba_cmd.append(str(num_procs))
+
+    if not on_mac:
+        elba_cmd += ["-c", str(256//num_procs), "--cpu_bind=cores"]
+
+    elba_cmd += [str(elba_exepath), "-i", str(reads_path), "-o", str(contig_path), "--idxmap", "idmap", "-c", str(num_reads), "-k", "31", "--xa", str(xdrop), "-s", "1", "-O", "100000", "--afreq", "100000"]
 
     if prune_bridges:
         elba_cmd.append("--pb")
@@ -65,10 +78,15 @@ def main(argc, argv):
     output_fname = path_prefix + ".out"
     output_path = Path(output_fname).absolute().resolve()
 
-    with open(str(output_path), "w") as f:
-        p = sp.Popen(elba_cmd, stdout=f, stderr=sp.STDOUT)
-        p.wait()
+    sys.stdout.write(" ".join(elba_cmd) + "\n")
+    sys.stdout.flush()
 
+    p = sp.Popen(elba_cmd)
+    p.wait()
+
+    #with open(str(output_path), "w") as f:
+    #    p = sp.Popen(elba_cmd, stdout=f, stderr=sp.STDOUT)
+    #    p.wait()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
