@@ -188,6 +188,12 @@ void ReadOverlapGraph
     TraceUtils& tu
 );
 
+void WriteContigs
+(
+    const char *filename,
+    const std::vector<std::string>& myContigSet
+);
+
 int main(int argc, char **argv)
 {
   parops = ParallelOps::init(&argc, &argv);
@@ -343,41 +349,9 @@ int main(int argc, char **argv)
 
   tp->times["StartMain:WriteContigs()"] = std::chrono::system_clock::now();
 
-  int64_t number_of_contigs = myContigSet.size();
-  int64_t contigs_offset = 0;
-  MPI_Exscan(&number_of_contigs, &contigs_offset, 1, MPI_INT64_T, MPI_SUM, MPI_COMM_WORLD);
+  WriteContigs(output_file.c_str(), myContigSet);
 
-  std::stringstream contig_filecontents;
-
-  for (int i = 0; i < myContigSet.size(); ++i)
-    contig_filecontents << ">contig" << i+contigs_offset << "\tmyrank=" << myrank << "\tmyoffset=" << i << "\n" << myContigSet[i] << "\n";
-
-  MPI_File cfh;
-  MPI_File_open(MPI_COMM_WORLD, output_file.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &cfh);
-
-  std::string cfs = contig_filecontents.str();
-  const char *strout = cfs.c_str();
-
-  MPI_Offset count = strlen(strout);
-  MPI_File_write_ordered(cfh, strout, count, MPI_CHAR, MPI_STATUS_IGNORE);
-  MPI_File_close(&cfh);
-
-  MPI_Barrier(MPI_COMM_WORLD);
   tp->times["EndMain:WriteContigs()"] = std::chrono::system_clock::now();
-
-  // //////////////////////////////////////////////////////////////////////////////////////
-  // // SCAFFOLDING                                                                      //
-  // //////////////////////////////////////////////////////////////////////////////////////
-
-  // tp->times["StartMain:ScaffoldContig()"] = std::chrono::system_clock::now();
-
-  // bool scaffolding = false;
-  // if(!contigging) scaffolding = false;
-
-  // if(scaffolding)
-  // {
-  //   // GetAssembly(myContigSet, tu);
-  // }
 
   //////////////////////////////////////////////////////////////////////////////////////
   // END OF PROGRAM                                                                   //
@@ -890,4 +864,30 @@ void ReadOverlapGraph(const char *filename, std::shared_ptr<DistributedFastaData
 {
     Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(commgrid);
     Rmat->ReadDistribute(filename, 0, false, ReadOverlapDiskHandler());
+}
+
+void WriteContigs(const char *filename, const std::vector<std::string>& myContigSet)
+{
+  int64_t number_of_contigs = myContigSet.size();
+  int64_t contigs_offset = 0;
+  MPI_Exscan(&number_of_contigs, &contigs_offset, 1, MPI_INT64_T, MPI_SUM, MPI_COMM_WORLD);
+
+  std::stringstream contig_filecontents;
+
+  for (int i = 0; i < number_of_contigs; ++i)
+  {
+    contig_filecontents << ">contig" << i+contigs_offset << "\n" << myContigSet[i] << "\n";
+  }
+
+  MPI_File cfh;
+  MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &cfh);
+
+  std::string cfs = contig_filecontents.str();
+  const char *strout = cfs.c_str();
+
+  MPI_Offset count = strlen(strout);
+  MPI_File_write_ordered(cfh, strout, count, MPI_CHAR, MPI_STATUS_IGNORE);
+  MPI_File_close(&cfh);
+
+  MPI_Barrier(MPI_COMM_WORLD);
 }
