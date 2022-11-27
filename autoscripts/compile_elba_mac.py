@@ -6,7 +6,7 @@ import shutil
 import os
 
 def usage():
-    sys.stderr.write("Usage: python {} [options] /path/to/workdir\n\n".format(sys.argv[0]))
+    sys.stderr.write("Usage: python {} [options] <elba>\n\n".format(sys.argv[0]))
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -L INT   prune k-mers below this bound [20]\n")
     sys.stderr.write("    -U INT   prune k-mers above this bound [30]\n")
@@ -38,8 +38,7 @@ def main(argc, argv):
     if len(args) != 1:
         return usage()
 
-    workdir_path = Path(args[0])
-    workdir_path.mkdir(exist_ok=True, parents=True)
+    exe_path = Path(args[0])
 
     elba_path = Path(elba_pathname).resolve()
     build_path = elba_path.joinpath("build_release")
@@ -76,8 +75,8 @@ def main(argc, argv):
                       "-DLOWER_KMER_FREQ={}".format(lower_kmer_bound),
                       "-DUPPER_KMER_FREQ={}".format(upper_kmer_bound),
                       "-DDELTACHERNOFF={}".format(delta_chernoff),
-                      "-DCMAKE_C_COMPILER=gcc-11",
-                      "-DCMAKE_CXX_COMPILER=g++-11"]
+                      "-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
+
     sys.stdout.write(" ".join(elba_cmake_cmd) + "\n")
     proc = sp.Popen(elba_cmake_cmd)
     proc.wait()
@@ -87,7 +86,7 @@ def main(argc, argv):
     proc = sp.Popen(elba_build_cmd)
     proc.wait()
 
-    shutil.copy(str(build_path.joinpath("elba").absolute()), str(workdir_path.absolute()))
+    shutil.copy(str(build_path.joinpath("elba").absolute()), str(exe_path.absolute()))
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
