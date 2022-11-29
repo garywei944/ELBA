@@ -12,11 +12,11 @@ def get_num_reads(reads_fname):
 def usage():
     sys.stderr.write("Usage: python {} [options] <reads.fa> <elba>\n\n".format(sys.argv[0]))
     sys.stderr.write("Options:\n")
-    sys.stderr.write("    -c FILE  contig fasta filename [ctg.fa]\n")
     sys.stderr.write("    -t INT   ktip threshold [0]\n")
     sys.stderr.write("    -x INT   xdrop value [15]\n")
-    sys.stderr.write("    -f STR   path prefixes [elba]\n")
+    sys.stderr.write("    -f STR   path prefixes [elba.out]\n")
     sys.stderr.write("    -n INT   number of processes [1]\n")
+    sys.stderr.write("    -r FILE  reference fasta file\n")
     sys.stderr.write("    -p       prune bridges\n")
     sys.stderr.write("    -M       run on personal computer\n")
     return -1
@@ -25,22 +25,21 @@ def main(argc, argv):
 
     if argc < 3: return usage()
 
-    contig_fname = "ctg.fa"
-    path_prefix = "elba"
+    path_prefix = "elba.out"
     prune_bridges = False
     ktip_threshold = 0
     num_procs = 1
     xdrop = 15
+    reference_fname = ""
     on_mac = False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "c:pMt:f:n:x:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "pMt:f:n:x:h")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
 
     for o, a in opts:
         if o == "-h": return usage()
-        elif o == "-c": contig_fname = a
         elif o == "-p": prune_bridges = True
         elif o == "-t": ktip_threshold = int(a)
         elif o == "-f": path_prefix = a
@@ -53,7 +52,7 @@ def main(argc, argv):
 
     reads_path = Path(args[0]).absolute().resolve()
     elba_exepath = Path(args[1]).absolute().resolve()
-    contig_path = Path(contig_fname).absolute().resolve()
+    contig_path = Path(path_prefix + ".ctg.fa").absolute().resolve()
 
     num_reads = get_num_reads(str(reads_path))
 
@@ -75,9 +74,6 @@ def main(argc, argv):
     if ktip_threshold != 0:
         elba_cmd += ["--tip", str(ktip_threshold)]
 
-    #  output_fname = path_prefix + ".out"
-    #  output_path = Path(output_fname).absolute().resolve()
-
     sys.stdout.write(" ".join(elba_cmd) + "\n")
     sys.stdout.flush()
 
@@ -89,10 +85,6 @@ def main(argc, argv):
 
     Path("elba.overlap.paf").rename(Path(path_prefix + ".overlap.paf"))
     Path("elba.string.paf").rename(Path(path_prefix + ".string.paf"))
-
-    #with open(str(output_path), "w") as f:
-    #    p = sp.Popen(elba_cmd, stdout=f, stderr=sp.STDOUT)
-    #    p.wait()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
