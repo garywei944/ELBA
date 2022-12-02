@@ -3,11 +3,17 @@ import getopt
 import subprocess as sp
 from pathlib import Path
 
-def get_num_reads(reads_fname):
-    grep_proc = sp.Popen(["grep", ">", reads_fname], stdout=sp.PIPE)
-    wc_proc = sp.Popen(["wc", "-l"], stdin=grep_proc.stdout, stdout=sp.PIPE)
-    return int(wc_proc.communicate()[0].decode().lstrip().rstrip())
+#def process_path("elba.overlap.paf", path_prefix + ".overlap.paf", idx_table_path)
 
+#def process_path(in_paf_fname, out_paf_fname, idx_table_path):
+
+def write_idx_table(reads_fname, idx_table_fname):
+
+    with open(idx_table_fname, "w") as f:
+        p = sp.Popen(["awk", "/^>/{print ++i, substr($1, 2); next}", reads_fname], stdout=f)
+        p.wait()
+
+    return int(sp.Popen(["tail", "-n1", idx_table_fname], stdout=sp.PIPE).communicate()[0].decode().lstrip().rstrip().split()[0])
 
 def usage():
     sys.stderr.write("Usage: python {} [options] <reads.fa> <elba>\n\n".format(sys.argv[0]))
@@ -53,8 +59,9 @@ def main(argc, argv):
     reads_path = Path(args[0]).absolute().resolve()
     elba_exepath = Path(args[1]).absolute().resolve()
     contig_path = Path(path_prefix + ".ctg.fa").absolute().resolve()
+    idx_table_path = Path(path_prefix + ".idxtable.txt").absolute().resolve()
 
-    num_reads = get_num_reads(str(reads_path))
+    num_reads = write_idx_table(str(reads_path), str(idx_table_path))
 
     elba_cmd = []
 
@@ -83,8 +90,17 @@ def main(argc, argv):
     for rankfile in Path.cwd().glob("elba_rank_*_log.txt"):
         rankfile.unlink()
 
-    Path("elba.overlap.paf").rename(Path(path_prefix + ".overlap.paf"))
-    Path("elba.string.paf").rename(Path(path_prefix + ".string.paf"))
+    #process_path("elba.overlap.paf", path_prefix + ".overlap.paf", idx_table_path)
+
+    #process_paf("elba.overlap.paf", path_prefix, idx_table_path)
+    #process_paf("elba.string.paf", path_prefix, idx_table_path)
+
+    #overlap_path = Path("elba.overlap.paf").rename(Path(path_prefix + ".overlap.paf"))
+    #string_path = Path("elba.string.paf").rename(Path(path_prefix + ".string.paf"))
+    
+    #paf_id_replace(Path("elba.overlap.paf"), idx_table_path)
+    #paf_id_replace(string_path, idx_table_path)
+    
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
