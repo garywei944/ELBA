@@ -3,9 +3,20 @@ import getopt
 import subprocess as sp
 from pathlib import Path
 
-#def process_path("elba.overlap.paf", path_prefix + ".overlap.paf", idx_table_path)
+def process_paf(in_paf_fname, out_paf_fname, idx_table_fname):
 
-#def process_path(in_paf_fname, out_paf_fname, idx_table_path):
+    in_paf = Path(in_paf_fname)
+    out_paf = Path(out_paf_fname)
+
+    idx_dict = dict(map(lambda line: line.rstrip().split(), open(idx_table_fname)))
+
+    def nameize_pafline(pafline):
+        l = pafline.rstrip().split()
+        l[0], l[5] = idx_dict[l[0]], idx_dict[l[5]]
+        return "\t".join(l) + "\n"
+
+    with open(out_paf_fname, "w") as f:
+        f.writelines(map(nameize_pafline, open(in_paf_fname)))
 
 def write_idx_table(reads_fname, idx_table_fname):
 
@@ -90,17 +101,11 @@ def main(argc, argv):
     for rankfile in Path.cwd().glob("elba_rank_*_log.txt"):
         rankfile.unlink()
 
-    #process_path("elba.overlap.paf", path_prefix + ".overlap.paf", idx_table_path)
+    process_paf("elba.overlap.paf", path_prefix + ".overlap.paf", str(idx_table_path))
+    process_paf("elba.string.paf", path_prefix + ".string.paf", str(idx_table_path))
 
-    #process_paf("elba.overlap.paf", path_prefix, idx_table_path)
-    #process_paf("elba.string.paf", path_prefix, idx_table_path)
-
-    #overlap_path = Path("elba.overlap.paf").rename(Path(path_prefix + ".overlap.paf"))
-    #string_path = Path("elba.string.paf").rename(Path(path_prefix + ".string.paf"))
-    
-    #paf_id_replace(Path("elba.overlap.paf"), idx_table_path)
-    #paf_id_replace(string_path, idx_table_path)
-    
+    Path("elba.overlap.paf").unlink()
+    Path("elba.string.paf").unlink()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
