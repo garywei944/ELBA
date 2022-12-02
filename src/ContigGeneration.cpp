@@ -190,7 +190,6 @@ IType RemoveBridgeVertices(SpParMat<IType,IType,SpDCCols<IType,IType>>& A)
     FullyDistVec<IType,IType> counts = N.Reduce(Row, std::plus<IType>(), static_cast<IType>(0));
 
     FullyDistVec<IType,IType> bridges = counts.FindInds(std::bind2nd(std::equal_to<IType>(), static_cast<IType>(2)));
-    bridges.ParallelWrite("bridges.txt", false);
 
     A.PruneFull(bridges, bridges);
     return bridges.TotalLength();
@@ -574,7 +573,6 @@ const char * ReadExchange(std::vector<IType>& LocalRead2Procs, std::unordered_ma
     }
 
     MPI_Alltoallv(char_send, str_sendcounts, str_sdispls, MPI_CHAR, char_recv, str_recvcounts, str_rdispls, MPI_CHAR, di.world);
-    //MPI_Alltoallv_str(char_send, char_sendcounts, char_sdispls, char_recv, char_recvcounts, char_rdispls, di.world);
 
     delete [] str_sendcounts;
     delete [] str_recvcounts;
@@ -743,68 +741,6 @@ std::vector<std::string> LocalAssembly(SpCCols<IType,ReadOverlap>& ContigChains,
     delete [] visited;
 
     return contigs;
-}
-
-int MPI_Alltoallv_str(const char *sendbuf, const std::vector<IType>& sendcounts, const std::vector<IType>& sdispls,
-                            char *recvbuf, const std::vector<IType>& recvcounts, const std::vector<IType>& rdispls, MPI_Comm comm)
-{
-    static_assert(sizeof(void*)==8);
-
-    int nprocs, myrank;
-    MPI_Comm_rank(comm, &myrank);
-    MPI_Comm_size(comm, &nprocs);
-
-    MPI_Request *reqs = new MPI_Request[2*nprocs];
-
-    for (int i = 0; i < nprocs; ++i) {
-        void *buf = recvbuf + rdispls[i];
-        MPI_Count recvcount = recvcounts[i];
-        if (recvcount <= max_int) {
-            MPI_Irecv(buf, static_cast<int>(recvcount), MPI_CHAR, i, 0, comm, &reqs[i]);
-        } else {
-            MPI_Datatype newtype, chunks, remains;
-            MPI_Type_vector(recvcount/max_int, max_int, max_int, MPI_CHAR, &chunks);
-            MPI_Type_contiguous(recvcount%max_int, MPI_CHAR, &remains);
-            MPI_Aint rdisp = static_cast<MPI_Aint>((recvcount/max_int)*max_int);
-            int blklens[2] = {1,1};
-            MPI_Aint displs[2] = {0,rdisp};
-            MPI_Datatype types[2] = {chunks,remains};
-            MPI_Type_create_struct(2, blklens, displs, types, &newtype);
-            MPI_Type_free(&chunks);
-            MPI_Type_free(&remains);
-            MPI_Type_commit(&newtype);
-            MPI_Irecv(buf, 1, newtype, i, 0, comm, &reqs[i]);
-            MPI_Type_free(&newtype);
-        }
-    }
-
-    for (int j = myrank; j < (nprocs+myrank); ++j) {
-        int i = j%nprocs;
-        const void *buf = sendbuf + sdispls[i];
-        MPI_Count sendcount = sendcounts[i];
-        if (sendcount <= max_int) {
-            MPI_Isend(buf, static_cast<int>(sendcount), MPI_CHAR, i, 0, comm, &reqs[i+nprocs]);
-        } else {
-            MPI_Datatype newtype, chunks, remains;
-            MPI_Type_vector(sendcount/max_int, max_int, max_int, MPI_CHAR, &chunks);
-            MPI_Type_contiguous(sendcount%max_int, MPI_CHAR, &remains);
-            MPI_Aint rdisp = static_cast<MPI_Aint>((sendcount/max_int)*max_int);
-            int blklens[2] = {1,1};
-            MPI_Aint displs[2] = {0,rdisp};
-            MPI_Datatype types[2] = {chunks,remains};
-            MPI_Type_create_struct(2, blklens, displs, types, &newtype);
-            MPI_Type_free(&chunks);
-            MPI_Type_free(&remains);
-            MPI_Type_commit(&newtype);
-            MPI_Isend(buf, 1, newtype, i, 0, comm, &reqs[i+nprocs]);
-            MPI_Type_free(&newtype);
-        }
-    }
-
-    MPI_Waitall(2*nprocs, reqs, MPI_STATUSES_IGNORE);
-    delete [] reqs;
-
-    return MPI_SUCCESS;
 }
 
 void PruneTips(SpParMat<IType,IType,SpDCCols<IType,IType>>& A, int ktip, TraceUtils& tu)

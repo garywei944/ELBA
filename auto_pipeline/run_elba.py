@@ -2,6 +2,59 @@ import sys
 import getopt
 import subprocess as sp
 from pathlib import Path
+from igraph import Graph
+
+def fasta_read_lengths(fasta):
+    read_lengths = []
+    read_names = []
+    with open(fasta, "r") as f:
+        seqlen = 0
+        name = ""
+        for line in f.readlines():
+            if line.startswith(">"):
+                if seqlen > 0:
+                    read_lengths.append(seqlen)
+                    read_names.append(name)
+                    seqlen = 0
+                name = line.lstrip(">").rstrip()
+            else:
+                seqlen += len(line.rstrip())
+        if seqlen > 0:
+            read_lengths.append(seqlen)
+            read_names.append(name)
+    assert len(read_lengths) == len(read_names)
+    return read_names, read_lengths
+
+def get_vertices(fasta_fname):
+    vertices = []
+    read_names, read_lengths = fasta_read_lengths(fasta_fname)
+    read_name_map = {}
+    for i in range(len(read_names)):
+        read_name = read_names[i]
+        read_length = read_lengths[i]
+        names = read_name.split(None, 1)
+        if len(names) == 2:
+            name, comment = names
+        else:
+            name = names[0]
+            comment = ""
+        read_name_map[name] = i
+        vertices.append({"name" : name, "comment" : comment, "length" : read_length})
+    return vertices, read_name_map, read_lengths
+
+def get_edges(paf_fname, vertices, read_name_map, read_lengths):
+    edges = []
+    for line in open(paf_fname, "r"):
+        items = line.rstrip().split()
+        source_name, target_name = items[0], items[5]
+        source_length, target_length = int(items[1]), int(items[6])
+        assert source_length == read_lengths[read_name_map[source_name]]
+        assert target_length == read_lengths[read_name_map[target_name]]
+        source_beg, target_beg = int(items[2]), int(items[7])
+        source_end, target_end = int(items[3]), int(items[8])
+        strand = items[4]
+        edges.append({"source" : source_name, "target" : target_name, "source_beg" : source_beg, "source_end" : source_end, "target_beg" : target_beg, "target_end" : target_end, "strand" : strand})
+    return edges
 
 def process_paf(in_paf_fname, out_paf_fname, idx_table_fname):
 
@@ -35,6 +88,7 @@ def usage():
     sys.stderr.write("    -n INT   number of processes [1]\n")
     sys.stderr.write("    -r FILE  reference fasta file\n")
     sys.stderr.write("    -p       prune bridges\n")
+    sys.stderr.write("    -G       generate gmls\n")
     sys.stderr.write("    -M       run on personal computer\n")
     return -1
 
@@ -48,9 +102,10 @@ def main(argc, argv):
     num_procs = 1
     xdrop = 15
     reference_fname = ""
+    generate_gmls = False
     on_mac = False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "pMt:f:n:x:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "pGMt:f:n:x:r:h")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
@@ -62,6 +117,8 @@ def main(argc, argv):
         elif o == "-f": path_prefix = a
         elif o == "-n": num_procs = int(a)
         elif o == "-x": xdrop = int(a)
+        elif o == "-r": reference_fname = a
+        elif o == "-G": generate_gmls = True
         elif o == "-M": on_mac = True
 
     if len(args) != 2:
@@ -106,6 +163,28 @@ def main(argc, argv):
 
     Path("elba.overlap.paf").unlink()
     Path("elba.string.paf").unlink()
+
+    if generate_gmls:
+
+        vertices, read_name_map, read_lengths = get_vertices(str(reads_path))
+
+        def write_elba_gml(paf_fname, gml_fname):
+            nonlocal vertices, read_name_map, read_lengths
+            edges = get_edges(paf_fname, vertices, read_name_map, read_lengths)
+            graph = Graph.DictList(vertices, edges, directed=True, vertex_name_attr="name", edge_foreign_keys=('source', 'target'), iterative=False)
+            del graph.es["source"]
+            del graph.es["target"]
+            graph.write_gml(gml_fname, creator="paf2gml.py")
+
+        write_elba_gml(path_prefix + ".overlap.paf", path_prefix + ".overlap.gml")
+        write_elba_gml(path_prefix + ".string.paf", path_prefix + ".string.gml")
+    
+    if reference_fname != "":
+        assert Path(reference_fname).is_file()
+        quast_path = Path("/global/homes/g/gabeh98/").joinpath("quast/quast.py").absolute().resolve()
+        quast_cmd = ["python", quast_path, "-o", str(Path(path_prefix + "quast_results").absolute().resolve()), "-r", reference_fname, "-t", "64", "--no-plots", "--no-html", "--no-icarus", "--no-snps", str(contig_path)]
+        p = sp.Popen(quast_cmd)        
+        p.wait()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
