@@ -66,7 +66,7 @@ std::string get_padding(ushort count, std::string prefix);
 /*! Global variables */
 std::shared_ptr<ParallelOps> parops;
 std::string input_file;
-std::string output_file;
+std::string output_prefix;
 uint64_t input_overlap;
 uint64_t seq_count;
 int xdrop;
@@ -194,6 +194,13 @@ void WriteContigs
     const std::vector<std::string>& myContigSet
 );
 
+static inline std::string append_output_suffix(const std::string& suffix)
+{
+    std::stringstream fname;
+    fname << output_prefix << suffix;
+    return fname.str();
+}
+
 int main(int argc, char **argv)
 {
   parops = ParallelOps::init(&argc, &argv);
@@ -297,7 +304,7 @@ int main(int argc, char **argv)
     PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
   }
 
-  Rmat->ParallelWriteGeneric("elba.overlap.paf", PafHandler());
+  Rmat->ParallelWriteGeneric(append_output_suffix(".overlap.paf").c_str(), PafHandler());
 
   if (coverage_min >= 0)
   {
@@ -318,7 +325,7 @@ int main(int argc, char **argv)
     TransitiveReduction(*Rmat, tu);
   }
 
-  Rmat->ParallelWriteGeneric("elba.string.paf", PafHandler());
+  Rmat->ParallelWriteGeneric(append_output_suffix(".string.paf").c_str(), PafHandler());
 
   Rmat->Apply(Tupleize());
 
@@ -349,7 +356,7 @@ int main(int argc, char **argv)
 
   tp->times["StartMain:WriteContigs()"] = std::chrono::system_clock::now();
 
-  WriteContigs(output_file.c_str(), myContigSet);
+  WriteContigs(append_output_suffix(".contigs.fa").c_str(), myContigSet);
 
   tp->times["EndMain:WriteContigs()"] = std::chrono::system_clock::now();
 
@@ -447,10 +454,10 @@ int parse_args(int argc, char **argv)
   }
 
   if (result.count(CMD_OPTION_OUTPUT)) {
-    output_file = result[CMD_OPTION_OUTPUT].as<std::string>();
+    output_prefix = result[CMD_OPTION_OUTPUT].as<std::string>();
   } else {
     if (is_world_rank0) {
-      std::cout << "ERROR: Output file not specified" << std::endl;
+      std::cout << "ERROR: Output prefix not specified" << std::endl;
     }
     return -1;
   }
@@ -635,7 +642,7 @@ void pretty_print_config(std::string &append_to) {
 
   std::vector<std::string> vals = {
     input_file,
-    output_file,
+    output_prefix,
     std::to_string(seq_count),
     std::to_string(klength),
     std::to_string(kstride),

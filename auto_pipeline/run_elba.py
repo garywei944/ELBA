@@ -126,7 +126,7 @@ def main(argc, argv):
 
     reads_path = Path(args[0]).absolute().resolve()
     elba_exepath = Path(args[1]).absolute().resolve()
-    contig_path = Path(path_prefix + ".ctg.fa").absolute().resolve()
+    contig_path = Path(path_prefix).absolute().resolve()
     idx_table_path = Path(path_prefix + ".idxtable.txt").absolute().resolve()
 
     num_reads = write_idx_table(str(reads_path), str(idx_table_path))
@@ -157,6 +157,8 @@ def main(argc, argv):
 
     for rankfile in Path.cwd().glob("elba_rank_*_log.txt"):
         rankfile.unlink()
+
+    sys.exit(1)
 
     process_paf("elba.overlap.paf", path_prefix + ".overlap.paf", str(idx_table_path))
     process_paf("elba.string.paf", path_prefix + ".string.paf", str(idx_table_path))

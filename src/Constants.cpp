@@ -5,7 +5,7 @@ const char *CMD_OPTION_INPUT = "i";
 const char *CMD_OPTION_DESCRIPTION_INPUT = "The input FASTA file.";
 
 const char *CMD_OPTION_OUTPUT = "o";
-const char *CMD_OPTION_DESCRIPTION_OUTPUT = "The output FASTA file.";
+const char *CMD_OPTION_DESCRIPTION_OUTPUT = "The output prefix [path].";
 
 const char *CMD_OPTION_INPUT_SEQ_COUNT = "c";
 const char *CMD_OPTION_DESCRIPTION_INPUT_SEQ_COUNT = "The sequence count in the input sequence file.";
