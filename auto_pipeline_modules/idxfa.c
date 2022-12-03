@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
             for (j = 1; j < 1024 && j < line.l; ++j)
                 if (!isspace(line.s[j]))
                     name[j-1] = line.s[j];
+                else break;
 
             name[j-1] = 0;
         }
