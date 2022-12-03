@@ -4,6 +4,9 @@ import subprocess as sp
 from pathlib import Path
 import shutil
 import os
+import platform
+
+command_id = 1
 
 def logmsg(msg):
     sys.stderr.write(msg + "\n")
@@ -19,7 +22,28 @@ def usage():
     sys.stderr.write("    -I PATH          compilation directory [compilation]\n")
     return -1
 
+
+def run_command(command_list):
+    global command_id
+    step_id = 1
+    logmsg("\n({}.*) executing: '{}'\n".format(command_id, " ".join(command_list)))
+    proc = sp.Popen(command_list, stdout=sp.PIPE)
+    while True:
+        output = proc.stdout.readline().decode()
+        if output == "" and proc.poll() is not None:
+            break
+        if output:
+            logmsg("\t({}.{}). {}".format(command_id, step_id, output.rstrip()))
+            step_id += 1
+    command_id += 1
+
 def main(argc, argv):
+
+    osplat = platform.system()
+
+    if not osplat in {"Linux", "Darwin"}:
+        logmsg("error: '{}' is not a valid platform to run this script on. Must be Linux or Darwin".format(osplat))
+        return -1
 
     if argc < 2: return usage()
 
@@ -28,10 +52,14 @@ def main(argc, argv):
     lower_kmer_bounds = [20]
     upper_kmer_bounds = [30]
     delta_chernoff = 0.1
+    job_count = os.cpu_count()
+
+    if osplat == "Linux":
+        job_count //= 4
 
     try: opts, args = getopt.gnu_getopt(argv[1:], "L:U:d:p:I:h")
     except getopt.GetoptError as err:
-        msglog("error: {}".format(err))
+        logmsg("error: {}".format(err))
         return usage()
 
     for o, a in opts:
@@ -41,6 +69,10 @@ def main(argc, argv):
         elif o == "-d": delta_chernoff = float(a)
         elif o == "-p": source_path = Path(a).resolve()
         elif o == "-I": compilation_path = Path(a).resolve()
+
+    if len(lower_kmer_bounds) != len(upper_kmer_bounds):
+        logmsg("error: lower_kmer_bounds list '{}' and upper_kmer_bounds list '{}' are not the same length".format(str(lower_kmer_bounds), str(upper_kmer_bounds)))
+        return usage()
 
     if len(args) != 1:
         return usage()
@@ -62,38 +94,27 @@ def main(argc, argv):
 
     if not combblas_path.is_dir():
         logmsg("error: CombBLAS not found at '{}'".format(str(combblas_path)))
+        return -1
 
-    combblas_build_setup_cmd = ["cmake", "-S", str(combblas_path), "-B", str(combblas_build_path), "-DCMAKE_INSTALL_PREFIX=" + str(combblas_install_path), "-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
-    logmsg(" ".join(combblas_build_setup_cmd))
-    proc = sp.Popen(combblas_build_setup_cmd)
-    proc.wait()
+    combblas_build_setup_cmd = ["cmake", "-S", str(combblas_path), "-B", str(combblas_build_path), "-DCMAKE_INSTALL_PREFIX=" + str(combblas_install_path)]
+    if osplat == "Darwin": combblas_build_setup_cmd += ["-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
+    run_command(combblas_build_setup_cmd)
 
-    combblas_build_cmd = ["make", "-j", str(12), "-C", str(combblas_build_path)]
-    logmsg(" ".join(combblas_build_cmd))
-    proc = sp.Popen(combblas_build_cmd)
-    proc.wait()
+    combblas_build_cmd = ["make", "-j", str(job_count), "-C", str(combblas_build_path)]
+    run_command(combblas_build_cmd)
 
-    combblas_install_cmd = ["make", "install", "-j", str(12), "-C", str(combblas_install_path)]
-    logmsg(" ".join(combblas_install_cmd))
-    proc = sp.Popen(combblas_build_cmd)
-    proc.wait()
+    combblas_install_cmd = ["make", "install", "-j", str(job_count), "-C", str(combblas_build_path)]
+    run_command(combblas_install_cmd)
 
-    for l in lower_kmer_bounds:
-        for u in upper_kmer_bounds:
-            elba_build_setup_cmd = ["cmake", "-S", str(source_path), "-B", str(elba_build_path),
-                                    "-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11",
-                                    "-DLOWER_KMER_FREQ="+str(l), "-DUPPER_KMER_FREQ="+str(u),
-                                    "-DDELTACHERNOFF="+str(delta_chernoff)]
-            logmsg(" ".join(elba_build_setup_cmd))
-            proc = sp.Popen(elba_build_setup_cmd)
-            proc.wait()
+    for l, u in zip(lower_kmer_bounds, upper_kmer_bounds):
+        elba_build_setup_cmd = ["cmake", "-S", str(source_path), "-B", str(elba_build_path), "-DLOWER_KMER_FREQ="+str(l), "-DUPPER_KMER_FREQ="+str(u), "-DDELTACHERNOFF="+str(delta_chernoff)]
+        if osplat == "Darwin": elba_build_setup_cmd += ["-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
+        elba_build_cmd = ["make", "-j", str(job_count), "-C", str(elba_build_path)]
 
-            elba_build_cmd = ["make", "-j", str(12), "-C", str(elba_build_path)]
-            logmsg(" ".join(elba_build_cmd))
-            proc = sp.Popen(elba_build_cmd)
-            proc.wait()
+        run_command(elba_build_setup_cmd)
+        run_command(elba_build_cmd)
 
-            shutil.copy(str(elba_build_path.joinpath("elba")), str(progdir_path.joinpath("elba.l{}u{}".format(l, u))))
+        shutil.copy(str(elba_build_path.joinpath("elba")), str(progdir_path.joinpath("elba.l{}u{}".format(l, u))))
 
     return 0
 
