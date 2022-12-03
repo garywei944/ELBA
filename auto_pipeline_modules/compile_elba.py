@@ -13,14 +13,26 @@ def logmsg(msg):
     sys.stderr.flush()
 
 def usage():
-    sys.stderr.write("Usage: python {} [options] /path/to/progdir\n\n".format(sys.argv[0]))
+    sys.stderr.write("\nUsage: python {} [options] /path/to/progdir\n\n".format(sys.argv[0]))
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -L INT,INT,...   prune k-mers below this bound [20]\n")
     sys.stderr.write("    -U INT,INT,...   prune k-mers above this bound [30]\n")
     sys.stderr.write("    -d FLOAT         chernoff bound [0.1]\n")
     sys.stderr.write("    -p PATH          ELBA main directory [../]\n")
     sys.stderr.write("    -I PATH          compilation directory [compilation]\n")
+    sys.stderr.write("    -h               give more detail in example form\n\n")
     return -1
+
+def usage_extra():
+    usage()
+    sys.stderr.write("Example:\n")
+    sys.stderr.write("    python {} -L10,15,20 -U40,35,30 -d0.2 -I compdir progdir\n\n".format(sys.argv[0]))
+    sys.stderr.write("    This sets up compilation files in $compdir and outputs 3 executables to $progdir\n"
+                     "    named elba.l10.u40, elba.l15.u35, and elba.l20,u30. These are ELBA executables with\n"
+                     "    lower and upper k-mer bounds coming after the l and the u respectively. Delta chernoff\n"
+                     "    value is set to 0.2 on all of them\n\n")
+    return -1
+                          
 
 
 def run_command(command_list):
@@ -63,7 +75,7 @@ def main(argc, argv):
         return usage()
 
     for o, a in opts:
-        if o == "-h": return usage()
+        if o == "-h": return usage_extra()
         elif o == "-L": lower_kmer_bounds = list(map(lambda x: int(x), a.split(",")))
         elif o == "-U": upper_kmer_bounds = list(map(lambda x: int(x), a.split(",")))
         elif o == "-d": delta_chernoff = float(a)
