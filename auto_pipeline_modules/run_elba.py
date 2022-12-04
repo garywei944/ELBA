@@ -59,7 +59,7 @@ def main(argc, argv):
     kmer_size = 31
     xdrop = 15
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "pl:t:o:n:N:u:x:k:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "pl:t:o:n:N:J:u:x:k:h")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
