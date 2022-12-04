@@ -32,8 +32,6 @@ def usage_extra():
                      "    lower and upper k-mer bounds coming after the l and the u respectively. Delta chernoff\n"
                      "    value is set to 0.2 on all of them\n\n")
     return -1
-                          
-
 
 def run_command(command_list):
     global command_id
