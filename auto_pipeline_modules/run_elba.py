@@ -126,6 +126,9 @@ def main(argc, argv):
 
     if prune_bridges: cmd += ["--pb"]
 
+    if ktip_threshold > 0: cmd += ["--tip", str(ktip_threshold)]
+
+
     sys.stdout.write(" ".join(cmd) + "\n")
     sys.stdout.flush()
 
