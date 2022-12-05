@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+
 import sys
 from pathlib import Path
 
 def usage():
-    sys.stderr.write("\nUsage: python {} <in.paf> <idxtable.tsv>\n\n".format(sys.argv[0]))
+    sys.stderr.write("\nUsage: process_paf.py <in.paf> <idxtable.tsv>\n\n")
     return -1
 
 def logmsg(msg):

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import getopt
 from pathlib import Path
@@ -11,7 +13,7 @@ def count_reads(fname):
     return count
 
 def usage():
-    sys.stderr.write("\nUsage: python {} [options] <reads.fa> /path/to/elba\n\n".format(sys.argv[0]))
+    sys.stderr.write("\nUsage: run_elba.py [options] <reads.fa> /path/to/elba\n\n")
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -p       prune bridges\n")
     sys.stderr.write("    -k INT   k-mer size [31]\n")
