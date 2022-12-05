@@ -65,7 +65,7 @@ def main(argc, argv):
 
         quast_cmd = ["quast.py", "-o", str(quast_outdir), "-r", str(reference_path), str(contigs_path)]
         logmsg("executing: '{}'\n".format(" ".join(quast_cmd)))
-        proc = sp.Popen(quast_cmd, stdout=sp.stderr)
+        proc = sp.Popen(quast_cmd, stdout=sys.stderr)
         proc.wait()
 
         gen_report_path = quast_outdir.joinpath("report.tsv").resolve()
