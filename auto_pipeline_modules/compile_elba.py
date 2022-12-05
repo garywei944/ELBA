@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import getopt
 import subprocess as sp
@@ -13,13 +15,12 @@ def logmsg(msg):
     sys.stderr.flush()
 
 def usage():
-    sys.stderr.write("\nUsage: python {} [options] /path/to/progdir\n\n".format(sys.argv[0]))
+    sys.stderr.write("\nUsage: compile_elba.py [options] /path/to/progdir\n\n")
     sys.stderr.write("Options:\n")
     sys.stderr.write("    -L INT,INT,...   prune k-mers below this bound [20]\n")
     sys.stderr.write("    -U INT,INT,...   prune k-mers above this bound [30]\n")
     sys.stderr.write("    -d FLOAT         chernoff bound [0.1]\n")
-    sys.stderr.write("    -p PATH          ELBA main directory [../]\n")
-    sys.stderr.write("    -I PATH          compilation directory [compilation]\n")
+    sys.stderr.write("    -I PATH          compilation directory [compdir]\n")
     sys.stderr.write("    -h               give more detail in example form\n\n")
     return -1
 
@@ -55,9 +56,27 @@ def main(argc, argv):
         logmsg("error: '{}' is not a valid platform to run this script on. Must be Linux or Darwin".format(osplat))
         return -1
 
+    envnames = ["ELBA_HOME", "COMBBLAS_HOME"]
+    envpaths = []
+
+    for i, envname in enumerate(envnames):
+        envpaths.append(os.environ.get(envname))
+
+    for i, envpath in enumerate(envpaths):
+        if envpath is None:
+            logmsg("error: environment variable {} needs to be declared".format(envpath))
+            return -1
+
+    elba_path = Path(envpaths[0]).resolve()
+    combblas_path = Path(envpaths[1]).joinpath("CombBLAS").resolve()
+
+    if not combblas_path.is_dir():
+        logmsg("error: CombBLAS not found at '{}'".format(str(combblas_path)))
+        return -1
+
+
     if argc < 2: return usage()
 
-    source_path = Path("..").resolve()
     compilation_path = Path("compilation").resolve()
     lower_kmer_bounds = [20]
     upper_kmer_bounds = [30]
@@ -67,7 +86,7 @@ def main(argc, argv):
     if osplat == "Linux":
         job_count //= 4
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "L:U:d:p:I:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "L:U:d:I:h")
     except getopt.GetoptError as err:
         logmsg("error: {}".format(err))
         return usage()
@@ -77,7 +96,6 @@ def main(argc, argv):
         elif o == "-L": lower_kmer_bounds = list(map(lambda x: int(x), a.split(",")))
         elif o == "-U": upper_kmer_bounds = list(map(lambda x: int(x), a.split(",")))
         elif o == "-d": delta_chernoff = float(a)
-        elif o == "-p": source_path = Path(a).resolve()
         elif o == "-I": compilation_path = Path(a).resolve()
 
     if len(lower_kmer_bounds) != len(upper_kmer_bounds):
@@ -100,11 +118,6 @@ def main(argc, argv):
     combblas_build_path.mkdir(parents=True, exist_ok=True)
     combblas_install_path.mkdir(parents=True, exist_ok=True)
 
-    combblas_path = source_path.joinpath("CombBLAS")
-
-    if not combblas_path.is_dir():
-        logmsg("error: CombBLAS not found at '{}'".format(str(combblas_path)))
-        return -1
 
     combblas_build_setup_cmd = ["cmake", "-S", str(combblas_path), "-B", str(combblas_build_path), "-DCMAKE_INSTALL_PREFIX=" + str(combblas_install_path)]
     if osplat == "Darwin": combblas_build_setup_cmd += ["-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
@@ -117,7 +130,7 @@ def main(argc, argv):
     run_command(combblas_install_cmd)
 
     for l, u in zip(lower_kmer_bounds, upper_kmer_bounds):
-        elba_build_setup_cmd = ["cmake", "-S", str(source_path), "-B", str(elba_build_path), "-DLOWER_KMER_FREQ="+str(l), "-DUPPER_KMER_FREQ="+str(u), "-DDELTACHERNOFF="+str(delta_chernoff)]
+        elba_build_setup_cmd = ["cmake", "-S", str(elba_path), "-B", str(elba_build_path), "-DLOWER_KMER_FREQ="+str(l), "-DUPPER_KMER_FREQ="+str(u), "-DDELTACHERNOFF="+str(delta_chernoff)]
         if osplat == "Darwin": elba_build_setup_cmd += ["-DCMAKE_C_COMPILER=gcc-11", "-DCMAKE_CXX_COMPILER=g++-11"]
         elba_build_cmd = ["make", "-j", str(job_count), "-C", str(elba_build_path)]
 
