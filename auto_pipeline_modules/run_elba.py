@@ -21,7 +21,8 @@ def usage():
     sys.stderr.write("    -x INT   xdrop value [15]\n\n")
 
     sys.stderr.write("    -o STR   output file prefixes [elba]\n")
-    sys.stderr.write("    -J STR   job name [elba.saul]\n\n")
+    sys.stdout.write("    -1       write slurm script to file\n")
+    sys.stdout.write("    -v       verbose naming\n")
 
     sys.stderr.write("    -t INT   time limit in minues [30]\n")
     sys.stderr.write("    -n INT   number of processes [1]\n")
@@ -51,7 +52,6 @@ def main(argc, argv):
     if argc < 3: return usage()
 
     file_prefix = "elba"
-    jobname = "elba.saul"
     email = ""
     prune_bridges = False
     ktip_threshold = 0
@@ -60,8 +60,10 @@ def main(argc, argv):
     num_nodes = 1
     kmer_size = 31
     xdrop = 15
+    stdout_job = True
+    verbose_naming = False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "pl:t:o:n:N:J:u:x:k:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "pl:t:o:n:N:1u:x:k:vh")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
@@ -72,12 +74,13 @@ def main(argc, argv):
         elif o == "-l": ktip_threshold = int(a)
         elif o == "-t": time_limit = int(a)
         elif o == "-o": file_prefix = a
-        elif o == "-J": jobname = a
         elif o == "-u": email = a
         elif o == "-n": num_procs = int(a)
         elif o == "-N": num_nodes = int(a)
         elif o == "-k": kmer_size = int(a)
         elif o == "-x": xdrop = int(a)
+        elif o == "-1": stdout_job = False
+        elif o == "-v": verbose_naming = True
 
     if len(args) != 2:
         return usage()
@@ -86,53 +89,71 @@ def main(argc, argv):
     elba_pname = Path(args[1]).resolve()
 
     num_reads = count_reads(str(reads_fname))
-
     num_procs, num_nodes, cpus_per_proc = perlmutter_task_resources(num_procs, num_nodes)
 
     qos = "debug" if time_limit <= 30 and num_nodes == 1 else "regular"
 
-    sys.stdout.write("#!/bin/bash\n\n")
-    sys.stdout.write("#SBATCH -N {}\n".format(num_nodes))
-    sys.stdout.write("#SBATCH -C cpu\n")
-    sys.stdout.write("#SBATCH -q {}\n".format(qos))
-    sys.stdout.write("#SBATCH -J {}\n".format(jobname))
-    sys.stdout.write("#SBATCH -t {}\n".format(time_limit))
-    sys.stdout.write("#SBATCH --error={}.%j.err\n".format(jobname))
-    sys.stdout.write("#SBATCH --output={}.%j.out\n".format(jobname))
-    sys.stdout.write("#SBATCH --switches=1\n")
+    f = sys.stdout
+
+    if verbose_naming:
+        exename = elba_pname.name
+        if exename.startswith("elba"):
+            exename = exename.split("elba")[1].lstrip("._")
+        file_prefix_list = [file_prefix, exename, "k{}".format(kmer_size), "x{}".format(xdrop), "n{}".format(num_procs), "N{}".format(num_nodes)]
+        if prune_bridges: file_prefix_list.append("pb")
+        if ktip_threshold > 0: file_prefix_list.append("tip{}".format(ktip_threshold))
+        file_prefix = ".".join(file_prefix_list)
+
+    jobname = "{}.perlmutter".format(file_prefix)
+
+    if not stdout_job:
+        f = open(str(Path.cwd().joinpath("job.{}.sh".format(jobname)).resolve()), "w")
+
+    f.write("#!/bin/bash\n\n")
+
+    f.write("#SBATCH -N {}\n".format(num_nodes))
+    f.write("#SBATCH -C cpu\n")
+    f.write("#SBATCH -q {}\n".format(qos))
+    f.write("#SBATCH -J {}\n".format(jobname))
+    f.write("#SBATCH -t {}\n".format(time_limit))
+    f.write("#SBATCH --error={}.%j.err\n".format(jobname))
+    f.write("#SBATCH --output={}.%j.out\n".format(jobname))
+    f.write("#SBATCH --switches=1\n")
 
     if email != "":
-        sys.stdout.write("#SBATCH --mail-user={}\n".format(email))
-        sys.stdout.write("#SBATCH --mail-type=ALL\n")
+        f.write("#SBATCH --mail-user={}\n".format(email))
+        f.write("#SBATCH --mail-type=ALL\n")
 
-    sys.stdout.write("\nexport OMP_NUM_THREADS=1\n")
-    sys.stdout.write("export OMP_PLACES=threads\n")
-    sys.stdout.write("export OMP_PROC_BIND=spread\n\n")
+    f.write("\nexport OMP_NUM_THREADS=1\n")
+    f.write("export OMP_PLACES=threads\n")
+    f.write("export OMP_PROC_BIND=spread\n\n")
+    f.write("export PREFIX={}\n\n".format(file_prefix))
 
     cmd = ["srun",
-           "-n", str(num_procs),
-           "-N", str(num_nodes),
-           "-c", str(cpus_per_proc),
+           "-n " + str(num_procs),
+           "-N " + str(num_nodes),
+           "-c " + str(cpus_per_proc),
            "--cpu_bind=cores",
            str(elba_pname),
-           "-i", str(reads_fname),
-           "-o", file_prefix,
-           "-k", str(kmer_size),
-           "--idxmap", "idmap",
-           "-c", str(num_reads),
-           "--af", "{}.af".format(jobname),
-           "--xa", str(xdrop),
-           "-s", str(1),
-           "-O", str(100000),
-           "--afreq", str(100000)]
+           "-i " + str(reads_fname),
+           "-o $PREFIX",
+           "-k " + str(kmer_size),
+           "--idxmap idmap",
+           "-c " + str(num_reads),
+           "--af {}.af".format(jobname),
+           "--xa " + str(xdrop),
+           "-s " + str(1),
+           "-O " + str(100000),
+           "--afreq " + str(100000)]
 
     if prune_bridges: cmd += ["--pb"]
 
-    if ktip_threshold > 0: cmd += ["--tip", str(ktip_threshold)]
+    if ktip_threshold > 0: cmd += ["--tip " + str(ktip_threshold)]
 
+    f.write(" \\\n".join(cmd) + "\n")
+    f.flush()
 
-    sys.stdout.write(" ".join(cmd) + "\n")
-    sys.stdout.flush()
+    if not stdout_job: f.close()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
