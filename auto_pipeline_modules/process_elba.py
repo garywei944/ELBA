@@ -87,13 +87,13 @@ def main(argc, argv):
             elif line.startswith("Reference_length"):
                 quast_info_dict["ref_length"] = int(line.rstrip().split("\t")[1])
             elif line.startswith("N50"):
-                quast_info_dict["N50"] = int(line.rstrip().split("\t")[1])
+                quast_info_dict["N50"] = '-' if '-' in line else int(line.rstrip().split("\t")[1])
             elif line.startswith("NG50"):
-                quast_info_dict["NG50"] = int(line.rstrip().split("\t")[1])
+                quast_info_dict["NG50"] = '-' if '-' in line else int(line.rstrip().split("\t")[1])
             elif line.startswith("N90"):
-                quast_info_dict["N90"] = int(line.rstrip().split("\t")[1])
+                quast_info_dict["N90"] = '-' if '-' in line else int(line.rstrip().split("\t")[1])
             elif line.startswith("NG90"):
-                quast_info_dict["NG90"] = int(line.rstrip().split("\t")[1])
+                quast_info_dict["NG90"] = '-' if '-' in line else int(line.rstrip().split("\t")[1])
             elif line.startswith("# misassemblies"):
                 quast_info_dict["num_misassemblies"] = int(line.rstrip().split("\t")[1])
             elif line.startswith("# misassembled contigs"):
