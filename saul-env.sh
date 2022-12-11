@@ -12,4 +12,4 @@ export OMP_NUM_THREADS=1
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
 
-export PATH=$PATH:$ELBA_HOME/auto_pipeline_modules
+export PATH=$PATH:$ELBA_HOME/auto_pipeline
