@@ -3,7 +3,7 @@
 #include "../../include/pw/SeedExtendXdrop.hpp"
 #include <unordered_set>
 
-uint minOverlapLen = 5000; /* GRGR: TODO: might need to play around with this */
+uint minOverlapLen = 500; /* GRGR: TODO: might need to play around with this */
 
 void SeedExtendXdrop::PostAlignDecision(const AlignmentInfo& ai, bool& passed, float& ratioScoreOverlap,
 	int& dir, int& dirT, int& sfx, int& sfxT, uint32_t& overlap, const bool noAlign, std::vector<int64_t>& ContainedSeqMyThread)

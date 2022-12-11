@@ -1,111 +1,69 @@
+#!/usr/bin/env python
+
 import sys
 import getopt
-import subprocess as sp
 from pathlib import Path
-from igraph import Graph
+import subprocess as sp
+import os
 
-def fasta_read_lengths(fasta):
-    read_lengths = []
-    read_names = []
-    with open(fasta, "r") as f:
-        seqlen = 0
-        name = ""
-        for line in f.readlines():
-            if line.startswith(">"):
-                if seqlen > 0:
-                    read_lengths.append(seqlen)
-                    read_names.append(name)
-                    seqlen = 0
-                name = line.lstrip(">").rstrip()
-            else:
-                seqlen += len(line.rstrip())
-        if seqlen > 0:
-            read_lengths.append(seqlen)
-            read_names.append(name)
-    assert len(read_lengths) == len(read_names)
-    return read_names, read_lengths
-
-def get_vertices(fasta_fname):
-    vertices = []
-    read_names, read_lengths = fasta_read_lengths(fasta_fname)
-    read_name_map = {}
-    for i in range(len(read_names)):
-        read_name = read_names[i]
-        read_length = read_lengths[i]
-        names = read_name.split(None, 1)
-        if len(names) == 2:
-            name, comment = names
-        else:
-            name = names[0]
-            comment = ""
-        read_name_map[name] = i
-        vertices.append({"name" : name, "comment" : comment, "length" : read_length})
-    return vertices, read_name_map, read_lengths
-
-def get_edges(paf_fname, vertices, read_name_map, read_lengths):
-    edges = []
-    for line in open(paf_fname, "r"):
-        items = line.rstrip().split()
-        source_name, target_name = items[0], items[5]
-        source_length, target_length = int(items[1]), int(items[6])
-        assert source_length == read_lengths[read_name_map[source_name]]
-        assert target_length == read_lengths[read_name_map[target_name]]
-        source_beg, target_beg = int(items[2]), int(items[7])
-        source_end, target_end = int(items[3]), int(items[8])
-        strand = items[4]
-        edges.append({"source" : source_name, "target" : target_name, "source_beg" : source_beg, "source_end" : source_end, "target_beg" : target_beg, "target_end" : target_end, "strand" : strand})
-    return edges
-
-def process_paf(in_paf_fname, out_paf_fname, idx_table_fname):
-
-    in_paf = Path(in_paf_fname)
-    out_paf = Path(out_paf_fname)
-
-    idx_dict = dict(map(lambda line: line.rstrip().split(), open(idx_table_fname)))
-
-    def nameize_pafline(pafline):
-        l = pafline.rstrip().split()
-        l[0], l[5] = idx_dict[l[0]], idx_dict[l[5]]
-        return "\t".join(l) + "\n"
-
-    with open(out_paf_fname, "w") as f:
-        f.writelines(map(nameize_pafline, open(in_paf_fname)))
-
-def write_idx_table(reads_fname, idx_table_fname):
-
-    with open(idx_table_fname, "w") as f:
-        p = sp.Popen(["awk", "/^>/{print ++i, substr($1, 2); next}", reads_fname], stdout=f)
-        p.wait()
-
-    return int(sp.Popen(["tail", "-n1", idx_table_fname], stdout=sp.PIPE).communicate()[0].decode().lstrip().rstrip().split()[0])
+def count_reads(fname):
+    grep_proc = sp.Popen(["grep", ">", fname], stdout=sp.PIPE)
+    wc_proc = sp.Popen(["wc", "-l"], stdin=grep_proc.stdout, stdout=sp.PIPE)
+    count = int(wc_proc.communicate()[0].decode())
+    return count
 
 def usage():
-    sys.stderr.write("Usage: python {} [options] <reads.fa> <elba>\n\n".format(sys.argv[0]))
+    sys.stderr.write("\nUsage: run_elba.py [options] <reads.fa> /path/to/elba(s)\n\n")
     sys.stderr.write("Options:\n")
-    sys.stderr.write("    -t INT   ktip threshold [0]\n")
-    sys.stderr.write("    -x INT   xdrop value [15]\n")
-    sys.stderr.write("    -f STR   path prefixes [elba.out]\n")
-    sys.stderr.write("    -n INT   number of processes [1]\n")
-    sys.stderr.write("    -r FILE  reference fasta file\n")
     sys.stderr.write("    -p       prune bridges\n")
-    sys.stderr.write("    -G       generate gmls\n")
-    sys.stderr.write("    -M       run on personal computer\n")
+    sys.stderr.write("    -k INT   k-mer size [31]\n")
+    sys.stderr.write("    -l INT   ktip threshold [0]\n")
+    sys.stderr.write("    -x INT   xdrop value [15]\n\n")
+
+    sys.stderr.write("    -o STR   output file prefixes [elba]\n")
+    sys.stderr.write("    -C       encapsulate job script within a folder\n")
+
+    sys.stderr.write("    -t INT   time limit in minues [30]\n")
+    sys.stderr.write("    -n INT   number of processes [1]\n")
+    sys.stderr.write("    -N INT   number of compute nodes [1] (overrides -n)\n")
+    sys.stderr.write("    -R       use regular queue\n")
+
+    sys.stderr.write("    -u STR   email for user updates []\n\n")
     return -1
+
+def perlmutter_task_resources(num_procs, num_nodes):
+
+    proc_counts = [p**2 for p in range(1,12)] + [p**2 for p in range(1,512) if (p**2)%128==0]
+    node_counts = [max(P//128, 1) for P in proc_counts]
+
+    if num_nodes > 1:
+        for i in range(len(node_counts)):
+            if num_nodes <= node_counts[i]:
+                break
+        return proc_counts[i], node_counts[i], 2
+    else:
+        for i in range(len(proc_counts)):
+            if num_procs <= proc_counts[i]:
+                break
+        return proc_counts[i], node_counts[i], max(256//proc_counts[i], 2)
 
 def main(argc, argv):
 
     if argc < 3: return usage()
 
-    path_prefix = "elba.out"
+    base_file_prefix = "elba"
+    email = ""
     prune_bridges = False
     ktip_threshold = 0
+    time_limit = 30
     num_procs = 1
+    num_nodes = 1
+    kmer_size = 31
     xdrop = 15
-    reference_fname = ""
-    generate_gmls = False
-    on_mac = False
+    encapsulate = False
+    regular_queue = False
 
-    try: opts, args = getopt.gnu_getopt(argv[1:], "pGMt:f:n:x:r:h")
+    try: opts, args = getopt.gnu_getopt(argv[1:], "pl:t:o:n:N:u:x:k:CRh")
     except getopt.GetoptError as err:
         sys.stderr.write("error: {}\n".format(err))
         return usage()
@@ -113,80 +71,105 @@ def main(argc, argv):
     for o, a in opts:
         if o == "-h": return usage()
         elif o == "-p": prune_bridges = True
-        elif o == "-t": ktip_threshold = int(a)
-        elif o == "-f": path_prefix = a
+        elif o == "-l": ktip_threshold = int(a)
+        elif o == "-t": time_limit = int(a)
+        elif o == "-o": base_file_prefix = a
+        elif o == "-u": email = a
         elif o == "-n": num_procs = int(a)
+        elif o == "-N": num_nodes = int(a)
+        elif o == "-k": kmer_size = int(a)
         elif o == "-x": xdrop = int(a)
-        elif o == "-r": reference_fname = a
-        elif o == "-G": generate_gmls = True
-        elif o == "-M": on_mac = True
+        elif o == "-C": encapsulate = True
+        elif o == "-R": regular_queue = True
 
     if len(args) != 2:
         return usage()
 
-    reads_path = Path(args[0]).absolute().resolve()
-    elba_exepath = Path(args[1]).absolute().resolve()
-    contig_path = Path(path_prefix).absolute().resolve()
-    idx_table_path = Path(path_prefix + ".idxtable.txt").absolute().resolve()
+    reads_fname = Path(args[0]).resolve()
+    elba_pname = Path(args[1]).resolve()
 
-    num_reads = write_idx_table(str(reads_path), str(idx_table_path))
+    num_reads = count_reads(str(reads_fname))
+    num_procs, num_nodes, cpus_per_proc = perlmutter_task_resources(num_procs, num_nodes)
 
-    elba_cmd = []
+    if not regular_queue:
+        qos = "debug" if time_limit <= 30 and num_nodes == 1 else "regular"
+    else:
+        qos = "regular"
 
-    if on_mac: elba_cmd += ["mpirun", "-np"]
-    else: elba_cmd += ["srun", "-n"]
+    if elba_pname.is_dir():
+        exes = list(elba_pname.iterdir())
+    elif elba_pname.is_file():
+        exes = [elba_pname]
+    else:
+        logmsg("error: '{}' is not a valid argument".format(args[1]))
+        return usage()
 
-    elba_cmd.append(str(num_procs))
+    for exepath in exes:
+        exename = exepath.name
+        if exename.startswith("elba"):
+            exename = exename.split("elba")[1].lstrip("._")
+        file_prefix_list = [base_file_prefix, exename, "k{}".format(kmer_size), "x{}".format(xdrop), "n{}".format(num_procs), "N{}".format(num_nodes)]
+        if prune_bridges: file_prefix_list.append("pb")
+        if ktip_threshold > 0: file_prefix_list.append("tip{}".format(ktip_threshold))
+        file_prefix = ".".join(file_prefix_list)
 
-    if not on_mac:
-        elba_cmd += ["-c", str(256//num_procs), "--cpu_bind=cores"]
+        jobname = "{}.perlmutter".format(file_prefix)
 
-    elba_cmd += [str(elba_exepath), "-i", str(reads_path), "-o", str(contig_path), "--idxmap", "idmap", "-c", str(num_reads), "-k", "31", "--xa", str(xdrop), "-s", "1", "-O", "100000", "--afreq", "100000"]
+        if encapsulate:
+            capsule_path = Path.cwd().joinpath(jobname).resolve()
+            if capsule_path.is_dir():
+                shutil.rmtree(str(capsule_path))
+            elif capsule_path.is_file():
+                capsule_path.unlink()
+            capsule_path.mkdir()
+            f = open(str(capsule_path.joinpath("job.{}.sh".format(jobname)).resolve()), "w")
+        else:
+            f = open(str(Path.cwd().joinpath("job.{}.sh".format(jobname)).resolve()), "w")
 
-    if prune_bridges:
-        elba_cmd.append("--pb")
+        f.write("#!/bin/bash\n\n")
 
-    if ktip_threshold != 0:
-        elba_cmd += ["--tip", str(ktip_threshold)]
+        f.write("#SBATCH -N {}\n".format(num_nodes))
+        f.write("#SBATCH -C cpu\n")
+        f.write("#SBATCH -q {}\n".format(qos))
+        f.write("#SBATCH -J {}\n".format(jobname))
+        f.write("#SBATCH -t {}\n".format(time_limit))
+        f.write("#SBATCH --error={}.%j.err\n".format(jobname))
+        f.write("#SBATCH --output={}.%j.out\n".format(jobname))
+        f.write("#SBATCH --switches=1\n")
 
-    sys.stdout.write(" ".join(elba_cmd) + "\n")
-    sys.stdout.flush()
+        if email != "":
+            f.write("#SBATCH --mail-user={}\n".format(email))
+            f.write("#SBATCH --mail-type=ALL\n")
 
-    p = sp.Popen(elba_cmd)
-    p.wait()
+        f.write("\nexport OMP_NUM_THREADS=1\n")
+        f.write("export OMP_PLACES=threads\n")
+        f.write("export OMP_PROC_BIND=spread\n\n")
+        f.write("export PREFIX={}\n\n".format(file_prefix))
 
-    for rankfile in Path.cwd().glob("elba_rank_*_log.txt"):
-        rankfile.unlink()
+        cmd = ["srun",
+               "-n " + str(num_procs),
+               "-N " + str(num_nodes),
+               "-c " + str(cpus_per_proc),
+               "--cpu_bind=cores",
+               str(exepath),
+               "-i " + str(reads_fname),
+               "-o $PREFIX",
+               "-k " + str(kmer_size),
+               "--idxmap idmap",
+               "-c " + str(num_reads),
+               "--af {}.af".format(jobname),
+               "--xa " + str(xdrop),
+               "-s " + str(1),
+               "-O " + str(100000),
+               "--afreq " + str(100000)]
 
-    sys.exit(1)
+        if prune_bridges: cmd += ["--pb"]
 
-    process_paf("elba.overlap.paf", path_prefix + ".overlap.paf", str(idx_table_path))
-    process_paf("elba.string.paf", path_prefix + ".string.paf", str(idx_table_path))
+        if ktip_threshold > 0: cmd += ["--tip " + str(ktip_threshold)]
 
-    Path("elba.overlap.paf").unlink()
-    Path("elba.string.paf").unlink()
-
-    if generate_gmls:
-
-        vertices, read_name_map, read_lengths = get_vertices(str(reads_path))
-
-        def write_elba_gml(paf_fname, gml_fname):
-            nonlocal vertices, read_name_map, read_lengths
-            edges = get_edges(paf_fname, vertices, read_name_map, read_lengths)
-            graph = Graph.DictList(vertices, edges, directed=True, vertex_name_attr="name", edge_foreign_keys=('source', 'target'), iterative=False)
-            del graph.es["source"]
-            del graph.es["target"]
-            graph.write_gml(gml_fname, creator="paf2gml.py")
-
-        write_elba_gml(path_prefix + ".overlap.paf", path_prefix + ".overlap.gml")
-        write_elba_gml(path_prefix + ".string.paf", path_prefix + ".string.gml")
-    
-    if reference_fname != "":
-        assert Path(reference_fname).is_file()
-        quast_path = Path("/global/homes/g/gabeh98/").joinpath("quast/quast.py").absolute().resolve()
-        quast_cmd = ["python", quast_path, "-o", str(Path(path_prefix + "quast_results").absolute().resolve()), "-r", reference_fname, "-t", "64", "--no-plots", "--no-html", "--no-icarus", "--no-snps", str(contig_path)]
-        p = sp.Popen(quast_cmd)        
-        p.wait()
+        f.write(" \\\n".join(cmd) + " & \nwait\n")
+        f.write("rm -rf elba_rank_*.txt\n")
+        f.close()
 
 if __name__ == "__main__":
     sys.exit(main(len(sys.argv), sys.argv))
