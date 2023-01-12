@@ -225,7 +225,7 @@ size_t faidx_size(const faidx_t fai)
     return size;
 }
 
-static void log_faidx(const faidx_t fai, const char *log_fname)
+void log_faidx(const faidx_t fai, const char *log_fname)
 {
     MPI_Comm comm = fai.comm;
 
@@ -243,7 +243,7 @@ static void log_faidx(const faidx_t fai, const char *log_fname)
     for (size_t i = 0; i < numreads; ++i)
     {
         faidx_rec_t rec = fai.recs[i];
-        string_catf(&buf, "%d\t%.*s\t%ld\t%ld\t%ld\n", myrank, sstore_get_string_length(fai.names, i), sstore_get_string(fai.names, i), rec.fpos, rec.readlen, rec.lwidth);
+        string_catf(&buf, "%d.%ld\t%.*s\t%ld\t%ld\t%ld\n", myrank, i, sstore_get_string_length(fai.names, i), sstore_get_string(fai.names, i), rec.fpos, rec.readlen, rec.lwidth);
     }
 
     MPI_File f;
