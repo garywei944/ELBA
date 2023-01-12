@@ -253,3 +253,99 @@ void log_faidx(const faidx_t fai, const char *log_fname)
 
     string_destroy(buf);
 }
+
+void log_fasta(char *buf, size_t *displs, const faidx_t fai, const char *fname)
+{
+    int nprocs, myrank;
+    MPI_Comm_size(fai.comm, &nprocs);
+    MPI_Comm_rank(fai.comm, &myrank);
+
+
+    string_t filebuf = STRING_INIT;
+
+    for (size_t i = 0; i < fai.numrecs; ++i)
+    {
+        faidx_rec_t rec = fai.recs[i];
+        string_catf(&filebuf, "%d\t>%.*s\n%d\t%.*s\n", myrank, sstore_get_string_length(fai.names, i), sstore_get_string(fai.names, i), myrank, rec.readlen, buf + displs[i]);
+    }
+
+    MPI_File f;
+    MPI_File_open(fai.comm, fname, MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &f);
+    MPI_File_write_shared(f, filebuf.buf, (int)filebuf.len, MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI_File_close(&f);
+
+    string_destroy(filebuf);
+}
+
+long read_indexed_fasta_file(char **buf, size_t **displs, const faidx_t fai, const char *fname)
+{
+    if (!buf || !displs || !fname)
+        return -1;
+
+    int ierr;
+
+    int myrank, nprocs;
+    MPI_Comm_size(fai.comm, &nprocs);
+    MPI_Comm_rank(fai.comm, &myrank);
+
+    MPI_File fasta_fh;
+    ierr = MPI_File_open(fai.comm, fname, MPI_MODE_RDONLY, MPI_INFO_NULL, &fasta_fh);
+
+    if (ierr != MPI_SUCCESS)
+    {
+        fprintf(stderr, "error: MPI_File_open failed on FASTA file named '%s'\n", fname);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    MPI_Offset filesize;
+    MPI_File_get_size(fasta_fh, &filesize);
+
+    size_t lnumreads = fai.numrecs;
+    faidx_rec_t firstrec = fai.recs[0];
+    faidx_rec_t lastrec = fai.recs[lnumreads-1];
+
+    MPI_Offset startpos = firstrec.fpos;
+    MPI_Offset endpos = lastrec.fpos + lastrec.readlen + (lastrec.readlen/lastrec.lwidth);
+    endpos = endpos < filesize? endpos : filesize;
+
+    int mychunksize = endpos - startpos;
+    char *mychunk = malloc(mychunksize);
+
+    MPI_File_read_at_all(fasta_fh, startpos, mychunk, mychunksize, MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI_File_close(&fasta_fh);
+
+    size_t *ldispls = realloc(*displs, lnumreads * sizeof(size_t));
+    ldispls[0] = 0;
+    size_t totbases = fai.recs[lnumreads-1].readlen;
+
+    for (size_t i = 0; i < lnumreads-1; ++i)
+    {
+        ldispls[i+1] = ldispls[i] + fai.recs[i].readlen;
+        totbases += fai.recs[i].readlen;
+    }
+
+    char *lbuf = realloc(*buf, totbases);
+
+    for (size_t i = 0; i < lnumreads; ++i)
+    {
+        char *s = lbuf + ldispls[i];
+        size_t lwidth = fai.recs[i].lwidth;
+        size_t localpos = 0;
+        ptrdiff_t chunkpos = fai.recs[i].fpos - startpos;
+        ptrdiff_t remain = fai.recs[i].readlen;
+
+        while (remain > 0)
+        {
+            size_t cnt = lwidth < remain? lwidth : remain;
+            memcpy(s, mychunk + chunkpos + localpos, cnt);
+            s += cnt;
+            remain -= cnt;
+            localpos += (cnt+1);
+        }
+    }
+
+    free(mychunk);
+    *buf = lbuf;
+    *displs = ldispls;
+    return lnumreads;
+}

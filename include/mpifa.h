@@ -60,6 +60,17 @@ size_t faidx_size(const faidx_t fai);
  * Write the distributed FAIDX records to a log file.
  */
 void log_faidx(const faidx_t fai, const char *log_fname);
+void log_fasta(char *buf, size_t *displs, const faidx_t fai, const char *fname);
+
+
+/*
+ * Use scattered FAIDX records to guide parallel I/O on FASTA file.
+ * Linearly decomposes and distributes sequences to each process,
+ * such that the first nprocs-1 processes get floor(numreads/nprocs) reads
+ * each, and the last process gets the remainder.
+ */
+long read_indexed_fasta_file(char **buf, size_t **offsets, const faidx_t fai, const char *fname);
+
 
 #ifdef __cplusplus
 }
