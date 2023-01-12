@@ -29,6 +29,8 @@ derivative works, and perform publicly and display publicly, and to permit other
 #include "../include/ReadOverlap.hpp"
 #include "../include/TransitiveReduction.hpp"
 #include "../include/PruneChimeras.hpp"
+#include "../include/mstring.h"
+#include "../include/mpifa.h"
 
 #include "seqan/score/score_matrix_data.h"
 
@@ -700,6 +702,12 @@ std::shared_ptr<DistributedFastaData>
 ParallelFastaParser(const char *input_file, const char *idx_map_file, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
     tp->times["StartMain:newDFD()"] = std::chrono::system_clock::now();
+
+    std::string faidx_fname(input_file);
+    faidx_fname += ".fai";
+
+    faidx_t fai;
+    read_faidx_file(&fai, faidx_fname.c_str(), MPI_COMM_WORLD);
 
     std::shared_ptr<DistributedFastaData> dfd = std::make_shared<DistributedFastaData>(
         input_file, idx_map_file, input_overlap, klength, parops, tp, tu);

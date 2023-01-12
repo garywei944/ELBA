@@ -91,6 +91,8 @@ add_executable(elba
         include/ReadOverlap.hpp
         src/PruneChimeras.cpp
         include/PruneChimeras.hpp
+        src/mstring.c
+        src/mpifa.c
 	)
 
 set(LOWER_KMER_FREQ 20
