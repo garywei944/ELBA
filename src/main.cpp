@@ -708,6 +708,7 @@ ParallelFastaParser(const char *input_file, const char *idx_map_file, const std:
 
     faidx_t fai;
     read_faidx_file(&fai, faidx_fname.c_str(), MPI_COMM_WORLD);
+    log_faidx(fai, "faidx.log");
 
     std::shared_ptr<DistributedFastaData> dfd = std::make_shared<DistributedFastaData>(
         input_file, idx_map_file, input_overlap, klength, parops, tp, tu);

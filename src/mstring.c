@@ -1,5 +1,6 @@
 #include "../include/mstring.h"
 #include <limits.h>
+#include <stdio.h>
 
 #ifndef MPI_SIZE_T
 #if SIZE_MAX == ULONG_MAX

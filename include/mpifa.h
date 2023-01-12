@@ -56,6 +56,11 @@ int read_faidx_file(faidx_t *fai, const char *fname, MPI_Comm comm);
  */
 size_t faidx_size(const faidx_t fai);
 
+/*
+ * Write the distributed FAIDX records to a log file.
+ */
+static void log_faidx(const faidx_t fai, const char *log_fname);
+
 #ifdef __cplusplus
 }
 #endif

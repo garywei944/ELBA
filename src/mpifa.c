@@ -224,3 +224,32 @@ size_t faidx_size(const faidx_t fai)
     MPI_Allreduce(MPI_IN_PLACE, &size, 1, MPI_SIZE_T, MPI_SUM, fai.comm);
     return size;
 }
+
+static void log_faidx(const faidx_t fai, const char *log_fname)
+{
+    MPI_Comm comm = fai.comm;
+
+    int nprocs, myrank;
+    MPI_Comm_size(comm, &nprocs);
+    MPI_Comm_rank(comm, &myrank);
+
+    string_t buf = STRING_INIT;
+
+    size_t offset;
+    size_t numreads = fai.numrecs;
+    MPI_Exscan(&numreads, &offset, 1, MPI_SIZE_T, MPI_SUM, comm);
+    if (!myrank) offset = 0;
+
+    for (size_t i = 0; i < numreads; ++i)
+    {
+        faidx_rec_t rec = fai.recs[i];
+        string_catf(&buf, "%d\t%.*s\t%ld\t%ld\t%ld\n", myrank, sstore_get_string_length(fai.names, i), sstore_get_string(fai.names, i), rec.fpos, rec.readlen, rec.lwidth);
+    }
+
+    MPI_File f;
+    MPI_File_open(comm, log_fname, MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &f);
+    MPI_File_write_shared(f, buf.buf, (int)buf.len, MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI_File_close(&f);
+
+    string_destroy(buf);
+}
