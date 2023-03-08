@@ -8,7 +8,12 @@ class XDropAligner : public PairwiseFunction
 {
 public:
 
-  XDropAligner(ScoringScheme scheme, ushort seedlen, int xdrop);
+  XDropAligner(ScoringScheme scheme, ushort seedlen, int dropoff);
+
+  void apply(uint64_t l_col_idx, uint64_t g_col_idx,
+             uint64_t l_row_idx, uint64_t g_row_idx,
+             seqan::Dna5String *seq_h, seqan::Dna5String *seq_v, ushort k,
+             elba::CommonKmers &cks, std::stringstream& ss) override;
 
   void apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> &seqsh,
                    seqan::StringSet<seqan::Gaps<seqan::Dna5String>> &seqsv,
@@ -26,7 +31,7 @@ public:
 private:
   ScoringScheme scheme;
   ushort seedlen;
-  int xdrop;
+  int dropoff;
 };
 
 #endif
