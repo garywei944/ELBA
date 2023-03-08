@@ -65,6 +65,8 @@ add_executable(elba
         src/pw/PairwiseFunction.cpp
         include/pw/SeedExtendXdrop.hpp
         src/pw/SeedExtendXdrop.cpp
+        include/pw/XDropAligner.hpp
+        src/pw/XDropAligner.cpp
         include/pw/OverlapFinder.hpp
         src/pw/OverlapFinder.cpp
         include/AlignmentInfo.hpp
