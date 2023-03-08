@@ -180,8 +180,10 @@ namespace elba {
 				// v.second.second;
 				// #endif
 
-            os << v.dir << "\t" << static_cast<int>(v.rc) << "\t" << v.first.first << "\t" << v.first.second << "\t" << v.second.first << "\t" << v.second.second << "\t"
-               << v.lenv << "\t" << v.lenh << "\t" << v.overlap;
+            // os << v.dir << "\t" << static_cast<int>(v.rc) << "\t" << v.first.first << "\t" << v.first.second << "\t" << v.second.first << "\t" << v.second.second << "\t"
+               // << v.lenv << "\t" << v.lenh << "\t" << v.overlap;
+               //
+            os << v.first.first << "\t" << v.first.second << "\t" << v.second.first << "\t" << v.second.second;
 
 		}
 	};

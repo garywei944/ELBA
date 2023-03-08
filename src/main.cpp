@@ -806,9 +806,9 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   uint64_t local_alignments = 1;
 
   // Output intermediate matrix post-alignment
-  //std::string candidatem = myoutput;
-  //candidatem += ".candidatematrix.mm";
-  //Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputMMHandler());
+  std::string candidatem = myoutput;
+  candidatem += ".candidatematrix.mm";
+  Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputHandler());
 
   if(xdropAlign)
   {
