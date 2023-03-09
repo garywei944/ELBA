@@ -318,6 +318,8 @@ int main(int argc, char **argv)
   // TRANSITIVE REDUCTION                                                             //
   //////////////////////////////////////////////////////////////////////////////////////
 
+  Rmat->ParallelWriteMM("overlap.sanity.mtx", true, ReadOverlapGraphHandler());
+
   tp->times["StartMain:TransitiveReduction()"] = std::chrono::system_clock::now();
 
   bool transitive_reduction = true; // use in development only
