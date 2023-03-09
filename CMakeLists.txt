@@ -101,7 +101,7 @@ set(LOWER_KMER_FREQ 20
 set(UPPER_KMER_FREQ 30
     CACHE STRING "Upper bound for the k-mer frequency")
 
-set(MAX_KMER_SIZE 64
+set(MAX_KMER_SIZE 32
     CACHE STRING "Longest k-mer length")
 
 set(DELTACHERNOFF 0.9
