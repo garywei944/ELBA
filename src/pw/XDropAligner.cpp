@@ -12,23 +12,31 @@ typedef enum
     SECOND_TO_FIRST_OVERLAP
 } overlap_class_t;
 
-typedef struct
+struct xseed_t
 {
     int begQ, endQ, begT, endT, score;
     bool rc;
-} xseed_t;
+
+    xseed_t() : begQ(0), endQ(0), begT(0), endT(0), score(-1), rc(false) {}
+};
 
         // classify_alignment(ai[i], kind, ratioScoreOverlap, ContainedSeqPerthread[0]);
 
 void classify_alignment(const xseed_t& ai, int lenQ, int lenT, overlap_class_t& kind)
 {
+    if (ai.score <= 0)
+    {
+        kind = INTERNAL_MATCH;
+        return;
+    }
+
     int begTr = ai.rc? lenT - ai.endT : ai.begT;
     int endTr = ai.rc? lenT - ai.begT : ai.endT;
 
     int maplen = std::max(ai.endT - ai.begT, ai.endQ - ai.begQ);
     int overhang = std::min(ai.begQ, begTr) + std::min(lenQ - ai.endQ, lenT - endTr);
 
-    if (overhang > std::min(1000.0, maplen * 0.8))
+    if (overhang > std::min(1000.0, maplen * 0.9))
     {
         kind = INTERNAL_MATCH;
     }
@@ -72,7 +80,7 @@ int _extend_seed_one_direction(seqan::Dna5String& seqQ, seqan::Dna5String& seqT,
     int min_err_score = int_min / len;
     gap = std::max(gap, min_err_score);
     mis = std::max(mis, min_err_score);
-    int undef = int_min;
+    int undef = int_min - gap;
 
     std::vector<int> ad1, ad2, ad3, tmp;
 
@@ -213,7 +221,7 @@ int _extend_seed_one_direction(seqan::Dna5String& seqQ, seqan::Dna5String& seqT,
     return best_ext_score;
 }
 
-int _xdrop_seed_and_extend_l(seqan::Dna5String& seqQ, seqan::Dna5String& seqT, int mat, int mis, int gap, int dropoff, const xseed_t& xseed, int& begQ_ext, int& begT_ext)
+static inline int _xdrop_seed_and_extend_l(seqan::Dna5String& seqQ, seqan::Dna5String& seqT, int mat, int mis, int gap, int dropoff, const xseed_t& xseed, int& begQ_ext, int& begT_ext)
 {
     xseed_t result = xseed;
 
@@ -225,7 +233,7 @@ int _xdrop_seed_and_extend_l(seqan::Dna5String& seqQ, seqan::Dna5String& seqT, i
     return lscore;
 }
 
-int _xdrop_seed_and_extend_r(seqan::Dna5String& seqQ, seqan::Dna5String& seqT, int mat, int mis, int gap, int dropoff, const xseed_t& xseed, int& endQ_ext, int& endT_ext)
+static inline int _xdrop_seed_and_extend_r(seqan::Dna5String& seqQ, seqan::Dna5String& seqT, int mat, int mis, int gap, int dropoff, const xseed_t& xseed, int& endQ_ext, int& endT_ext)
 {
     xseed_t result = xseed;
 
@@ -268,13 +276,13 @@ _xdrop_aligner
     if (begT < 0 || begT + seedlen > lenT)
         return -1;
 
-    bool rc = (seqQ[begQ + (seedlen>>1)] != seqT[begT + (seedlen>>1)]);
+    if (begQ == 0 && begT == 0)
+        return -1;
 
+    bool rc = (seqQ[begQ + (seedlen>>1)] != seqT[begT + (seedlen>>1)]);
 
     for (int i = 0; i < seedlen; ++i)
     {
-        /* lenT - 1 - (begT + seedlen - 1 - i) = lenT - 1 - begT - seedlen + 1 + i */
-
         if (seqQ[begQ + i] != (rc? seqTr[lenT - begT - seedlen + i] : seqT[begT + i]))
             return -1;
     }
@@ -300,6 +308,9 @@ _xdrop_aligner
 
     result.begT = rc? lenT - endT_ext : begT_ext;
     result.endT = rc? lenT - begT_ext : endT_ext;
+
+    result.rc = rc;
+    result.score = score;
 
     return score;
 }
@@ -357,8 +368,20 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
 
             add_time("XA:ExtendSeed", (ms_t(end_time - start_time)).count());
 
-            result.score = score;
-            ai[i] = result;
+            bool rc = result.rc;
+            int lenQ = length(seqan::source(seqsv[i]));
+            int lenT = length(seqan::source(seqsh[i]));
+            int64_t idxQ = std::get<0>(mattuples[lids[i]]) + row_offset;
+            int64_t idxT = std::get<1>(mattuples[lids[i]]) + col_offset;
+            int begQr = ai[i].begQ;
+            int endQr = ai[i].endQ;
+            int begTr = rc? lenT - ai[i].endT : ai[i].begT;
+            int endTr = rc? lenT - ai[i].begT : ai[i].endT;
+
+            if (ai[i].score < result.score)
+                ai[i] = result;
+
+            /* std::cout << idxQ << "\t" << lenQ << "\t" << begQr << "\t" << endQr << "\t" << static_cast<int>(rc) << "\t" << idxT << "\t" << lenT << "\t" << ai[i].begT << "\t" << ai[i].endT << "\t" << score << std::endl; */
         }
 
         auto end_time = std::chrono::system_clock::now();
@@ -399,6 +422,7 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
         cks->lenh = lenT;
         cks->score = score;
         cks->rc = rc;
+        cks->passed = false;
 
         if (kind != INTERNAL_MATCH)
         {
@@ -427,7 +451,6 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
                 cks->passed = true;
             }
         }
-        else cks->passed = false;
     }
 
     int readcount = 0;
