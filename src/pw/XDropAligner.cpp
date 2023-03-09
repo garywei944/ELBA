@@ -5,7 +5,7 @@
 
 typedef enum
 {
-    INTERNAL_MATCH, /* bad alignment */
+    BAD_ALIGNMENT, /* bad alignment */
     FIRST_CONTAINED,
     SECOND_CONTAINED,
     FIRST_TO_SECOND_OVERLAP,
@@ -20,33 +20,34 @@ struct xseed_t
     xseed_t() : begQ(0), endQ(0), begT(0), endT(0), score(-1), rc(false) {}
 };
 
-        // classify_alignment(ai[i], kind, ratioScoreOverlap, ContainedSeqPerthread[0]);
-
 void classify_alignment(const xseed_t& ai, int lenQ, int lenT, overlap_class_t& kind)
 {
     if (ai.score <= 0)
     {
-        kind = INTERNAL_MATCH;
+        kind = BAD_ALIGNMENT;
         return;
     }
 
     int begTr = ai.rc? lenT - ai.endT : ai.begT;
     int endTr = ai.rc? lenT - ai.begT : ai.endT;
 
-    int maplen = std::max(ai.endT - ai.begT, ai.endQ - ai.begQ);
+    int maplen = ((ai.endT - ai.begT) + (ai.endQ - ai.begQ)) / 2;
     int overhang = std::min(ai.begQ, begTr) + std::min(lenQ - ai.endQ, lenT - endTr);
+    int overlap = maplen + overhang;
 
-    if (overhang > std::min(1000.0, maplen * 0.9))
-    {
-        kind = INTERNAL_MATCH;
-    }
-    else if (ai.begQ <= begTr && lenQ - ai.endQ <= lenT - endTr)
+    float my_thr = (1 - DELTACHERNOFF) * (0.99 * (overlap + 0.0));
+
+    if (ai.begQ <= begTr && lenQ - ai.endQ <= lenT - endTr)
     {
         kind = FIRST_CONTAINED;
     }
     else if (ai.begQ >= begTr && lenQ - ai.endQ >= lenT - endTr)
     {
         kind = SECOND_CONTAINED;
+    }
+    else if (ai.score < my_thr || overlap < 500)
+    {
+        kind = BAD_ALIGNMENT;
     }
     else if (ai.begQ > begTr)
     {
@@ -424,7 +425,7 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
         cks->rc = rc;
         cks->passed = false;
 
-        if (kind != INTERNAL_MATCH)
+        if (kind != BAD_ALIGNMENT)
         {
             if (kind == FIRST_CONTAINED)
             {
