@@ -85,129 +85,19 @@ void DistributedPairwiseRunner::write_overlaps(const char *file)
 	}
 }
 
-void DistributedPairwiseRunner::run(PairwiseFunction *pf, const char* file, std::ofstream& lfs, int log_freq, ushort k) {
-  /*! There are two types of rows and columns below.
-   * The sequences are arranged as an NxN matrix in
-   * mat (this is not how it's stored internally).
-   * This NxN is distributed over a grid of
-   * sqrt(P) x sqrt (P), where P is the total number
-   * of processes. Anything to do with the grid will
-   * be prefixed by gr_*/
-
-  std::ofstream af_stream;
-  af_stream.open(file);
-
-  uint64_t local_nnz_count = spSeq->getnnz();
-  std::atomic<uint64_t> current_nnz_count(0);
-
-  lfs << "Local nnz count: " << local_nnz_count << std::endl;
-
-  int numThreads = 1;	// default case
-#ifdef THREADED
-#pragma omp parallel
-    {
-      numThreads = omp_get_num_threads();
-    }
-#endif
-
-  std::vector<std::stringstream> ss(numThreads);
-  if(parops->world_proc_rank == 0)
-    af_stream << "g_col_idx,g_row_idx,pid,col_seq_len,row_seq_len,"
-		"col_seq_align_len,row_seq_align_len, num_gap_opens, "
-		"col_seq_len_coverage, row_seq_len_coverage,common_count" << std::endl;
-
-  std::atomic<uint64_t> line_count(0);
-  uint64_t nalignments = 0;
-  PSpMat<elba::CommonKmers>::Tuples mattuples(*spSeq);
-
-  #pragma omp parallel for reduction(+:nalignments)
-  for(uint64_t i=0; i< local_nnz_count; i++)
-  {
-	auto l_row_idx = mattuples.rowindex(i);
-	auto l_col_idx = mattuples.colindex(i);
-	uint64_t g_col_idx = l_col_idx + col_offset;
-	uint64_t g_row_idx = l_row_idx + row_offset;
-
-	seqan::Dna5String *seq_h = dfd->col_seq(l_col_idx);
-	seqan::Dna5String *seq_v = dfd->row_seq(l_row_idx);
-
-	current_nnz_count++;
-	if (current_nnz_count % log_freq == 0){
-		#pragma omp critical
-		{
-			  auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			  lfs << "  (" << current_nnz_count << "/" << local_nnz_count << ") -- "
-			  << std::setprecision(2) << (1.0*current_nnz_count / local_nnz_count)
-			  << "% done. " << std::ctime(&t);
-			  lfs.flush();
-		}
-	}
-
-	/*!
-	 * Note. the cells means the process grid cells.
-	 * We only want to compute the top triangles of any grid cell.
-	 * Further, we want cell diagonals only for cells that are on the
-	 * top half of the grid excluding the grid's main diagonal cells
-	 * */
-	if (l_col_idx < l_row_idx){
-		continue;
-	}
-	if (l_col_idx == l_row_idx && g_col_idx <= g_row_idx){
-		continue;
-	}
-
-	elba::CommonKmers cks = mattuples.numvalue(i);
-
-	int myThread = 0;
-#ifdef THREADED
-	myThread = omp_get_thread_num();
-#endif
-
-		++nalignments;
-		pf->apply(l_col_idx, g_col_idx, l_row_idx, g_row_idx, seq_h, seq_v, k, cks, ss[myThread]);
-		line_count++;
-
-		if (line_count % afreq == 0)
-		{
-			#pragma omp critical
-			{
-			  af_stream << ss[myThread].str();
-			  af_stream.flush();
-			  ss[myThread].str(std::string());
-			}
-		}
-	}
-
-	pf->nalignments = nalignments;
-
-	lfs << "  (" << current_nnz_count << "/" << local_nnz_count << ") -- "
-	    << "100% done." << std::endl;
-	lfs << "#alignments run " << nalignments << std::endl;
-
-	pf->print_avg_times(parops, lfs);
-
-	for(int i=0; i< numThreads; ++i)
-	{
-		af_stream << ss[i].str();
-	}
-	af_stream.flush();
-	af_stream.close();
-}
-
-
 void
 DistributedPairwiseRunner::run_batch
 (
-    PairwiseFunction	*pf,
-	std::ofstream&		 lfs,
-	int					 log_freq,
-	int					 ckthr,
-	bool				 aln_score_thr,
-	TraceUtils 			 tu,
-	const bool 			 noAlign,
-	ushort 				 k,
-	uint64_t 			 nreads,
-	bool				 score_only
+    XDropAligner&     aligner,
+    std::ofstream&    lfs,
+    int               log_freq,
+    int               ckthr,
+    bool              aln_score_thr,
+    TraceUtils        tu,
+    const bool        noAlign,
+    ushort            k,
+    uint64_t          nreads,
+    bool              score_only
 )
 {
 	uint64_t	local_nnz_count = spSeq->getnnz();
@@ -374,7 +264,7 @@ DistributedPairwiseRunner::run_batch
 			<< std::endl;
 
 		// GGGG: fill ContainedSeqPerBatch
-		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx]);
+		aligner.apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx]);
 
 		delete [] lids;
 		++batch_idx;
@@ -489,10 +379,8 @@ DistributedPairwiseRunner::run_batch
 	// TOTAL ALIGNMENTES COMMUNICATION                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	if(noAlign) nalignments = 0;
-
-	pf->nalignments = nalignments;
-	pf->print_avg_times(parops, lfs);
+	aligner.nalignments = nalignments;
+	aligner.print_avg_times(parops, lfs);
 
 	lfs << "#alignments run " << nalignments << std::endl;
 

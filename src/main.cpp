@@ -805,44 +805,25 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   tp->times["StartMain:DprAlign()"] = std::chrono::system_clock::now();
   ScoringScheme scoring_scheme(match, mismatch_sc, gap_ext);
 
-  PairwiseFunction* pf = nullptr;
+  XDropAligner aligner(scoring_scheme, klength, xdrop);
   uint64_t local_alignments = 1;
 
-  // Output intermediate matrix post-alignment
-  std::string candidatem = myoutput;
-  candidatem += ".candidatematrix.mm";
-  Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputHandler());
+  // std::string candidatem = myoutput;
+  // candidatem += ".candidatematrix.mm";
+  // Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputHandler());
 
-  if(xdropAlign)
-  {
-    /* pf = new SeedExtendXdrop (scoring_scheme, klength, xdrop, seed_count); */
-    pf = new XDropAligner(scoring_scheme, klength, xdrop);
-    dpr.run_batch(pf, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
-    local_alignments = static_cast<XDropAligner*>(pf)->nalignments;
-  }
-  else if(fullAlign)
-  {
-    pf = new FullAligner(scoring_scheme);
-    dpr.run_batch(pf, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
-    local_alignments = static_cast<FullAligner*>(pf)->nalignments;
-  }
+  dpr.run_batch(aligner, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
+  local_alignments = aligner.nalignments;
 
   tp->times["EndMain:DprAlign()"] = std::chrono::system_clock::now();
-  delete pf;
 
   uint64_t total_alignments = 0;
   MPI_Reduce(&local_alignments, &total_alignments, 1, MPI_UINT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
 
-  // total_alignments should be zero if "noAlign" is true
   if(is_print_rank)
   {
     std::cout << "Final alignment (L+U-D) count: " << 2 * total_alignments << std::endl;
   }
-
-  // Output intermediate matrix post-alignment
-  //std::string postalignment = myoutput;
-  //postalignment += ".resultmatrix.mm";
-  //Bmat->ParallelWriteMM(postalignment, true, elba::CkOutputHandler());
 
   Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(*Bmat);
 
