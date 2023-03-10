@@ -1,5 +1,5 @@
 
-#include "../../include/pw/XDropAligner.hpp"
+#include "../../include/XDropAligner.hpp"
 #include <vector>
 #include <algorithm>
 

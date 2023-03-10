@@ -61,14 +61,8 @@ add_executable(elba
         include/TraceUtils.hpp
         include/Types.hpp
         include/Utils.hpp
-        include/pw/PairwiseFunction.hpp
-        src/pw/PairwiseFunction.cpp
-        include/pw/SeedExtendXdrop.hpp
-        src/pw/SeedExtendXdrop.cpp
-        include/pw/XDropAligner.hpp
-        src/pw/XDropAligner.cpp
-        include/pw/OverlapFinder.hpp
-        src/pw/OverlapFinder.cpp
+        include/XDropAligner.hpp
+        src/XDropAligner.cpp
         include/AlignmentInfo.hpp
         include/ScoreMat.hpp
         src/ScoreMat.cpp
@@ -76,8 +70,6 @@ add_executable(elba
         include/MemoryChk.h
         src/Buffer.c
         include/Buffer.h
-        include/pw/FullAligner.hpp
-        src/pw/FullAligner.cpp
         include/kmer/CommonKmers.hpp
         include/kmer/KmerIntersectSR.hpp
         include/kmer/MatrixEntry.hpp

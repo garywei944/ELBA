@@ -9,7 +9,7 @@
 #include <seqan/align.h>
 #include "Utils.hpp"
 #include "DistributedFastaData.hpp"
-#include "pw/XDropAligner.hpp"
+#include "XDropAligner.hpp"
 #include "AlignmentInfo.hpp"
 #include "kmer/CommonKmers.hpp"
 

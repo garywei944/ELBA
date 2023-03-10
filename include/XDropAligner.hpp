@@ -5,11 +5,11 @@
 #include <string>
 #include <seqan/score.h>
 #include <seqan/align_parallel.h>
-#include "../AlignmentInfo.hpp"
-#include "../kmer/CommonKmers.hpp"
-#include "../ParallelOps.hpp"
-#include "../DistributedFastaData.hpp"
-#include "../Utils.hpp"
+#include "AlignmentInfo.hpp"
+#include "kmer/CommonKmers.hpp"
+#include "ParallelOps.hpp"
+#include "DistributedFastaData.hpp"
+#include "Utils.hpp"
 
 static int const MAX_THD = 128;
 
