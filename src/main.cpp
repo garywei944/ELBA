@@ -283,26 +283,18 @@ int main(int argc, char **argv)
   /* allocates dfd  (shared ptr) */
   dfd = ParallelFastaParser(input_file.c_str(), idx_map_file.c_str(), parops, tp, tu);
 
-  if (skip_overlap_detection)
-  {
-    Rmat = new PSpMat<ReadOverlap>::MPI_DCCols(parops->grid);
-    Rmat->ReadDistribute(overlap_graph_filename.c_str(), 0, false, ReadOverlapDiskHandler());
-  }
-  else
-  {
-    /* allocates Amat
-     * allocates ATmat */
-    GenerateKmerByReadMatrix(dfd, Amat, ATmat, parops, tp, tu);
+  /* allocates Amat
+   * allocates ATmat */
+  GenerateKmerByReadMatrix(dfd, Amat, ATmat, parops, tp, tu);
 
-    /* allocates Bmat
-     * deletes Amat
-     * deletes ATmat */
-    OverlapDetection(dfd, Bmat, Amat, ATmat, tp, tu);
+  /* allocates Bmat
+   * deletes Amat
+   * deletes ATmat */
+  OverlapDetection(dfd, Bmat, Amat, ATmat, tp, tu);
 
-    /* allocates Rmat
-     * deletes Bmat */
-    PairwiseAlignment(dfd, Bmat, Rmat, contained, parops, tp, tu);
-  }
+  /* allocates Rmat
+   * deletes Bmat */
+  PairwiseAlignment(dfd, Bmat, Rmat, contained, parops, tp, tu);
 
   Rmat->ParallelWriteGeneric(append_output_suffix(".overlap.paf").c_str(), PafHandler());
 
@@ -310,6 +302,8 @@ int main(int argc, char **argv)
   {
     PruneChimeras(dfd, Rmat, coverage_min, parops, tp, tu);
   }
+
+  Rmat->PruneFull(contained, contained);
 
   // Rmat->ParallelWriteMM("overlaps.disk.mtx", true, ReadOverlapDiskHandler());
 
