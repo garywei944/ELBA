@@ -160,6 +160,7 @@ void PairwiseAlignment
     std::shared_ptr<DistributedFastaData> dfd,
     PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat,
     PSpMat<ReadOverlap>::MPI_DCCols*& Rmat,
+    FullyDistVec<int64_t, int64_t>& contained,
     const std::shared_ptr<ParallelOps>& parops,
     const std::shared_ptr<TimePod>& tp,
     TraceUtils& tu
@@ -273,6 +274,7 @@ int main(int argc, char **argv)
   PSpMat<PosInRead>::MPI_DCCols *Amat, *ATmat;
   PSpMat<elba::CommonKmers>::MPI_DCCols *Bmat;
   PSpMat<ReadOverlap>::MPI_DCCols *Rmat;
+  FullyDistVec<int64_t, int64_t> contained;
 
   //////////////////////////////////////////////////////////////////////////////////////
   // PIPELINE                                                                         //
@@ -299,7 +301,7 @@ int main(int argc, char **argv)
 
     /* allocates Rmat
      * deletes Bmat */
-    PairwiseAlignment(dfd, Bmat, Rmat, parops, tp, tu);
+    PairwiseAlignment(dfd, Bmat, Rmat, contained, parops, tp, tu);
   }
 
   Rmat->ParallelWriteGeneric(append_output_suffix(".overlap.paf").c_str(), PafHandler());
@@ -781,7 +783,7 @@ void OverlapDetection(std::shared_ptr<DistributedFastaData> dfd,
     tp->times["EndMain:DfdWait()"] = std::chrono::system_clock::now();
 }
 
-void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
+void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, FullyDistVec<int64_t, int64_t>& contained, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
   uint64_t n_rows, n_cols;
   n_rows = n_cols = dfd->global_count();
@@ -809,7 +811,8 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   // candidatem += ".candidatematrix.mm";
   // Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputHandler());
 
-  dpr.run_batch(aligner, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count);
+  dpr.run_batch(aligner, proc_log_stream, log_freq, ckthr, aln_score_thr, tu, noAlign, klength, seq_count, contained);
+
   local_alignments = aligner.nalignments;
 
   tp->times["EndMain:DprAlign()"] = std::chrono::system_clock::now();

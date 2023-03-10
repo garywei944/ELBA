@@ -18,8 +18,7 @@ public:
   DistributedPairwiseRunner(std::shared_ptr<DistributedFastaData> dfd,
                      PSpMat<elba::CommonKmers>::DCCols * localmat,
                      PSpMat<elba::CommonKmers>::MPI_DCCols *glmat,
-                     int afreq,
-		                 uint64_t rowoffset, uint64_t coloffset,
+                     int afreq, uint64_t rowoffset, uint64_t coloffset,
                      const std::shared_ptr<ParallelOps> &parops);
 
   void write_overlaps(const char *file);
@@ -29,6 +28,7 @@ public:
                     const bool noAlign,
                     ushort k,
                     uint64_t nreads,
+                    FullyDistVec<int64_t, int64_t>& contained,
                     bool score_only = false);
 
 private:
