@@ -12,7 +12,7 @@ int intplus(int a, int b)
 
 void ReadOverlap::SetPathInf() { sfxpath[0] = sfxpath[1] = sfxpath[2] = sfxpath[3] = MAX_INT; }
 
-ReadOverlap::ReadOverlap() : sfx(0), dir(-1), score(-1), transpose(false), passed(false) { SetPathInf(); }
+ReadOverlap::ReadOverlap() : sfx(0), dir(-1), score(-1), transpose(false), passed(false), count(1) { SetPathInf(); }
 ReadOverlap::ReadOverlap(ushort count) : count(count) {}
 
 /* TODO: try and simplify this constructor to just initializers */
@@ -29,8 +29,6 @@ ReadOverlap::ReadOverlap(const ReadOverlap& rhs)
 
     for (int i = 0; i < 4; ++i)
         sfxpath[i] = rhs.sfxpath[i];
-
-    count = rhs.count;
 
     begQs[0] = rhs.begQs[0];
     begQs[1] = rhs.begQs[1];
