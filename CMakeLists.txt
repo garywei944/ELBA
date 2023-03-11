@@ -70,7 +70,6 @@ add_executable(elba
         include/MemoryChk.h
         src/Buffer.c
         include/Buffer.h
-        include/kmer/CommonKmers.hpp
         include/kmer/KmerIntersectSR.hpp
         include/kmer/MatrixEntry.hpp
         include/kmer/KmerOps.hpp

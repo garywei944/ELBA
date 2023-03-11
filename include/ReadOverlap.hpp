@@ -1,10 +1,8 @@
 #ifndef READ_OVERLAPS_H_
 #define READ_OVERLAPS_H_
 
-#include "kmer/CommonKmers.hpp"
 #include "DistributedFastaData.hpp"
 
-using namespace elba;
 using namespace combblas;
 
 struct ReadOverlap
@@ -21,7 +19,6 @@ struct ReadOverlap
 
     ReadOverlap(ushort count);
     ReadOverlap(const ReadOverlap& rhs);
-    // ReadOverlap(const CommonKmers& cks);
 
     bool is_invalid() const;
 

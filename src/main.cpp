@@ -752,7 +752,7 @@ void OverlapDetection(std::shared_ptr<DistributedFastaData> dfd,
 
     // @GGGG-TODO: check vector version (new one stack error)
     Bmat = new PSpMat<ReadOverlap>::MPI_DCCols(Mult_AnXBn_DoubleBuff<KmerIntersectSR_t, ReadOverlap, PSpMat<ReadOverlap>::DCCols>(*Amat, *ATmat));
-    //Bmat->Prune([](const elba::CommonKmers& ck) { return ck.count < 2; }, true);
+    //Bmat->Prune([](const ReadOverlap& ck) { return ck.count < 2; }, true);
 
     delete Amat;
     delete ATmat;

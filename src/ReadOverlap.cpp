@@ -39,24 +39,6 @@ ReadOverlap::ReadOverlap(const ReadOverlap& rhs)
     begTs[1] = rhs.begTs[1];
 }
 
-// ReadOverlap::ReadOverlap(const CommonKmers& cks) : transpose(false), score(static_cast<int>(cks.score))
-// {
-    // b[0] = cks.first.first;  b[1] = cks.second.first;
-    // e[0] = cks.first.second; e[1] = cks.second.second;
-    // l[0] = cks.lenv;         l[1] = cks.lenh;
-
-    // rc = cks.rc;
-
-    // sfx  = cks.sfx;
-    // sfxT = cks.sfxT;
-    // dir  = cks.dir;
-    // dirT = cks.dirT;
-
-    // SetPathInf();
-
-    // sfxpath[dir] = sfx;
-// }
-
 bool ReadOverlap::is_invalid() const { return (dir == -1); }
 
 bool ReadOverlap::arrows(int& t, int& h) const

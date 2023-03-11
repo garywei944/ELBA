@@ -8,8 +8,6 @@
 #include "DistributedFastaData.hpp"
 #include "Utils.hpp"
 
-using namespace elba;
-
 class PileupVector
 {
 public:

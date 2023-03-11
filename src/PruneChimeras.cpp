@@ -5,7 +5,6 @@
 #include <fstream>
 #include <mpi.h>
 
-using namespace elba;
 using namespace combblas;
 
 template <class T, class T1, class T2>

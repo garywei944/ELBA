@@ -12,7 +12,6 @@
 #include "XDropAligner.hpp"
 #include "AlignmentInfo.hpp"
 #include "ReadOverlap.hpp"
-// #include "kmer/CommonKmers.hpp"
 
 class DistributedPairwiseRunner {
 public:
