@@ -11,13 +11,14 @@
 #include "DistributedFastaData.hpp"
 #include "XDropAligner.hpp"
 #include "AlignmentInfo.hpp"
-#include "kmer/CommonKmers.hpp"
+#include "ReadOverlap.hpp"
+// #include "kmer/CommonKmers.hpp"
 
 class DistributedPairwiseRunner {
 public:
   DistributedPairwiseRunner(std::shared_ptr<DistributedFastaData> dfd,
-                     PSpMat<elba::CommonKmers>::DCCols * localmat,
-                     PSpMat<elba::CommonKmers>::MPI_DCCols *glmat,
+                     PSpMat<ReadOverlap>::DCCols * localmat,
+                     PSpMat<ReadOverlap>::MPI_DCCols *glmat,
                      int afreq, uint64_t rowoffset, uint64_t coloffset,
                      const std::shared_ptr<ParallelOps> &parops);
 
@@ -32,8 +33,8 @@ public:
                     bool score_only = false);
 
 private:
-  PSpMat<elba::CommonKmers>::DCCols * spSeq;
-  PSpMat<elba::CommonKmers>::MPI_DCCols * gmat;
+  PSpMat<ReadOverlap>::DCCols * spSeq;
+  PSpMat<ReadOverlap>::MPI_DCCols * gmat;
   uint64_t row_offset;  // local to global row id offset
   uint64_t col_offset;	// ditto
   std::shared_ptr<DistributedFastaData> dfd;

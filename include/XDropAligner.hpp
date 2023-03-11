@@ -6,7 +6,8 @@
 #include <seqan/score.h>
 #include <seqan/align_parallel.h>
 #include "AlignmentInfo.hpp"
-#include "kmer/CommonKmers.hpp"
+#include "ReadOverlap.hpp"
+// #include "kmer/CommonKmers.hpp"
 #include "ParallelOps.hpp"
 #include "DistributedFastaData.hpp"
 #include "Utils.hpp"
@@ -22,14 +23,14 @@ public:
   void apply(uint64_t l_col_idx, uint64_t g_col_idx,
              uint64_t l_row_idx, uint64_t g_row_idx,
              seqan::Dna5String *seq_h, seqan::Dna5String *seq_v, ushort k,
-             elba::CommonKmers &cks, std::stringstream& ss);
+             ReadOverlap& cks, std::stringstream& ss);
 
   void apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> &seqsh,
                    seqan::StringSet<seqan::Gaps<seqan::Dna5String>> &seqsv,
                    uint64_t *lids,
                    uint64_t col_offset,
                    uint64_t row_offset,
-                   PSpMat<elba::CommonKmers>::ref_tuples *mattuples,
+                   PSpMat<ReadOverlap>::ref_tuples *mattuples,
                    std::ofstream &lfs,
                    const bool noAlign,
                    ushort k,

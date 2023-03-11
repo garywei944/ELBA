@@ -9,8 +9,8 @@
 
 DistributedPairwiseRunner::DistributedPairwiseRunner(
     const std::shared_ptr<DistributedFastaData> dfd,
-    PSpMat<elba::CommonKmers>::DCCols * localmat,
-	PSpMat<elba::CommonKmers>::MPI_DCCols * glmat,
+    PSpMat<ReadOverlap>::DCCols * localmat,
+	PSpMat<ReadOverlap>::MPI_DCCols * glmat,
     int afreq,
     uint64_t rowoffset, uint64_t coloffset,
     const std::shared_ptr<ParallelOps> &parops)
@@ -62,7 +62,7 @@ void DistributedPairwiseRunner::write_overlaps(const char *file)
 	      continue;
 	    }
 
-	    elba::CommonKmers cks = nzit.value();
+	    ReadOverlap cks = nzit.value();
 	    if (cks.count > l_max_common_kmers)
 		{
 	      l_max_common_kmers = cks.count;
@@ -111,10 +111,10 @@ DistributedPairwiseRunner::run_batch
 	int			batch_idx		= 0;
 	uint64_t	nalignments		= 0;
 
-	// PSpMat<elba::CommonKmers>::Tuples mattuples(*spSeq);
+	// PSpMat<ReadOverlap>::Tuples mattuples(*spSeq);
 	// @TODO threaded
-	PSpMat<elba::CommonKmers>::ref_tuples *mattuples =
-		new PSpMat<elba::CommonKmers>::ref_tuples[local_nnz_count];
+	PSpMat<ReadOverlap>::ref_tuples *mattuples =
+		new PSpMat<ReadOverlap>::ref_tuples[local_nnz_count];
 
 	uint64_t z = 0;
 	auto dcsc = spSeq->GetDCSC();
@@ -185,7 +185,7 @@ DistributedPairwiseRunner::run_batch
 
 				assert(l_row_idx >= 0 && l_col_idx >= 0 && g_col_idx >= 0 && g_row_idx >= 0);
 
-				elba::CommonKmers *cks = std::get<2>(mattuples[i]);
+				ReadOverlap *cks = std::get<2>(mattuples[i]);
 
 				if ((cks->count >= ckthr) 	 	&&
 					(l_col_idx >= l_row_idx) 	&&
@@ -243,9 +243,8 @@ DistributedPairwiseRunner::run_batch
 
 				assert(l_row_idx >= 0 && l_col_idx >= 0 && g_col_idx >= 0 && g_row_idx >= 0);
 
-				elba::CommonKmers *cks = std::get<2>(mattuples[i]);
+				ReadOverlap *cks = std::get<2>(mattuples[i]);
 
-			//	if ((cks->count >= ckthr) && (l_col_idx >= l_row_idx) && (l_col_idx != l_row_idx  || g_col_idx > g_row_idx))
 				if ((cks->count >= ckthr) && (l_col_idx >= l_row_idx) && (l_col_idx != l_row_idx  || g_col_idx > g_row_idx))
 				{
 
@@ -415,7 +414,7 @@ DistributedPairwiseRunner::run_batch
 
 	tu.print_str("\t* nnz before pruning " + std::to_string(gmat->getnnz()) + "\n");
 
-	auto elim_score = [] (elba::CommonKmers &ck) { return ck.passed == false; };
+	auto elim_score = [] (ReadOverlap &ck) { return ck.passed == false; };
     gmat->Prune(elim_score);
 
 	// GGGG: if noAlign == true, we remove only the contained overlaps as they are not useful for transitive reduction (next prune)

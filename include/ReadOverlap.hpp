@@ -10,15 +10,18 @@ using namespace combblas;
 struct ReadOverlap
 {
     int sfx, sfxT, dir, dirT;
+    int begQs[2], begTs[2];
     int b[2], e[2], l[2], coords[2], sfxpath[4];
-    bool transpose, rc;
+    ushort count;
+    bool transpose, passed, rc;
     int score;
 
     void SetPathInf();
     ReadOverlap();
 
+    ReadOverlap(ushort count);
     ReadOverlap(const ReadOverlap& rhs);
-    ReadOverlap(const CommonKmers& cks);
+    // ReadOverlap(const CommonKmers& cks);
 
     bool is_invalid() const;
 

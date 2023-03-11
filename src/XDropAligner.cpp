@@ -323,7 +323,7 @@ nalignments(0), scheme(scheme), seedlen(seedlen), dropoff(dropoff) {}
 void XDropAligner::apply(uint64_t l_col_idx, uint64_t g_col_idx,
                          uint64_t l_row_idx, uint64_t g_row_idx,
                          seqan::Dna5String *seq_h, seqan::Dna5String *seq_v, ushort k,
-                         elba::CommonKmers &cks, std::stringstream& ss)
+                         ReadOverlap &cks, std::stringstream& ss)
 {}
 
 void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> &seqsh,
@@ -331,7 +331,7 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
                                uint64_t *lids,
                                uint64_t col_offset,
                                uint64_t row_offset,
-                               PSpMat<elba::CommonKmers>::ref_tuples *mattuples,
+                               PSpMat<ReadOverlap>::ref_tuples *mattuples,
                                std::ofstream &lfs,
                                const bool noAlign,
                                ushort k,
@@ -354,12 +354,12 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
 
         for (uint64_t i = 0; i < npairs; ++i)
         {
-            elba::CommonKmers *cks = std::get<2>(mattuples[lids[i]]);
+            ReadOverlap *cks = std::get<2>(mattuples[lids[i]]);
 
             /* TODO: check the logic here */
 
-            int begQ = (cnt == 0)? cks->first.first : cks->second.first;
-            int begT = (cnt == 0)? cks->first.second : cks->second.second;
+            int begQ = cks->begQs[cnt];
+            int begT = cks->begTs[cnt];
 
             xseed_t result;
 
@@ -412,15 +412,15 @@ void XDropAligner::apply_batch(seqan::StringSet<seqan::Gaps<seqan::Dna5String>> 
         int begTr = rc? lenT - ai[i].endT : ai[i].begT;
         int endTr = rc? lenT - ai[i].begT : ai[i].endT;
 
-        elba::CommonKmers *cks = std::get<2>(mattuples[lids[i]]);
+        ReadOverlap *cks = std::get<2>(mattuples[lids[i]]);
 
-        cks->first.first = begQr;
-        cks->first.second = endQr;
-        cks->second.first = begTr;
-        cks->second.second = endTr;
+        cks->b[0] = ai[i].begQ;
+        cks->b[1] = ai[i].endQ;
+        cks->e[0] = ai[i].begT;
+        cks->e[1] = ai[i].endT;
 
-        cks->lenv = lenQ;
-        cks->lenh = lenT;
+        cks->l[0] = lenQ;
+        cks->l[1] = lenT;
         cks->score = score;
         cks->rc = rc;
         cks->passed = false;

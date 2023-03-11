@@ -3,6 +3,7 @@
 #ifndef ELBA_KMERINTERSECTSR_HPP
 #define ELBA_KMERINTERSECTSR_HPP
 
+#include "../ReadOverlap.hpp"
 #include "../ParallelOps.hpp"
 #include "../Defines.hpp"
 
@@ -19,6 +20,9 @@ bool operator>(const std::pair<int, int>& l, const int& c) {
 	else return false;
 }
 
+// int begQ = (cnt == 0)? cks->first.first : cks->second.first;
+// int begT = (cnt == 0)? cks->first.second : cks->second.second;
+
 namespace elba {
   template<typename IN, typename OUT>
   struct KmerIntersect {
@@ -32,38 +36,17 @@ namespace elba {
     static OUT add(const OUT &arg1, const OUT &arg2)
     {
   #ifdef TWOSEED
-      OUT res(arg1.count + arg2.count);
+      OUT res(arg1.count + arg2.count); /* ReadOverlap constructor will need to take count as int input */
 
-      res.first.first   = arg1.first.first;
-      res.second.first  = arg2.first.first;
+      res.begQs[0] = arg1.begQs[0];
+      res.begQs[1] = arg2.begQs[0];
 
-      res.first.second  = arg1.first.second;
-      res.second.second = arg2.first.second;
+      res.begTs[0] = arg1.begTs[0];
+      res.begTs[1] = arg2.begTs[0];
 
       return res;
   #else
-      OUT res(arg1.count);
-      res.pos = arg1.pos;
-
-      std::vector<std::pair<PosInRead, PosInRead>> kmertobeinserted; //(arg1->pos.size()); GGGG: techinically i don't need size
-
-      for(int i = 0; i < arg2.pos.size(); ++i)	
-        for(int j = 0; j < arg1.pos.size(); ++j)
-        {
-          auto kmer1 = arg1.pos[j];
-          auto kmer2 = arg2.pos[i];
-
-          if(distance(kmer1, kmer2) > KLEN)
-            kmertobeinserted.push_back(kmer2);
-        }
-
-      for (int i = 0; i < kmertobeinserted.size(); i++)
-      {
-        res.count	+= kmertobeinserted.size();
-        res.pos.insert(res.pos.end(), kmertobeinserted.begin(), kmertobeinserted.end());
-      } 
-
-      return res;
+      #error "require TWOSEED"
   #endif
     }
 
@@ -72,13 +55,12 @@ namespace elba {
       OUT a;
 
   #ifdef TWOSEED
-      a.first.first  = arg1;
-      a.first.second = arg2;
+      a.begQs[0] = arg1;
+      a.begTs[0] = arg2;
   #else
-      std::pair<IN, IN> mypair{std::make_pair(arg1, arg2)};
-      a.pos.push_back(mypair);
+      #error "require TWOSEED"
   #endif
-  
+
       return a;
     }
 
