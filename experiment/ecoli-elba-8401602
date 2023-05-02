@@ -1,0 +1,170 @@
+number of processes: 1
+
+Process Grid (p x p x t): 1 x 1 x 1
+
+INFO: ELBA started on Tue May  2 13:04:46 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 701634724 bits, 83.6414 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 0 is responsible for 1 1 0 0
+GPU-based LOGAN alignment started:
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+4 GPUs
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134740
+#nonzeros in C after contained sequences pruning: 21486
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42972 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6472 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 14
+Local Assembly time: 0.0110768
+
+INFO: ELBA completed on Tue May  2 13:10:32 2023
+
+INFO: ELBA runtimes:
+  Main:345854.997803 ms
+  Main:newDFD():431.970777 ms
+  Dfd:PfrReadFasta():78.525919 ms
+  Dfd:newFD():353.367147 ms
+  KmerOp:GenerateA:CardinalityHLL():5.422849 ms
+  KmerOp:GenerateA:FirstPass():111695.361876 ms
+  KmerOp:GenerateA:SecondPass():93981.851907 ms
+  KmerOp:GenerateA:SpMatA():7117.231958 ms
+  Main:GenerateA():216505.187593 ms
+  Main:At():8621.876893 ms
+  Main:AAt():67424.030106 ms
+  Main:DfdWait():69.987395 ms
+  Dfd:MPI_Waitall(seqs):0.000861 ms
+  Main:DprAlign():52338.790209 ms
+  Main:TransitiveReduction():135.105214 ms
+  Main:ExtractContig():95.354643 ms
+  CreateContig:GetRead2Contigs():78.452598 ms
+  CreateContig:GetRead2ProcAssignments():0.476470 ms
+  CreateContig:InducedSubgraphs2Procs():1.200726 ms
+  CreateContig:BuildContigChains():0.685362 ms
+  CreateContig:ReadExchange():0.709889 ms
+  CreateContig:LocalAssembly():11.077619 ms
+  Main:WriteContigs():6.577338 ms
