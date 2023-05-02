@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 #include <bits/stdc++.h>
-
+#include <mpi.h>
 #include "RunLoganAligner.hpp"
 
 using namespace std;

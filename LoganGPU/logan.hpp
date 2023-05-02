@@ -17,5 +17,5 @@
 #include"seed.hpp"
 #include"score.hpp"
 #include"functions.hpp"
-
+//#include <mpi.h>
 #endif

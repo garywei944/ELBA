@@ -271,6 +271,7 @@ GPULoganAligner::apply_batch
 //			else
 //				std::cout << " - 2nd k-mer comparison started on ";
 
+			
 			RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
 		}
 		

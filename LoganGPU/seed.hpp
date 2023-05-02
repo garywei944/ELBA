@@ -4,13 +4,13 @@
 // Date:   6 March 2019
 //==================================================================
 
-#include <algorithm> 
+#include <algorithm>
 #include <cassert>
 
 #include "RunLoganAligner.hpp"
 
 template<typename Tx_>
-const Tx_&  
+const Tx_&
 __device__ __host__ min_logan(const Tx_& _Left, const Tx_& Right_)
 {   // return smaller of _Left and Right_
     if (_Left < Right_)
@@ -20,7 +20,7 @@ __device__ __host__ min_logan(const Tx_& _Left, const Tx_& Right_)
 }
 
 template<typename Tx_, typename Ty_>
-Tx_  
+Tx_
 __device__ __host__ min_logan(const Tx_& _Left, const Ty_& Right_)
 {   // return smaller of _Left and Right_
     return (Right_ < _Left ? Right_ : _Left);

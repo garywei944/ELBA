@@ -192,6 +192,7 @@ int main(int argc, char **argv)
 
     if(myrank == 0)
     {
+        std::cout<<"number of processes: "<<nprocs<<std::endl;
         std::cout << "\nProcess Grid (p x p x t): " << sqrt(nprocs) << " x " << sqrt(nprocs) << " x " << nthreads << std::endl;
     }
 
@@ -704,6 +705,7 @@ void OverlapDetection(std::shared_ptr<DistributedFastaData> dfd,
 
 void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::CommonKmers>::MPI_DCCols* Bmat, PSpMat<ReadOverlap>::MPI_DCCols*& Rmat, const std::shared_ptr<ParallelOps>& parops, const std::shared_ptr<TimePod>& tp, TraceUtils& tu)
 {
+  //what is grid
   uint64_t n_rows, n_cols;
   n_rows = n_cols = dfd->global_count();
   int gr_rows = parops->grid->GetGridRows();
@@ -711,7 +713,9 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
 
   int gr_col_idx = parops->grid->GetRankInProcRow();
   int gr_row_idx = parops->grid->GetRankInProcCol();
-
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  std::cout<<"process "<<rank<< " is responsible for "<<gr_rows<<" "<<gr_cols<<" "<<gr_col_idx<<" "<<gr_row_idx<<std::endl;
   uint64_t avg_rows_in_grid = n_rows / gr_rows;
   uint64_t avg_cols_in_grid = n_cols / gr_cols;
   uint64_t row_offset = gr_row_idx * avg_rows_in_grid;  // first row in this process
