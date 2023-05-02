@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1
+#SBATCH -n 2
 #SBATCH -C gpu
 #SBATCH -G 2
 #SBATCH -q regular
@@ -17,4 +18,4 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=true
 
 
-../build_release/elba -i ../ecoli_hifi_29x.fasta -k 31 --idxmap ecoli-idxmap -c 8605 --alph dna --af ecoli-cpu -s 1 -O 100000 --afreq 100000 --ca 15
+srun ../build_release/elba -i ../ecoli_hifi_29x.fasta -k 31 --idxmap ecoli-idxmap -c 8605 --alph dna --af ecoli-cpu -s 1 -O 100000 --afreq 100000 --ga 15
