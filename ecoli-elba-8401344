@@ -25,3 +25,49 @@ INFO: ELBA started on Tue May  2 12:27:56 2023
 K-mer Counting and 'A' Creation started:
 ProcessFiles: First pass: Table size is: 701634724 bits, 83.6414 MB
 ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+CPU-based SeqAn alignment started:
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134740
+#nonzeros in C after contained sequences pruning: 21486
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42972 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6472 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 14
+Local Assembly time: 0.0113009
+
+INFO: ELBA completed on Tue May  2 12:38:59 2023
+
+INFO: ELBA runtimes:
+  Main:662868.913690 ms
+  Main:newDFD():357.453013 ms
+  Dfd:PfrReadFasta():98.062598 ms
+  Dfd:newFD():259.337744 ms
+  KmerOp:GenerateA:CardinalityHLL():5.554267 ms
+  KmerOp:GenerateA:FirstPass():114312.730192 ms
+  KmerOp:GenerateA:SecondPass():101261.124326 ms
+  KmerOp:GenerateA:SpMatA():7056.214246 ms
+  Main:GenerateA():226223.935291 ms
+  Main:At():8457.568318 ms
+  Main:AAt():66542.541913 ms
+  Main:DfdWait():69.861634 ms
+  Dfd:MPI_Waitall(seqs):0.000731 ms
+  Main:DprAlign():360788.039154 ms
+  Main:TransitiveReduction():140.415420 ms
+  Main:ExtractContig():134.366534 ms
+  CreateContig:GetRead2Contigs():98.677606 ms
+  CreateContig:GetRead2ProcAssignments():0.561070 ms
+  CreateContig:InducedSubgraphs2Procs():1.181164 ms
+  CreateContig:BuildContigChains():0.667275 ms
+  CreateContig:ReadExchange():20.659904 ms
+  CreateContig:LocalAssembly():11.308522 ms
+  Main:WriteContigs():7.142651 ms

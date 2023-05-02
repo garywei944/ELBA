@@ -136,6 +136,7 @@ void GPULoganAligner::apply(
 }
 
 // @NOTE This is hard-coded to the number of seeds being <= 2
+// add one more argument to indicate number of GPU
 void
 GPULoganAligner::apply_batch
 (
@@ -154,7 +155,8 @@ GPULoganAligner::apply_batch
     int debugThr
 )
 {
-	int myrank;
+	int myrank,numprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 	int numThreads = 1;
@@ -271,8 +273,29 @@ GPULoganAligner::apply_batch
 //			else
 //				std::cout << " - 2nd k-mer comparison started on ";
 
+			//todo: add one more argument GPU devide pass MPI id 
+			//in logan : mpi id % number of GPU device
+			// MPI: 0,1,2,3,4,5,6
+			// GPU: 0,1
+			// When MPI process 5 start working, it only assigns to
+			// 5%2=1, GPU 1
+			if(myrank == 0){
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				int completed = 1;
+				if(num_procs > 1){
+					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
+				}
+				
+			}
+			else{
+				int completed;
+				MPI_Recv(&completed,1,MPI_INT,myrank-1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				if(myrank!=numprocs-1){
+					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
+				}
+			}
 			
-			RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
 		}
 		
 		end_time = std::chrono::system_clock::now();
