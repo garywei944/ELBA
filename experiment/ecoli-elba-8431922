@@ -1,0 +1,590 @@
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+
+INFO: ELBA started on Wed May  3 20:59:12 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          2
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 3 is responsible for 2 2 1 1
+process 0 is responsible for 2 2 0 0
+process 1 is responsible for 2 2 1 0
+process 2 is responsible for 2 2 0 1
+GPU-based LOGAN alignment started:
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+number of gpu: 2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 starts
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+rank 2 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 0 ends
+number of gpu: 2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 3 ends
+number of gpu: 2
+number of gpu: 2
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 3 ends
+rank 0 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 1 ends
+number of gpu: 2
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 3 ends
+rank 0 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 1 ends
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 1 ends
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 0 ends
+number of gpu: 2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 1 ends
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 0 ends
+Apply run batch with GPU passed from constructor:  2
+rank 1 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 1 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 0 ends
+rank 1 starts
+2 GPUs
+2 Actual GPUs
+Apply run batch with GPU passed from constructor:  2
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 0 ends
+number of gpu: 2
+rank 0 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+rank 0 ends
+number of gpu: 2
+rank 2 ends
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 1 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+number of gpu: 2
+rank 2 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 2 ends
+rank 3 ends
+number of gpu: 2
+rank 3 starts
+2 GPUs
+2 Actual GPUs
+rank 3 ends
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134726
+#nonzeros in C after contained sequences pruning: 21453
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42906 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6468 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 14
+Local Assembly time: 0.00952463
+
+INFO: ELBA completed on Wed May  3 21:01:23 2023
+
+INFO: ELBA runtimes:
+  Main:130621.527591 ms
+  Main:newDFD():182.172947 ms
+  Dfd:PfrReadFasta():91.581547 ms
+  Dfd:newFD():89.841155 ms
+  KmerOp:GenerateA:CardinalityHLL():67.879006 ms
+  KmerOp:GenerateA:FirstPass():25608.792623 ms
+  KmerOp:GenerateA:SecondPass():21148.800287 ms
+  KmerOp:GenerateA:SpMatA():1877.089073 ms
+  Main:GenerateA():50186.236157 ms
+  Main:At():2166.699667 ms
+  Main:AAt():22425.069351 ms
+  Main:DfdWait():114.621364 ms
+  Dfd:MPI_Waitall(seqs):0.000811 ms
+  Main:DprAlign():55111.592978 ms
+  Main:TransitiveReduction():57.866201 ms
+  Main:ExtractContig():111.841741 ms
+  CreateContig:GetRead2Contigs():85.464161 ms
+  CreateContig:GetRead2ProcAssignments():2.406313 ms
+  CreateContig:InducedSubgraphs2Procs():0.637057 ms
+  CreateContig:BuildContigChains():0.221757 ms
+  CreateContig:ReadExchange():10.659775 ms
+  CreateContig:LocalAssembly():9.526303 ms
+  Main:WriteContigs():23.866816 ms
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [2] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [1] cudaHostUnregister: driver shutting down

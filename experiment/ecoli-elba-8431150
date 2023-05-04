@@ -1,0 +1,62 @@
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+output1
+output2
+output1
+output2
+output1
+output2
+output1
+
+INFO: ELBA started on Wed May  3 19:50:39 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          2
+output2
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+output3
+output3
+start pairwise alignment
+output3
+output3
+GPU-based LOGAN alignment started:
+main run batch :2
+Apply run batch with GPU:  0
+rank 0 start align
+0 GPUs
+0 Actual GPUs
+srun: error: nid008701: task 0: Floating point exception
+srun: Terminating StepId=8431150.0
+slurmstepd: error: *** STEP 8431150.0 ON nid008701 CANCELLED AT 2023-05-04T02:51:56 ***
+srun: error: nid008701: tasks 2-3: Terminated
+srun: error: nid008701: task 1: Terminated
+srun: Force Terminated StepId=8431150.0

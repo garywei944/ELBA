@@ -119,8 +119,10 @@ SeedExtendXdrop::apply_batch
 	ushort k,
 	uint64_t nreads,
 	std::vector<int64_t>& ContainedSeqPerBatch,
+	int gpu_num,
     float ratioScoreOverlap, // GGGG: this is my ratioScoreOverlap variable change name later
     int debugThr
+	
 )
 {
 	seqan::ExecutionPolicy<seqan::Parallel, seqan::Vectorial> exec_policy;

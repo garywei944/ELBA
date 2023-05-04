@@ -20,7 +20,8 @@ public:
                      PSpMat<elba::CommonKmers>::MPI_DCCols *glmat,
                      int afreq,
 		                 uint64_t rowoffset, uint64_t coloffset,
-                     const std::shared_ptr<ParallelOps> &parops);
+                     const std::shared_ptr<ParallelOps> &parops,
+                     int gpu_num);
 
   void write_overlaps(const char *file);
   void run(PairwiseFunction *pf, const char* file, std::ofstream& lfs, int log_freq, ushort k);
@@ -40,6 +41,7 @@ private:
   std::shared_ptr<DistributedFastaData> dfd;
   int afreq;
   std::shared_ptr<ParallelOps> parops;
+  int gpu_num;
 };
 
 #endif //LBL_DAL_ALIGNER_H

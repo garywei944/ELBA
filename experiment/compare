@@ -1,0 +1,23 @@
+Main:129728.427907 ms
+  Main:newDFD():181.961139 ms
+  Dfd:PfrReadFasta():92.210539 ms
+  Dfd:newFD():65.778156 ms
+  KmerOp:GenerateA:CardinalityHLL():66.301317 ms
+  KmerOp:GenerateA:FirstPass():25085.586124 ms
+  KmerOp:GenerateA:SecondPass():20688.487526 ms
+  KmerOp:GenerateA:SpMatA():1888.618088 ms
+  Main:GenerateA():49204.332380 ms
+  Main:At():2168.754041 ms
+  Main:AAt():22335.447560 ms
+  Main:DfdWait():100.789968 ms
+  Dfd:MPI_Waitall(seqs):0.000962 ms
+  Main:DprAlign():55343.380885 ms
+  Main:TransitiveReduction():59.794765 ms
+  Main:ExtractContig():94.218411 ms
+  CreateContig:GetRead2Contigs():67.682207 ms
+  CreateContig:GetRead2ProcAssignments():1.737242 ms
+  CreateContig:InducedSubgraphs2Procs():0.620661 ms
+  CreateContig:BuildContigChains():0.214936 ms
+  CreateContig:ReadExchange():9.755947 ms
+  CreateContig:LocalAssembly():11.021655 ms
+  Main:WriteContigs():16.297984 ms

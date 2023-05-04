@@ -1,0 +1,296 @@
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+user input number of GPUS: 2
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+
+INFO: ELBA started on Wed May  3 20:05:01 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          2
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 3 is responsible for 2 2 1 1
+process 0 is responsible for 2 2 0 0
+process 1 is responsible for 2 2 1 0
+process 2 is responsible for 2 2 0 1
+GPU-based LOGAN alignment started:
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+Apply run batch with GPU:  0
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+2 GPUs
+0 Actual GPUs
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 146565
+#nonzeros in C after contained sequences pruning: 23064
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 46128 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6582 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 163
+Local Assembly time: 0.0128882
+
+INFO: ELBA completed on Wed May  3 20:07:12 2023
+
+INFO: ELBA runtimes:
+  Main:131237.821109 ms
+  Main:newDFD():312.810039 ms
+  Dfd:PfrReadFasta():222.816222 ms
+  Dfd:newFD():66.572438 ms
+  KmerOp:GenerateA:CardinalityHLL():68.004869 ms
+  KmerOp:GenerateA:FirstPass():25254.999309 ms
+  KmerOp:GenerateA:SecondPass():20987.249338 ms
+  KmerOp:GenerateA:SpMatA():1880.593357 ms
+  Main:GenerateA():49698.931194 ms
+  Main:At():2166.677939 ms
+  Main:AAt():22508.296116 ms
+  Main:DfdWait():101.939772 ms
+  Dfd:MPI_Waitall(seqs):0.000812 ms
+  Main:DprAlign():55959.932143 ms
+  Main:TransitiveReduction():99.880586 ms
+  Main:ExtractContig():94.064235 ms
+  CreateContig:GetRead2Contigs():63.345733 ms
+  CreateContig:GetRead2ProcAssignments():2.063968 ms
+  CreateContig:InducedSubgraphs2Procs():0.500685 ms
+  CreateContig:BuildContigChains():0.190527 ms
+  CreateContig:ReadExchange():10.376782 ms
+  CreateContig:LocalAssembly():7.664604 ms
+  Main:WriteContigs():47.607076 ms
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [0] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [1] cudaHostUnregister: driver shutting down
+GTL_DEBUG: [2] cudaHostUnregister: driver shutting down

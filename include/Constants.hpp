@@ -69,5 +69,6 @@ extern const char *CMD_OPTION_DESCRIPTION_LOG_FREQ;
 
 extern const char *CMD_OPTION_AF_FREQ;
 extern const char *CMD_OPTION_DESCRIPTION_AF_FREQ;
-
+extern const char *CMD_OPTION_GPU_NUM;
+extern const char *CMD_OPTION_DESCRIPTION_GPU_NUM;
 #endif //LBL_DAL_CONSTANTS_H

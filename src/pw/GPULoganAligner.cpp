@@ -151,12 +151,14 @@ GPULoganAligner::apply_batch
 	ushort k,
 	uint64_t nreads,
 	std::vector<int64_t>& ContainedSeqPerBatch,
+	int gpu_num,
     float ratioScoreOverlap, // GGGG: this is my ratioScoreOverlap variable change name later
     int debugThr
+	
 )
 {
 	int myrank,numprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 	int numThreads = 1;
@@ -279,21 +281,57 @@ GPULoganAligner::apply_batch
 			// GPU: 0,1
 			// When MPI process 5 start working, it only assigns to
 			// 5%2=1, GPU 1
+
+			//calculate which GPU to use for a MPI process
+
+			//compute a vector of vector
+			//vector<mpi_process_id>:vector<gpu_device_id>
+			/*
+			std::cout<<"number of gpu: "<<gpu_num<<std::endl;
+			vector<int> gpu_id;
+			gpu_id.resize(gpu_num);
+			for(int i=0;i<gpu_num;i++){
+				gpu_id[i]=i;
+			}
 			if(myrank == 0){
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
 				int completed = 1;
-				if(num_procs > 1){
+				if(numprocs > 1){
 					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
 				}
-				
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 			}
 			else{
 				int completed;
 				MPI_Recv(&completed,1,MPI_INT,myrank-1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
 				if(myrank!=numprocs-1){
 					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
 				}
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+			}
+			*/
+			int target_gpu=myrank%gpu_num;
+			if(myrank < gpu_num){
+				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
+				int completed = 1;
+				if(myrank+gpu_num<numprocs){
+					MPI_Send(&completed, 1, MPI_INT, myrank+gpu_num, 0, MPI_COMM_WORLD);
+				}
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+			}
+			else{
+				int completed;
+				MPI_Recv(&completed,1,MPI_INT,myrank-gpu_num,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
+				if(myrank+gpu_num<numprocs){
+					MPI_Send(&completed, 1, MPI_INT, myrank+gpu_num, 0, MPI_COMM_WORLD);
+				}
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 			}
 			
 		}

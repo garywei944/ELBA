@@ -13,9 +13,10 @@ DistributedPairwiseRunner::DistributedPairwiseRunner(
 	PSpMat<elba::CommonKmers>::MPI_DCCols * glmat,
     int afreq,
     uint64_t rowoffset, uint64_t coloffset,
-    const std::shared_ptr<ParallelOps> &parops)
+    const std::shared_ptr<ParallelOps> &parops, 
+	int gpu_num)
     : dfd(dfd), gmat(glmat), spSeq(localmat), row_offset(rowoffset),
-			col_offset(coloffset), afreq(afreq), parops(parops) {
+			col_offset(coloffset), afreq(afreq), parops(parops),gpu_num(gpu_num) {
 }
 
 void DistributedPairwiseRunner::write_overlaps(const char *file)
@@ -211,7 +212,6 @@ DistributedPairwiseRunner::run_batch
 )
 {
 	uint64_t	local_nnz_count = spSeq->getnnz();
-	
 	int myrank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
@@ -372,7 +372,9 @@ DistributedPairwiseRunner::run_batch
 			<< std::endl;
 
 		// GGGG: fill ContainedSeqPerBatch
-		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx]);
+		//TODO: add number of gpu to argument
+		tu.print_str("Apply run batch with GPU passed from constructor:  "+std::to_string(gpu_num)+"\n");
+		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx],gpu_num);
 		
 		delete [] lids;
 		++batch_idx;

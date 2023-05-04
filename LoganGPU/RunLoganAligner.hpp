@@ -62,6 +62,6 @@ struct SeedInterface {
 
 void 
 RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs, 
-	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length);
+	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length, vector<int> gpu_id);
 
 #endif // __LOGAN_ALIGN_RESULT_HPP__

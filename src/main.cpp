@@ -77,7 +77,7 @@ bool write_overlaps = false;
 std::string overlap_file;
 bool add_substitue_kmers = false;
 int subk_count = 0;
-
+int gpu_count = 1;
 /*! Parameters related to outputting alignment info */
 std::string myoutput;
 int afreq;
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 {
   parops = ParallelOps::init(&argc, &argv);
   int ret = parse_args(argc, argv);
-
+  std::cout<< "user input number of GPUS: "<<gpu_count<<std::endl;
   if (ret < 0)
   {
     parops->teardown_parallelism();
@@ -398,6 +398,8 @@ int parse_args(int argc, char **argv)
     (CMD_OPTION_LOG_FREQ, CMD_OPTION_DESCRIPTION_LOG_FREQ,
      cxxopts::value<int>())
     (CMD_OPTION_AF_FREQ, CMD_OPTION_DESCRIPTION_AF_FREQ,
+     cxxopts::value<int>())
+    (CMD_OPTION_GPU_NUM, CMD_OPTION_DESCRIPTION_GPU_NUM,
      cxxopts::value<int>());
 
   auto result = options.parse(argc, argv);
@@ -533,6 +535,9 @@ int parse_args(int argc, char **argv)
     afreq = result[CMD_OPTION_AF_FREQ].as<int>();
   }
 
+  if (result.count(CMD_OPTION_GPU_NUM)) {
+    gpu_count = result[CMD_OPTION_GPU_NUM].as<int>();
+  }
   return 0;
 }
 
@@ -559,7 +564,8 @@ void pretty_print_config(std::string &append_to) {
     "GPU alignment (--ga)",
     "CPU-based alignment (--ca)",
     "Read index map (--idxmap)",
-    "Pairwise alignment alphabet (--alph)"
+    "Pairwise alignment alphabet (--alph)",
+    "GPU number (--gpu)",
   };
 
   std::vector<std::string> vals = {
@@ -580,7 +586,8 @@ void pretty_print_config(std::string &append_to) {
     bool_to_str(gpuAlign) + (gpuAlign  ? " | X: " + std::to_string(xdrop) : ""),
     bool_to_str(cpuAlign) + (cpuAlign  ? " | X: " + std::to_string(xdrop) : ""),
     !idx_map_file.empty() ? idx_map_file : "None",
-    std::to_string(alph_t)
+    std::to_string(alph_t),
+    std::to_string(gpu_count)
   };
 
   ushort max_length = 0;
@@ -725,7 +732,7 @@ void PairwiseAlignment(std::shared_ptr<DistributedFastaData> dfd, PSpMat<elba::C
   candidatem += "-overlap.mtx";
   Bmat->ParallelWriteMM(candidatem, true, elba::CkOutputMMHandler());
 
-  DistributedPairwiseRunner dpr(dfd, Bmat->seqptr(), Bmat, afreq, row_offset, col_offset, parops);
+  DistributedPairwiseRunner dpr(dfd, Bmat->seqptr(), Bmat, afreq, row_offset, col_offset, parops,gpu_count);
 
   double mytime = MPI_Wtime();
   tp->times["StartMain:DprAlign()"] = std::chrono::system_clock::now();
