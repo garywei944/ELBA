@@ -327,7 +327,7 @@ GPULoganAligner::apply_batch
 				int completed;
 				MPI_Recv(&completed,1,MPI_INT,myrank-gpu_num,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
 				if(myrank+gpu_num<numprocs){
 					MPI_Send(&completed, 1, MPI_INT, myrank+gpu_num, 0, MPI_COMM_WORLD);
 				}
