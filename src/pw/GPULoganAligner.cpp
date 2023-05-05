@@ -283,7 +283,7 @@ GPULoganAligner::apply_batch
 			if(myrank == 0){
 				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
 				int completed = 1;
-				if(num_procs > 1){
+				if(numprocs > 1){
 					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
 				}
 				
