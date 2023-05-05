@@ -156,7 +156,7 @@ GPULoganAligner::apply_batch
 )
 {
 	int myrank,numprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 	int numThreads = 1;
@@ -279,6 +279,7 @@ GPULoganAligner::apply_batch
 			// GPU: 0,1
 			// When MPI process 5 start working, it only assigns to
 			// 5%2=1, GPU 1
+			/*
 			if(myrank == 0){
 				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
 				int completed = 1;
@@ -294,6 +295,44 @@ GPULoganAligner::apply_batch
 				if(myrank!=numprocs-1){
 					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
 				}
+			}*/
+			if(myrank==0&&count==0){
+
+				int completed = 1;
+				int send_to=myrank;
+				if(myrank+1<numprocs){
+					send_to=myrank+1;
+				}
+				else{
+					send_to=0;
+				}
+				std::cout<<"rank "<<myrank<<" starts, next one is "<<send_to<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+			}
+			else{
+				int completed = 1;
+				int receive_from,send_to;
+				receive_from=myrank;
+				send_to=myrank;
+				if(myrank==0&&numprocs>1){
+					receive_from=numprocs-1;
+				}
+				if(myrank-1>=0){
+					receive_from=myrank-1;
+				}
+				if(myrank+1<numprocs){
+					send_to=myrank+1;
+				}
+				else{
+					send_to=0;
+				}
+				MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				std::cout<<"rank "<<myrank<<" starts, next one is "<<send_to<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 			}
 			
 		}
