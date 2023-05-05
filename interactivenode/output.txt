@@ -1,0 +1,389 @@
+user input number of GPUS: 4
+user input number of GPUS: 4
+user input number of GPUS: 4
+user input number of GPUS: 4
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 4
+
+INFO: ELBA started on Fri May  5 09:44:49 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          4
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 3 is responsible for 2 2 1 1
+process 0 is responsible for 2 2 0 0
+process 2 is responsible for 2 2 0 1
+process 1 is responsible for 2 2 1 0
+GPU-based LOGAN alignment started:
+Apply run batch with GPU passed from constructor:  4
+rank 3 starts, next one for GPU 3 is 3
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 2 ends
+rank 3 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+rank 2 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 0 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 ends
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 0 ends
+rank 3 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 1 ends
+rank 3 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 2 ends
+rank 1 ends
+rank 0 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 2 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 2 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+rank 1 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 0 ends
+rank 1 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 0 ends
+rank 1 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+rank 2 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+rank 2 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 1 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 0 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 3 ends
+rank 3 starts, next one for GPU 3 is 3
+actual gpu num: 4
+rank 2 ends
+rank 2 starts, next one for GPU 2 is 2
+actual gpu num: 4
+rank 1 ends
+rank 1 starts, next one for GPU 1 is 1
+actual gpu num: 4
+rank 0 ends
+Apply run batch with GPU passed from constructor:  4
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 0 ends
+rank 0 starts, next one for GPU 0 is 0
+actual gpu num: 4
+rank 2 ends
+rank 0 ends
+rank 1 ends
+rank 3 ends
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134726
+#nonzeros in C after contained sequences pruning: 21453
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42906 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6468 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 14
+Local Assembly time: 0.00882033
+
+INFO: ELBA completed on Fri May  5 09:45:52 2023
+
+INFO: ELBA runtimes:
+  Main:62812.448162 ms
+  Main:newDFD():159.074292 ms
+  Dfd:PfrReadFasta():72.546532 ms
+  Dfd:newFD():64.752010 ms
+  KmerOp:GenerateA:CardinalityHLL():72.233337 ms
+  KmerOp:GenerateA:FirstPass():7591.673953 ms
+  KmerOp:GenerateA:SecondPass():7190.198254 ms
+  KmerOp:GenerateA:SpMatA():1511.654806 ms
+  Main:GenerateA():17808.223206 ms
+  Main:At():1866.414068 ms
+  Main:AAt():12247.077953 ms
+  Main:DfdWait():76.918341 ms
+  Dfd:MPI_Waitall(seqs):0.000912 ms
+  Main:DprAlign():30355.441338 ms
+  Main:TransitiveReduction():44.958990 ms
+  Main:ExtractContig():56.483139 ms
+  CreateContig:GetRead2Contigs():30.981739 ms
+  CreateContig:GetRead2ProcAssignments():1.017396 ms
+  CreateContig:InducedSubgraphs2Procs():0.675505 ms
+  CreateContig:BuildContigChains():0.217190 ms
+  CreateContig:ReadExchange():11.984599 ms
+  CreateContig:LocalAssembly():8.821667 ms
+  Main:WriteContigs():7.311489 ms

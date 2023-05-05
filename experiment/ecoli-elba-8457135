@@ -1,0 +1,55 @@
+user input number of GPUS: 3
+user input number of GPUS: 3
+user input number of GPUS: 3
+user input number of GPUS: 3
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+
+INFO: ELBA started on Fri May  5 09:23:11 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          3
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 3 is responsible for 2 2 1 1
+process 0 is responsible for 2 2 0 0
+process 2 is responsible for 2 2 0 1
+process 1 is responsible for 2 2 1 0
+GPU-based LOGAN alignment started:
+Apply run batch with GPU passed from constructor:  3
+rank 2 starts
+elba: /global/homes/m/ml2499/ELBA/LoganGPU/RunLoganAligner.cpp:25: void RunLoganAlign(std::vector<std::__cxx11::basic_string<char> >&, std::vector<std::__cxx11::basic_string<char> >&, std::vector<SeedInterface>&, std::vector<LoganResult>&, int&, ushort&, std::vector<int>): Assertion `deviceCount==actual_device' failed.
+rank 0 starts
+elba: /global/homes/m/ml2499/ELBA/LoganGPU/RunLoganAligner.cpp:25: void RunLoganAlign(std::vector<std::__cxx11::basic_string<char> >&, std::vector<std::__cxx11::basic_string<char> >&, std::vector<SeedInterface>&, std::vector<LoganResult>&, int&, ushort&, std::vector<int>): Assertion `deviceCount==actual_device' failed.
+rank 1 starts
+elba: /global/homes/m/ml2499/ELBA/LoganGPU/RunLoganAligner.cpp:25: void RunLoganAlign(std::vector<std::__cxx11::basic_string<char> >&, std::vector<std::__cxx11::basic_string<char> >&, std::vector<SeedInterface>&, std::vector<LoganResult>&, int&, ushort&, std::vector<int>): Assertion `deviceCount==actual_device' failed.
+srun: error: nid001673: tasks 0-1: Aborted
+srun: Terminating StepId=8457135.0
+slurmstepd: error: *** STEP 8457135.0 ON nid001673 CANCELLED AT 2023-05-05T16:24:24 ***
+srun: error: nid001673: task 2: Aborted
+srun: error: nid001673: task 3: Terminated
+srun: Force Terminated StepId=8457135.0

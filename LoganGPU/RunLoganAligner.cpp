@@ -22,7 +22,7 @@ RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs,
 	//cudaGetDeviceCount(&deviceCount); // 1 MPI process to many GPUs 
 	int actual_device;
 	cudaGetDeviceCount(&actual_device);
-	assert(deviceCount==actual_device);
+	std::cout<<"actual gpu num: "<<actual_device<<std::endl;
 	int AlignmentsToBePerformed = SeedInterfaceSet.size();
 	int numAlignmentsLocal = BATCH_SIZE * deviceCount; 
 

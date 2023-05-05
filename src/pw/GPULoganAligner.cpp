@@ -124,6 +124,7 @@ GPULoganAligner::GPULoganAligner(
     PairwiseFunction(),
     scoring_scheme(scoring_scheme),
     seed_length(seed_length), xdrop(xdrop), seed_count(seed_count){
+		started=false;
 }
 
 void GPULoganAligner::apply(
@@ -314,24 +315,56 @@ GPULoganAligner::apply_batch
 			}
 			*/
 			int target_gpu=myrank%gpu_num;
-			if(myrank < gpu_num){
-				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
+			if(myrank < gpu_num && count==0){
+				//can directly access the gpu
+				int send_to=myrank;
+				if(myrank+gpu_num<numprocs){
+					send_to=myrank+gpu_num;
+				}
+				std::cout<<"rank "<<myrank<<" starts, next one for GPU "<<target_gpu<<" is "<<send_to<<std::endl;
 				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
 				int completed = 1;
-				if(myrank+gpu_num<numprocs){
-					MPI_Send(&completed, 1, MPI_INT, myrank+gpu_num, 0, MPI_COMM_WORLD);
-				}
+				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 			}
 			else{
-				int completed;
-				MPI_Recv(&completed,1,MPI_INT,myrank-gpu_num,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
-				if(myrank+gpu_num<numprocs){
-					MPI_Send(&completed, 1, MPI_INT, myrank+gpu_num, 0, MPI_COMM_WORLD);
+				//need to wait for itself or previous rank process
+				int receive_from=myrank;
+				if(myrank-gpu_num>=0){
+					receive_from=myrank-gpu_num;
 				}
+				else{
+					while(receive_from+gpu_num<numprocs){
+						receive_from=receive_from+gpu_num;
+					}
+				}
+				int send_to=myrank;
+				if(myrank+gpu_num<numprocs){
+					send_to=myrank+gpu_num;
+				}
+				else{
+					send_to=myrank%gpu_num;
+				}
+				//CPU: 0 1 2 3 4 5 6 7 8 9
+				//GPU: 0 1 2
+				//CPU: 0 1 2 3 4 5 6 7 8 9
+				//GPU: 0 1 2 3
+				//CPU: 0 1 2 3
+				//GPU: 0 1 2 3
+				//CPU: 0 1 2 3 4 5 6 7
+				//GPU: 0 1 2 3
+				// 0 waits 9
+				// 1 waits 7
+				// 2 waits 8
+				int completed;
+				
+				MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				std::cout<<"rank "<<myrank<<" starts, next one for GPU "<<target_gpu<<" is "<<send_to<<std::endl;
+	
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
+				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+				
 			}
 			
 		}

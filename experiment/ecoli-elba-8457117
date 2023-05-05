@@ -1,0 +1,36 @@
+user input number of GPUS: 2
+user input number of GPUS: 2
+number of processes: 2
+
+Process Grid (p x p x t): 1.41421 x 1.41421 x 1
+
+INFO: ELBA started on Fri May  5 09:20:35 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          2
+Error: Program terminated because FASTA is too small for 2 procs. Run with fewer procs than the number of input reads.
+MPICH ERROR [Rank 1] [job id 8457117.0] [Fri May  5 09:20:35 2023] [nid001673] - Abort(1) (rank 1 in comm 0): application called MPI_Abort(MPI_COMM_WORLD, 1) - process 1
+
+aborting job:
+application called MPI_Abort(MPI_COMM_WORLD, 1) - process 1
+srun: error: nid001673: task 1: Exited with exit code 255
+srun: Terminating StepId=8457117.0
+slurmstepd: error: *** STEP 8457117.0 ON nid001673 CANCELLED AT 2023-05-05T16:20:35 ***
+srun: error: nid001673: task 0: Terminated
+srun: Force Terminated StepId=8457117.0
