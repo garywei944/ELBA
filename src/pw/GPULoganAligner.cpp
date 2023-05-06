@@ -200,7 +200,7 @@ GPULoganAligner::apply_batch
 	//receive from the final process in other pipelines
 	for(int i=numprocs-gpu_num;i<numprocs;i++){
 		bool buffer;
-		MPI_Irecv(&buffer, 1, MPI_CXX_BOOL, i, 0, MPI_COMM_WORLD, &request[i]);
+		MPI_Irecv(&buffer, 1, MPI_CXX_BOOL, i, 1, MPI_COMM_WORLD, &request[i]);
 	}
 	for(int count = 0; count < seed_count; ++count)
 	{
@@ -306,7 +306,10 @@ GPULoganAligner::apply_batch
 				if(request_complete[i]==0){
 					MPI_Status status;
 					MPI_Test(&request[i],&request_complete[i],&status);
-					std::cout<<"rank "<<myrank<<" ack completion of gpu "<<i<<std::endl;
+					if(request_complete[i]==1){
+						std::cout<<"rank "<<myrank<<" ack completion of gpu "<<i<<std::endl;
+					}
+					
 				}
 			}
 			int offset=1;
@@ -387,7 +390,7 @@ GPULoganAligner::apply_batch
 				std::cout<<"rank "<<myrank<<" finish and release gpu "<<assigned_gpu[0]<<std::endl;
 				for(int i=0;i<numprocs;i++){
 					bool end=true;
-					MPI_Send(&end,1,MPI_CXX_BOOL,i,0,MPI_COMM_WORLD);
+					MPI_Send(&end,1,MPI_CXX_BOOL,i,1,MPI_COMM_WORLD);
 				}
 			}
 			

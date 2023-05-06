@@ -1,0 +1,85 @@
+user input number of GPUS: 4
+user input number of GPUS: 4
+user input number of GPUS: 4
+user input number of GPUS: 4
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+
+INFO: ELBA started on Sat May  6 11:45:16 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          4
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 3 is responsible for 2 2 1 1
+process 0 is responsible for 2 2 0 0
+process 2 is responsible for 2 2 0 1
+process 1 is responsible for 2 2 1 0
+GPU-based LOGAN alignment started:
+Apply run batch with GPU passed from constructor:  4
+rank 0 ack completion of gpu 0
+rank 0 ack completion of gpu 1
+rank 0 ack completion of gpu 2
+rank 0 ack completion of gpu 3
+rank 0 starts epoch 0 / 2
+rank 1 ack completion of gpu 0
+rank 1 ack completion of gpu 1
+rank 1 ack completion of gpu 2
+rank 1 ack completion of gpu 3
+rank 1 starts epoch 0 / 2
+rank 2 ack completion of gpu 0
+rank 2 ack completion of gpu 1
+rank 2 ack completion of gpu 2
+rank 2 ack completion of gpu 3
+rank 2 starts epoch 0 / 2
+actual gpu num: 4
+actual gpu num: 4
+actual gpu num: 4
+rank 3 ack completion of gpu 0
+rank 3 ack completion of gpu 1
+rank 3 ack completion of gpu 2
+rank 3 ack completion of gpu 3
+rank 3 starts epoch 0 / 2
+rank 0 ends
+MPICH ERROR [Rank 0] [job id 8480740.0] [Sat May  6 11:46:21 2023] [nid001124] - Abort(739376910) (rank 0 in comm 0): Fatal error in PMPI_Test: Message truncated, error stack:
+PMPI_Test(190)....: MPI_Test(request=0x3c047ef0, flag=0x3d69b920, status=0x7fff3e7aa6c0) failed
+MPIR_Test(83).....: 
+progress_recv(174): Message from rank 2 and tag 11 truncated; 1 bytes received but buffer size is 4
+
+aborting job:
+Fatal error in PMPI_Test: Message truncated, error stack:
+PMPI_Test(190)....: MPI_Test(request=0x3c047ef0, flag=0x3d69b920, status=0x7fff3e7aa6c0) failed
+MPIR_Test(83).....: 
+progress_recv(174): Message from rank 2 and tag 11 truncated; 1 bytes received but buffer size is 4
+actual gpu num: 4
+srun: error: nid001124: task 0: Exited with exit code 255
+srun: Terminating StepId=8480740.0
+slurmstepd: error: *** STEP 8480740.0 ON nid001124 CANCELLED AT 2023-05-06T18:46:21 ***
+srun: error: nid001124: task 3: Terminated
+srun: error: nid001124: task 1: Terminated
+srun: error: nid001124: task 2: Terminated
+srun: Force Terminated StepId=8480740.0
