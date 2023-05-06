@@ -25,4 +25,3 @@ calling aligner for batch idx 11 cur #algnments 8988 overall 57726
 processing batch of size 8988 with 1 threads 
 Post concatenation ContainedSeqPerBatch, readcount 3147
 Removed duplicates and sorted, contained readcount 1852 out of 8605 sequences
-#alignments run 57726

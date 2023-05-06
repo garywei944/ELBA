@@ -1,28 +1,10 @@
-Local nnz count: 116436
-calling aligner for batch idx 0 cur #algnments 428 overall 428
-processing batch of size 428 with 1 threads 
-calling aligner for batch idx 1 cur #algnments 1400 overall 1828
-processing batch of size 1400 with 1 threads 
-calling aligner for batch idx 2 cur #algnments 2183 overall 4011
-processing batch of size 2183 with 1 threads 
-calling aligner for batch idx 3 cur #algnments 2999 overall 7010
-processing batch of size 2999 with 1 threads 
-calling aligner for batch idx 4 cur #algnments 3902 overall 10912
-processing batch of size 3902 with 1 threads 
-calling aligner for batch idx 5 cur #algnments 4737 overall 15649
-processing batch of size 4737 with 1 threads 
-calling aligner for batch idx 6 cur #algnments 5583 overall 21232
-processing batch of size 5583 with 1 threads 
-calling aligner for batch idx 7 cur #algnments 6350 overall 27582
-processing batch of size 6350 with 1 threads 
-calling aligner for batch idx 8 cur #algnments 7310 overall 34892
-processing batch of size 7310 with 1 threads 
-calling aligner for batch idx 9 cur #algnments 8161 overall 43053
-processing batch of size 8161 with 1 threads 
-calling aligner for batch idx 10 cur #algnments 9067 overall 52120
-processing batch of size 9067 with 1 threads 
-calling aligner for batch idx 11 cur #algnments 6259 overall 58379
-processing batch of size 6259 with 1 threads 
-Post concatenation ContainedSeqPerBatch, readcount 3290
-Removed duplicates and sorted, contained readcount 2309 out of 8605 sequences
-#alignments run 58379
+Local nnz count: 29208
+calling aligner for batch idx 0 cur #algnments 1721 overall 1721
+processing batch of size 1721 with 4 threads 
+calling aligner for batch idx 1 cur #algnments 5148 overall 6869
+processing batch of size 5148 with 4 threads 
+calling aligner for batch idx 2 cur #algnments 7732 overall 14601
+processing batch of size 7732 with 4 threads 
+Post concatenation ContainedSeqPerBatch, readcount 811
+Removed duplicates and sorted, contained readcount 678 out of 8605 sequences
+#alignments run 14601

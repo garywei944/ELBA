@@ -13,9 +13,10 @@ DistributedPairwiseRunner::DistributedPairwiseRunner(
 	PSpMat<elba::CommonKmers>::MPI_DCCols * glmat,
     int afreq,
     uint64_t rowoffset, uint64_t coloffset,
-    const std::shared_ptr<ParallelOps> &parops)
+    const std::shared_ptr<ParallelOps> &parops, int gpu_num)
     : dfd(dfd), gmat(glmat), spSeq(localmat), row_offset(rowoffset),
-			col_offset(coloffset), afreq(afreq), parops(parops) {
+			col_offset(coloffset), afreq(afreq), parops(parops),gpu_num(gpu_num) {
+	
 }
 
 void DistributedPairwiseRunner::write_overlaps(const char *file)
@@ -212,13 +213,36 @@ DistributedPairwiseRunner::run_batch
 {
 	uint64_t	local_nnz_count = spSeq->getnnz();
 	
-	int myrank;
+	int myrank,numprocs;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
+	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	int			batch_size		= 1e4;
 	int			batch_cnt		= (local_nnz_count / batch_size) + 1;
 	int			batch_idx		= 0;
 	uint64_t	nalignments		= 0;
+	//do a all to all communication
+	vector<int> proc_batch_num;
+	proc_batch_num.resize(numprocs);
+	for(int i=0;i<numprocs;i++){
+		if(myrank==i){
+			//i send this round
+			for(int j=0;j<numprocs;j++){
+				if(j!=i){
+					MPI_Send(&batch_cnt, 1, MPI_INT, j, 0, MPI_COMM_WORLD);
+				}
+				
+			}
+			proc_batch_num[i]=batch_cnt;
+		}
+		else{
+			//I receive this round
+			MPI_Recv(&proc_batch_num[i],1,MPI_INT,i,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	}
+
+	for(int i=0;i<numprocs;i++){
+		std::cout<<"my rank "<<myrank<<", process "<<i<<" has batch: "<<proc_batch_num[i]<<std::endl;
+	}
 
 	// PSpMat<elba::CommonKmers>::Tuples mattuples(*spSeq);
 	// @TODO threaded
@@ -372,7 +396,7 @@ DistributedPairwiseRunner::run_batch
 			<< std::endl;
 
 		// GGGG: fill ContainedSeqPerBatch
-		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx]);
+		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx],gpu_num,batch_idx,batch_cnt,proc_batch_num);
 		
 		delete [] lids;
 		++batch_idx;

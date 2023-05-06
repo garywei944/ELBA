@@ -1,0 +1,331 @@
+number of processes: 4
+
+Process Grid (p x p x t): 2 x 2 x 1
+
+INFO: ELBA started on Sat May  6 12:40:29 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 175411678 bits, 20.9107 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 0 is responsible for 2 2 0 0
+process 3 is responsible for 2 2 1 1
+process 2 is responsible for 2 2 0 1
+process 1 is responsible for 2 2 1 0
+GPU-based LOGAN alignment started:
+rank 0 starts epoch 0 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 0 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 0 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 0 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 1 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 1 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 1 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 1 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 2 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 2 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 2 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 2 next one is 0
+2 GPUs
+rank 0 starts epoch 3 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 3 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 3 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 3 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 4 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 4 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 4 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 4 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 5 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 5 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 5 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 5 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 6 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 6 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 6 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 6 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 7 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 7 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 7 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 7 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 8 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 8 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 8 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 8 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 9 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 9 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 9 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 9 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 10 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 10 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 10 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 10 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 11 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 11 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 11 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 11 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 12 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 12 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 12 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 12 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 13 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 13 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 13 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 13 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 14 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 14 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 14 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 14 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 15 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 15 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 15 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 15 next one is 0
+2 GPUs
+rank 0 starts epoch 16 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 16 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 16 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 16 next one is 0
+2 GPUs
+rank 0 starts epoch 17 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 17 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 17 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 17 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 18 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 18 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 18 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 18 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 19 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 19 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 19 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 19 next one is 0
+2 GPUs
+rank 0 starts epoch 20 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 20 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 20 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 20 next one is 0
+2 GPUs
+rank 0 starts epoch 21 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 21 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 21 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 21 next one is 0
+2 GPUs
+rank 0 starts epoch 22 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+rank 1 starts epoch 22 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 22 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 22 next one is 0
+2 GPUs
+rank 3 ends
+rank 0 starts epoch 23 next one is 1
+2 GPUs
+rank 0 ends
+rank 1 starts epoch 23 next one is 2
+2 GPUs
+rank 1 ends
+rank 2 starts epoch 23 next one is 3
+2 GPUs
+rank 2 ends
+rank 3 starts epoch 23 next one is 0
+2 GPUs
+rank 0 starts epoch 24 next one is 1
+2 GPUs
+rank 3 ends
+rank 0 ends
+slurmstepd: error: *** STEP 8483027.0 ON nid001177 CANCELLED AT 2023-05-06T20:25:18 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 8483027 ON nid001177 CANCELLED AT 2023-05-06T20:25:18 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.

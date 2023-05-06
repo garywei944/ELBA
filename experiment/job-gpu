@@ -4,7 +4,7 @@
 #SBATCH -G 2
 #SBATCH -q regular
 #SBATCH -J ecoli-cpu-gpu
-#SBATCH -t 45:00
+#SBATCH -t 10:00
 #SBATCH -A m4341
 #SBATCH --error=ecoli-elba-%j
 #SBATCH --output=ecoli-elba-%j
