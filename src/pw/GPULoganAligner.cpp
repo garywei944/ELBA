@@ -482,11 +482,11 @@ GPULoganAligner::apply_batch
 							receive_from=index;
 							break;
 						}
-						offset++;
+						offset=offset+gpu_num;
 					}
 				}
 				else{
-					offset=1;
+					offset=gpu_num;
 					while(offset<numprocs){
 						int index;
 						if(myrank-offset>=0){
@@ -499,7 +499,7 @@ GPULoganAligner::apply_batch
 							receive_from=index;
 							break;
 						}
-						offset++;
+						offset=offset+gpu_num;
 					}
 				}
 			}
@@ -507,7 +507,7 @@ GPULoganAligner::apply_batch
 				//if i am not the left most process, just find the left process to me
 				// and receive from its signal
 				for(int i=myrank-1;i>=0;i--){
-					if(epoch<proc_batch_num[i]){
+					if((myrank-i)%gpu_num==0&&epoch<proc_batch_num[i]){
 						receive_from=i;
 						break;
 					}

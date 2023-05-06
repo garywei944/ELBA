@@ -63,3 +63,6 @@ const char *CMD_OPTION_DESCRIPTION_LOG_FREQ = "Log frequency.";
 
 const char *CMD_OPTION_AF_FREQ = "afreq";
 const char *CMD_OPTION_DESCRIPTION_AF_FREQ = "The alignment write frequency in number of lines.";
+
+const char *CMD_OPTION_GPU_NUM = "gpu_num";
+const char *CMD_OPTION_DESCRIPTION_GPU_NUM = "The number of gpu. ";
