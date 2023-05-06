@@ -189,6 +189,19 @@ GPULoganAligner::apply_batch
 	// TSeed  *seeds = new TSeed[npairs];
 
 	/* GGGG: seed_count is hardcoded here (2) */
+	vector<MPI_Request> request;
+	vector<int> request_complete;
+	request.resize(gpu_num);
+	request_complete.resize(gpu_num);
+	for(int i=0;i<gpu_num;i++){
+		request_complete[i]=0;
+	}
+
+	//receive from the final process in other pipelines
+	for(int i=numprocs-gpu_num;i<numprocs;i++){
+		bool buffer;
+		MPI_Irecv(&buffer, 1, MPI_CXX_BOOL, i, 0, MPI_COMM_WORLD, &request[i]);
+	}
 	for(int count = 0; count < seed_count; ++count)
 	{
 		auto start_time = std::chrono::system_clock::now();
@@ -287,42 +300,44 @@ GPULoganAligner::apply_batch
 
 			//compute a vector of vector
 			//vector<mpi_process_id>:vector<gpu_device_id>
-			/*
-			std::cout<<"number of gpu: "<<gpu_num<<std::endl;
-			vector<int> gpu_id;
-			gpu_id.resize(gpu_num);
+			vector<int> assigned_gpu;
+			assigned_gpu.push_back(myrank%gpu_num);
 			for(int i=0;i<gpu_num;i++){
-				gpu_id[i]=i;
-			}
-			if(myrank == 0){
-				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
-				int completed = 1;
-				if(numprocs > 1){
-					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
+				if(request_complete[i]==0){
+					MPI_Status status;
+					MPI_Test(&request[i],&request_complete[i],&status);
+					std::cout<<"rank "<<myrank<<" ack completion of gpu "<<i<<std::endl;
 				}
-				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 			}
-			else{
-				int completed;
-				MPI_Recv(&completed,1,MPI_INT,myrank-1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				std::cout<<"rank "<<myrank<<" starts"<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu_id);
-				if(myrank!=numprocs-1){
-					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
+			int offset=1;
+			while(offset<gpu_num-1){
+				if(myrank%gpu_num-offset>=0){
+					if(request_complete[myrank%gpu_num-offset]==1){
+						assigned_gpu.push_back(myrank%gpu_num-offset);
+					}
+					else{
+						break;
+					}
 				}
-				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+				else{
+					if(request_complete[myrank%gpu_num-offset+gpu_num]==1){
+						assigned_gpu.push_back(myrank%gpu_num-offset+gpu_num);
+					}
+					else{
+						break;
+					}
+				}
+				offset++;
 			}
-			*/
-			int target_gpu=myrank%gpu_num;
+
 			if(myrank < gpu_num && count==0){
 				//can directly access the gpu
 				int send_to=myrank;
 				if(myrank+gpu_num<numprocs){
 					send_to=myrank+gpu_num;
 				}
-				std::cout<<"rank "<<myrank<<" starts, next one for GPU "<<target_gpu<<" is "<<send_to<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
+				std::cout<<"rank "<<myrank<<" starts epoch "<<count<< " / "<<seed_count<<std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,assigned_gpu);
 				int completed = 1;
 				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
@@ -359,12 +374,21 @@ GPULoganAligner::apply_batch
 				int completed;
 				
 				MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				std::cout<<"rank "<<myrank<<" starts, next one for GPU "<<target_gpu<<" is "<<send_to<<std::endl;
+				std::cout<<"rank "<<myrank<<" starts epoch "<<count<< " / "<<seed_count<<std::endl;
 	
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,vector<int>{target_gpu});
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,assigned_gpu);
 				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 				
+			}
+			//if is the last
+			if(count==seed_count-1 && myrank>=numprocs-gpu_num){
+				//assigned gpus can be used for other processor's work
+				std::cout<<"rank "<<myrank<<" finish and release gpu "<<assigned_gpu[0]<<std::endl;
+				for(int i=0;i<numprocs;i++){
+					bool end=true;
+					MPI_Send(&end,1,MPI_CXX_BOOL,i,0,MPI_COMM_WORLD);
+				}
 			}
 			
 		}

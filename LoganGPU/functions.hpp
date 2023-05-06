@@ -240,6 +240,31 @@ __inline__ __device__ void initAntiDiags(
 	antiDiag3[0] = gapCost;
 	antiDiag3[1] = gapCost;
 }
+struct Lock{
+	int *mutex;
+	Lock(){
+		int state=0;
+		cudaMalloc((void**)&mutex, sizeof(int));
+		cudaMemcpy(mutex,&state,sizeof(int),cudaMemcpyHostToDevice);
+
+	}
+	~Lock(){
+		cudaFree(mutex);
+	}
+	__device__ void lock(){
+		while(atomicCAS(mutex,0,1)!=0);
+	}
+	__device__ void unlock(){
+		atomicExch(mutex,0);
+	}
+};
+
+__global__ void lck(Lock lock){
+	lock.lock();
+}
+__global__ void un_lck(Lock lock){
+	lock.unlock();
+}
 
 __global__ void extendSeedLGappedXDropOneDirectionGlobal(
 		LSeed *seed,
@@ -431,7 +456,8 @@ void extendSeedL(std::vector<LSeed> &seeds,
 			std::vector<int> gpu_id
 			)
 {
-
+	Lock lock;
+	
 	// GGGG: std::vector<LSeed> &seeds needs to be allocated using pinned memory usign cudaMallocaHost
 	// but I cannot call cudaMallocaHost in the non-cuda file where extendSeedL is called
 	// so I'm going to create a copy of the vector to handle the moving back and forth from the GPU
@@ -443,7 +469,8 @@ void extendSeedL(std::vector<LSeed> &seeds,
     //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	//std::cout<<"my rank: "<<rank<<std::endl;
 	//std::cout<<"total number of procs: "<<num_procs<<std::endl;
-
+	//lck <<<1,1 >>>(lock);
+	//std::cout<<"lock grabbed"<<std::endl;
 	std::vector<LSeed, cuda_allocator<LSeed>> cudaseeds(numAlignments);   // seeds vector using cudaMallocHost
 	std::vector<LSeed, cuda_allocator<LSeed>> cudaseeds_r(numAlignments); // seeds vector using cudaMallocHost
 	copy_to_cuda_vector(seeds, cudaseeds);
@@ -731,7 +758,9 @@ void extendSeedL(std::vector<LSeed> &seeds,
 		setEndPositionH(seeds[i], getEndPositionH(cudaseeds_r[i]));
 		setEndPositionV(seeds[i], getEndPositionV(cudaseeds_r[i]));
 	}
-
+	
 	cudaFreeHost(scoreLeft);
 	cudaFreeHost(scoreRight);
+	//std::cout<<"lock released"<<std::endl;
+	//un_lck<<<1,1>>>(lock);
 }
