@@ -341,9 +341,10 @@ GPULoganAligner::apply_batch
 				}
 				std::cout<<"rank "<<myrank<<" starts epoch "<<count<< " / "<<seed_count<<std::endl;
 				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,assigned_gpu);
+				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
 				int completed = 1;
 				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
-				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+				
 			}
 			else{
 				//need to wait for itself or previous rank process
@@ -380,8 +381,9 @@ GPULoganAligner::apply_batch
 				std::cout<<"rank "<<myrank<<" starts epoch "<<count<< " / "<<seed_count<<std::endl;
 	
 				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,assigned_gpu);
-				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
+				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
+				
 				
 			}
 			//if is the last
