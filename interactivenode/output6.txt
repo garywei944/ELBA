@@ -1,0 +1,777 @@
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+number of processes: 16
+
+Process Grid (p x p x t): 4 x 4 x 4
+
+INFO: ELBA started on Sat May  6 17:10:06 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          -1
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 43853061 bits, 5.22769 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 5 is responsible for 4 4 1 1
+process 15 is responsible for 4 4 3 3
+process 10 is responsible for 4 4 2 2
+process 0 is responsible for 4 4 0 0
+process 6 is responsible for 4 4 2 1
+process 11 is responsible for 4 4 3 2
+process 7 is responsible for 4 4 3 1
+process 9 is responsible for 4 4 1 2
+process 14 is responsible for 4 4 2 3
+process 13 is responsible for 4 4 1 3
+process 1 is responsible for 4 4 1 0
+process 2 is responsible for 4 4 2 0
+process 3 is responsible for 4 4 3 0
+process 4 is responsible for 4 4 0 1
+process 12 is responsible for 4 4 0 3
+process 8 is responsible for 4 4 0 2
+GPU-based LOGAN alignment started:
+my rank 0, process 0 has batch: 4
+my rank 0, process 1 has batch: 3
+my rank 0, process 2 has batch: 3
+my rank 0, process 3 has batch: 3
+my rank 0, process 4 has batch: 3
+my rank 0, process 5 has batch: 4
+my rank 0, process 6 has batch: 3
+my rank 0, process 7 has batch: 3
+my rank 0, process 8 has batch: 3
+my rank 0, process 9 has batch: 3
+my rank 0, process 10 has batch: 4
+my rank 0, process 11 has batch: 3
+my rank 0, process 12 has batch: 3
+my rank 0, process 13 has batch: 3
+my rank 0, process 14 has batch: 3
+my rank 0, process 15 has batch: 4
+my rank 1, process 0 has batch: 4
+my rank 1, process 1 has batch: 3
+my rank 1, process 2 has batch: 3
+my rank 1, process 3 has batch: 3
+my rank 1, process 4 has batch: 3
+my rank 1, process 5 has batch: 4
+my rank 1, process 6 has batch: 3
+my rank 1, process 7 has batch: 3
+my rank 1, process 8 has batch: 3
+my rank 1, process 9 has batch: 3
+my rank 1, process 10 has batch: 4
+my rank 1, process 11 has batch: 3
+my rank 1, process 12 has batch: 3
+my rank 1, process 13 has batch: 3
+my rank 1, process 14 has batch: 3
+my rank 1, process 15 has batch: 4
+my rank 3, process 0 has batch: 4
+my rank 3, process 1 has batch: 3
+my rank 3, process 2 has batch: 3
+my rank 3, process 3 has batch: 3
+my rank 3, process 4 has batch: 3
+my rank 3, process 5 has batch: 4
+my rank 3, process 6 has batch: 3
+my rank 3, process 7 has batch: 3
+my rank 3, process 8 has batch: 3
+my rank 3, process 9 has batch: 3
+my rank 3, process 10 has batch: 4
+my rank 3, process 11 has batch: 3
+my rank 3, process 12 has batch: 3
+my rank 3, process 13 has batch: 3
+my rank 3, process 14 has batch: 3
+my rank 3, process 15 has batch: 4
+my rank 4, process 0 has batch: 4
+my rank 4, process 1 has batch: 3
+my rank 4, process 2 has batch: 3
+my rank 4, process 3 has batch: 3
+my rank 4, process 4 has batch: 3
+my rank 4, process 5 has batch: 4
+my rank 4, process 6 has batch: 3
+my rank 4, process 7 has batch: 3
+my rank 4, process 8 has batch: 3
+my rank 4, process 9 has batch: 3
+my rank 4, process 10 has batch: 4
+my rank 4, process 11 has batch: 3
+my rank 4, process 12 has batch: 3
+my rank 4, process 13 has batch: 3
+my rank 4, process 14 has batch: 3
+my rank 4, process 15 has batch: 4
+my rank 5, process 0 has batch: 4
+my rank 5, process 1 has batch: 3
+my rank 5, process 2 has batch: 3
+my rank 5, process 3 has batch: 3
+my rank 5, process 4 has batch: 3
+my rank 5, process 5 has batch: 4
+my rank 5, process 6 has batch: 3
+my rank 5, process 7 has batch: 3
+my rank 5, process 8 has batch: 3
+my rank 5, process 9 has batch: 3
+my rank 5, process 10 has batch: 4
+my rank 5, process 11 has batch: 3
+my rank 5, process 12 has batch: 3
+my rank 5, process 13 has batch: 3
+my rank 5, process 14 has batch: 3
+my rank 5, process 15 has batch: 4
+my rank 6, process 0 has batch: 4
+my rank 6, process 1 has batch: 3
+my rank 6, process 2 has batch: 3
+my rank 6, process 3 has batch: 3
+my rank 6, process 4 has batch: 3
+my rank 6, process 5 has batch: 4
+my rank 6, process 6 has batch: 3
+my rank 6, process 7 has batch: 3
+my rank 6, process 8 has batch: 3
+my rank 6, process 9 has batch: 3
+my rank 6, process 10 has batch: 4
+my rank 6, process 11 has batch: 3
+my rank 6, process 12 has batch: 3
+my rank 6, process 13 has batch: 3
+my rank 6, process 14 has batch: 3
+my rank 6, process 15 has batch: 4
+my rank 7, process 0 has batch: 4
+my rank 7, process 1 has batch: 3
+my rank 7, process 2 has batch: 3
+my rank 7, process 3 has batch: 3
+my rank 7, process 4 has batch: 3
+my rank 7, process 5 has batch: 4
+my rank 7, process 6 has batch: 3
+my rank 7, process 7 has batch: 3
+my rank 7, process 8 has batch: 3
+my rank 7, process 9 has batch: 3
+my rank 7, process 10 has batch: 4
+my rank 7, process 11 has batch: 3
+my rank 7, process 12 has batch: 3
+my rank 7, process 13 has batch: 3
+my rank 7, process 14 has batch: 3
+my rank 7, process 15 has batch: 4
+my rank 8, process 0 has batch: 4
+my rank 8, process 1 has batch: 3
+my rank 8, process 2 has batch: 3
+my rank 8, process 3 has batch: 3
+my rank 8, process 4 has batch: 3
+my rank 8, process 5 has batch: 4
+my rank 8, process 6 has batch: 3
+my rank 8, process 7 has batch: 3
+my rank 8, process 8 has batch: 3
+my rank 8, process 9 has batch: 3
+my rank 8, process 10 has batch: 4
+my rank 8, process 11 has batch: 3
+my rank 8, process 12 has batch: 3
+my rank 8, process 13 has batch: 3
+my rank 8, process 14 has batch: 3
+my rank 8, process 15 has batch: 4
+my rank 9, process 0 has batch: 4
+my rank 9, process 1 has batch: 3
+my rank 9, process 2 has batch: 3
+my rank 9, process 3 has batch: 3
+my rank 9, process 4 has batch: 3
+my rank 9, process 5 has batch: 4
+my rank 9, process 6 has batch: 3
+my rank 9, process 7 has batch: 3
+my rank 9, process 8 has batch: 3
+my rank 9, process 9 has batch: 3
+my rank 9, process 10 has batch: 4
+my rank 9, process 11 has batch: 3
+my rank 9, process 12 has batch: 3
+my rank 9, process 13 has batch: 3
+my rank 9, process 14 has batch: 3
+my rank 9, process 15 has batch: 4
+my rank 10, process 0 has batch: 4
+my rank 10, process 1 has batch: 3
+my rank 10, process 2 has batch: 3
+my rank 10, process 3 has batch: 3
+my rank 10, process 4 has batch: 3
+my rank 10, process 5 has batch: 4
+my rank 10, process 6 has batch: 3
+my rank 10, process 7 has batch: 3
+my rank 10, process 8 has batch: 3
+my rank 10, process 9 has batch: 3
+my rank 10, process 10 has batch: 4
+my rank 10, process 11 has batch: 3
+my rank 10, process 12 has batch: 3
+my rank 10, process 13 has batch: 3
+my rank 10, process 14 has batch: 3
+my rank 10, process 15 has batch: 4
+my rank 11, process 0 has batch: 4
+my rank 11, process 1 has batch: 3
+my rank 11, process 2 has batch: 3
+my rank 11, process 3 has batch: 3
+my rank 11, process 4 has batch: 3
+my rank 11, process 5 has batch: 4
+my rank 11, process 6 has batch: 3
+my rank 11, process 7 has batch: 3
+my rank 11, process 8 has batch: 3
+my rank 11, process 9 has batch: 3
+my rank 11, process 10 has batch: 4
+my rank 11, process 11 has batch: 3
+my rank 11, process 12 has batch: 3
+my rank 11, process 13 has batch: 3
+my rank 11, process 14 has batch: 3
+my rank 11, process 15 has batch: 4
+my rank 12, process 0 has batch: 4
+my rank 12, process 1 has batch: 3
+my rank 12, process 2 has batch: 3
+my rank 12, process 3 has batch: 3
+my rank 12, process 4 has batch: 3
+my rank 12, process 5 has batch: 4
+my rank 12, process 6 has batch: 3
+my rank 12, process 7 has batch: 3
+my rank 12, process 8 has batch: 3
+my rank 12, process 9 has batch: 3
+my rank 12, process 10 has batch: 4
+my rank 12, process 11 has batch: 3
+my rank 12, process 12 has batch: 3
+my rank 12, process 13 has batch: 3
+my rank 12, process 14 has batch: 3
+my rank 12, process 15 has batch: 4
+my rank 13, process 0 has batch: 4
+my rank 13, process 1 has batch: 3
+my rank 13, process 2 has batch: 3
+my rank 13, process 3 has batch: 3
+my rank 13, process 4 has batch: 3
+my rank 13, process 5 has batch: 4
+my rank 13, process 6 has batch: 3
+my rank 13, process 7 has batch: 3
+my rank 13, process 8 has batch: 3
+my rank 13, process 9 has batch: 3
+my rank 13, process 10 has batch: 4
+my rank 13, process 11 has batch: 3
+my rank 13, process 12 has batch: 3
+my rank 13, process 13 has batch: 3
+my rank 13, process 14 has batch: 3
+my rank 13, process 15 has batch: 4
+my rank 14, process 0 has batch: 4
+my rank 14, process 1 has batch: 3
+my rank 14, process 2 has batch: 3
+my rank 14, process 3 has batch: 3
+my rank 14, process 4 has batch: 3
+my rank 14, process 5 has batch: 4
+my rank 14, process 6 has batch: 3
+my rank 14, process 7 has batch: 3
+my rank 14, process 8 has batch: 3
+my rank 14, process 9 has batch: 3
+my rank 14, process 10 has batch: 4
+my rank 14, process 11 has batch: 3
+my rank 14, process 12 has batch: 3
+my rank 14, process 13 has batch: 3
+my rank 14, process 14 has batch: 3
+my rank 14, process 15 has batch: 4
+my rank 15, process 0 has batch: 4
+my rank 15, process 1 has batch: 3
+my rank 15, process 2 has batch: 3
+my rank 15, process 3 has batch: 3
+my rank 15, process 4 has batch: 3
+my rank 15, process 5 has batch: 4
+my rank 15, process 6 has batch: 3
+my rank 15, process 7 has batch: 3
+my rank 15, process 8 has batch: 3
+my rank 15, process 9 has batch: 3
+my rank 15, process 10 has batch: 4
+my rank 15, process 11 has batch: 3
+my rank 15, process 12 has batch: 3
+my rank 15, process 13 has batch: 3
+my rank 15, process 14 has batch: 3
+my rank 15, process 15 has batch: 4
+my rank 2, process 0 has batch: 4
+my rank 2, process 1 has batch: 3
+my rank 2, process 2 has batch: 3
+my rank 2, process 3 has batch: 3
+my rank 2, process 4 has batch: 3
+my rank 2, process 5 has batch: 4
+my rank 2, process 6 has batch: 3
+my rank 2, process 7 has batch: 3
+my rank 2, process 8 has batch: 3
+my rank 2, process 9 has batch: 3
+my rank 2, process 10 has batch: 4
+my rank 2, process 11 has batch: 3
+my rank 2, process 12 has batch: 3
+my rank 2, process 13 has batch: 3
+my rank 2, process 14 has batch: 3
+my rank 2, process 15 has batch: 4
+rank 15 waits from 14 total batch 4
+rank 10 waits from 9 total batch 4
+rank 5 waits from 4 total batch 4
+rank 9 waits from 8 total batch 3
+rank 0 starts first epoch 0 next one is 1
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 13 waits from 12 total batch 3
+rank 7 waits from 6 total batch 3
+rank 8 waits from 7 total batch 3
+rank 14 waits from 13 total batch 3
+rank 6 waits from 5 total batch 3
+rank 12 waits from 11 total batch 3
+rank 4 waits from 3 total batch 3
+rank 1 waits from 0 total batch 3
+rank 3 waits from 2 total batch 3
+rank 2 waits from 1 total batch 3
+rank 0 ends 
+rank 1 starts epoch 0 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 0 total batch 3
+4 GPUs
+rank 1 waits from 0 total batch 3
+rank 2 ends signal process 3
+rank 3 starts epoch 0 total batch 3
+4 GPUs
+rank 2 waits from 1 total batch 3
+rank 3 ends signal process 4
+rank 4 starts epoch 0 total batch 3
+4 GPUs
+rank 3 waits from 2 total batch 3
+rank 4 ends signal process 5
+rank 5 starts epoch 0 total batch 4
+rank 4 waits from 3 total batch 3
+4 GPUs
+rank 5 ends signal process 6
+rank 6 starts epoch 0 total batch 3
+rank 5 waits from 4 total batch 4
+4 GPUs
+rank 6 ends signal process 7
+rank 7 starts epoch 0 total batch 3
+rank 6 waits from 5 total batch 3
+4 GPUs
+rank 7 ends signal process 8
+rank 8 starts epoch 0 total batch 3
+rank 7 waits from 6 total batch 3
+4 GPUs
+rank 8 ends signal process 9
+rank 9 starts epoch 0 total batch 3
+rank 8 waits from 7 total batch 3
+4 GPUs
+rank 9 ends signal process 10
+rank 10 starts epoch 0 total batch 4
+rank 9 waits from 8 total batch 3
+4 GPUs
+rank 10 ends signal process 11
+rank 11 starts epoch 0 total batch 3
+rank 10 waits from 9 total batch 4
+4 GPUs
+rank 11 ends signal process 12
+rank 12 starts epoch 0 total batch 3
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 12 ends signal process 13
+rank 13 starts epoch 0 total batch 3
+rank 12 waits from 11 total batch 3
+4 GPUs
+rank 13 ends signal process 14
+rank 14 starts epoch 0 total batch 3
+rank 13 waits from 12 total batch 3
+4 GPUs
+rank 14 ends signal process 15
+rank 15 starts epoch 0 total batch 4
+rank 14 waits from 13 total batch 3
+4 GPUs
+rank 15 ends signal process 0
+rank 0 starts epoch 0 total batch 4
+4 GPUs
+rank 15 waits from 14 total batch 4
+rank 0 ends signal process 1
+rank 1 starts epoch 0 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 0 total batch 3
+4 GPUs
+rank 1 waits from 0 total batch 3
+rank 2 ends signal process 3
+rank 3 starts epoch 0 total batch 3
+4 GPUs
+rank 2 waits from 1 total batch 3
+rank 3 ends signal process 4
+rank 4 starts epoch 0 total batch 3
+4 GPUs
+rank 3 waits from 2 total batch 3
+rank 4 ends signal process 5
+rank 5 starts epoch 0 total batch 4
+4 GPUs
+rank 4 waits from 3 total batch 3
+rank 5 ends signal process 6
+rank 6 starts epoch 0 total batch 3
+4 GPUs
+rank 5 waits from 4 total batch 4
+rank 6 ends signal process 7
+rank 7 starts epoch 0 total batch 3
+4 GPUs
+rank 6 waits from 5 total batch 3
+rank 7 ends signal process 8
+rank 8 starts epoch 0 total batch 3
+4 GPUs
+rank 7 waits from 6 total batch 3
+rank 8 ends signal process 9
+rank 9 starts epoch 0 total batch 3
+4 GPUs
+rank 8 waits from 7 total batch 3
+rank 9 ends signal process 10
+rank 10 starts epoch 0 total batch 4
+4 GPUs
+rank 9 waits from 8 total batch 3
+rank 10 ends signal process 11
+rank 11 starts epoch 0 total batch 3
+4 GPUs
+rank 10 waits from 9 total batch 4
+rank 11 ends signal process 12
+rank 12 starts epoch 0 total batch 3
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 12 ends signal process 13
+rank 13 starts epoch 0 total batch 3
+4 GPUs
+rank 12 waits from 11 total batch 3
+rank 13 ends signal process 14
+rank 14 starts epoch 0 total batch 3
+4 GPUs
+rank 13 waits from 12 total batch 3
+rank 14 ends signal process 15
+rank 15 starts epoch 0 total batch 4
+4 GPUs
+rank 14 waits from 13 total batch 3
+rank 15 ends signal process 0
+rank 0 starts epoch 1 total batch 4
+4 GPUs
+rank 15 waits from 14 total batch 4
+rank 0 ends signal process 1
+rank 1 starts epoch 1 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 1 total batch 3
+4 GPUs
+rank 1 waits from 0 total batch 3
+rank 2 ends signal process 3
+rank 3 starts epoch 1 total batch 3
+4 GPUs
+rank 2 waits from 1 total batch 3
+rank 3 ends signal process 4
+rank 4 starts epoch 1 total batch 3
+4 GPUs
+rank 3 waits from 2 total batch 3
+rank 4 ends signal process 5
+rank 5 starts epoch 1 total batch 4
+4 GPUs
+rank 4 waits from 3 total batch 3
+rank 5 ends signal process 6
+rank 6 starts epoch 1 total batch 3
+4 GPUs
+rank 5 waits from 4 total batch 4
+rank 6 ends signal process 7
+rank 7 starts epoch 1 total batch 3
+4 GPUs
+rank 6 waits from 5 total batch 3
+rank 7 ends signal process 8
+rank 8 starts epoch 1 total batch 3
+4 GPUs
+rank 7 waits from 6 total batch 3
+rank 8 ends signal process 9
+rank 9 starts epoch 1 total batch 3
+4 GPUs
+rank 8 waits from 7 total batch 3
+rank 9 ends signal process 10
+rank 10 starts epoch 1 total batch 4
+4 GPUs
+rank 9 waits from 8 total batch 3
+rank 10 ends signal process 11
+rank 11 starts epoch 1 total batch 3
+4 GPUs
+rank 10 waits from 9 total batch 4
+rank 11 ends signal process 12
+rank 12 starts epoch 1 total batch 3
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 12 ends signal process 13
+rank 13 starts epoch 1 total batch 3
+4 GPUs
+rank 12 waits from 11 total batch 3
+rank 13 ends signal process 14
+rank 14 starts epoch 1 total batch 3
+4 GPUs
+rank 13 waits from 12 total batch 3
+rank 14 ends signal process 15
+rank 15 starts epoch 1 total batch 4
+4 GPUs
+rank 14 waits from 13 total batch 3
+rank 15 ends signal process 0
+rank 0 starts epoch 1 total batch 4
+4 GPUs
+rank 15 waits from 14 total batch 4
+rank 0 ends signal process 1
+rank 1 starts epoch 1 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 1 total batch 3
+4 GPUs
+rank 1 waits from 0 total batch 3
+rank 2 ends signal process 3
+rank 3 starts epoch 1 total batch 3
+4 GPUs
+rank 2 waits from 1 total batch 3
+rank 3 ends signal process 4
+rank 4 starts epoch 1 total batch 3
+4 GPUs
+rank 3 waits from 2 total batch 3
+rank 4 ends signal process 5
+rank 5 starts epoch 1 total batch 4
+4 GPUs
+rank 4 waits from 3 total batch 3
+rank 5 ends signal process 6
+rank 6 starts epoch 1 total batch 3
+4 GPUs
+rank 5 waits from 4 total batch 4
+rank 6 ends signal process 7
+rank 7 starts epoch 1 total batch 3
+4 GPUs
+rank 6 waits from 5 total batch 3
+rank 7 ends signal process 8
+rank 8 starts epoch 1 total batch 3
+4 GPUs
+rank 7 waits from 6 total batch 3
+rank 8 ends signal process 9
+rank 9 starts epoch 1 total batch 3
+4 GPUs
+rank 8 waits from 7 total batch 3
+rank 9 ends signal process 10
+rank 10 starts epoch 1 total batch 4
+4 GPUs
+rank 9 waits from 8 total batch 3
+rank 10 ends signal process 11
+rank 11 starts epoch 1 total batch 3
+4 GPUs
+rank 10 waits from 9 total batch 4
+rank 11 ends signal process 12
+rank 12 starts epoch 1 total batch 3
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 12 ends signal process 13
+rank 13 starts epoch 1 total batch 3
+4 GPUs
+rank 12 waits from 11 total batch 3
+rank 13 ends signal process 14
+rank 14 starts epoch 1 total batch 3
+4 GPUs
+rank 13 waits from 12 total batch 3
+rank 14 ends signal process 15
+rank 15 starts epoch 1 total batch 4
+4 GPUs
+rank 14 waits from 13 total batch 3
+rank 15 ends signal process 0
+rank 0 starts epoch 2 total batch 4
+4 GPUs
+rank 15 waits from 14 total batch 4
+rank 0 ends signal process 1
+rank 1 starts epoch 2 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 2 total batch 3
+4 GPUs
+rank 1 waits from 0 total batch 3
+rank 2 ends signal process 3
+rank 3 starts epoch 2 total batch 3
+4 GPUs
+rank 2 waits from 1 total batch 3
+rank 3 ends signal process 4
+rank 4 starts epoch 2 total batch 3
+4 GPUs
+rank 3 waits from 2 total batch 3
+rank 4 ends signal process 5
+rank 5 starts epoch 2 total batch 4
+4 GPUs
+rank 4 waits from 3 total batch 3
+rank 5 ends signal process 6
+rank 6 starts epoch 2 total batch 3
+4 GPUs
+rank 5 waits from 4 total batch 4
+rank 6 ends signal process 7
+rank 7 starts epoch 2 total batch 3
+4 GPUs
+rank 6 waits from 5 total batch 3
+rank 7 ends signal process 8
+rank 8 starts epoch 2 total batch 3
+4 GPUs
+rank 7 waits from 6 total batch 3
+rank 8 ends signal process 9
+rank 9 starts epoch 2 total batch 3
+4 GPUs
+rank 8 waits from 7 total batch 3
+rank 9 ends signal process 10
+rank 10 starts epoch 2 total batch 4
+4 GPUs
+rank 9 waits from 8 total batch 3
+rank 10 ends signal process 11
+rank 11 starts epoch 2 total batch 3
+4 GPUs
+rank 10 waits from 9 total batch 4
+rank 11 ends signal process 12
+rank 12 starts epoch 2 total batch 3
+4 GPUs
+rank 11 waits from 10 total batch 3
+rank 12 ends signal process 13
+rank 13 starts epoch 2 total batch 3
+4 GPUs
+rank 12 waits from 11 total batch 3
+rank 13 ends signal process 14
+rank 14 starts epoch 2 total batch 3
+4 GPUs
+rank 13 waits from 12 total batch 3
+rank 14 ends signal process 15
+rank 15 starts epoch 2 total batch 4
+4 GPUs
+rank 14 waits from 13 total batch 3
+rank 15 ends signal process 0
+rank 0 starts epoch 2 total batch 4
+4 GPUs
+rank 15 waits from 14 total batch 4
+rank 0 ends signal process 1
+rank 1 starts epoch 2 total batch 3
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 1 ends signal process 2
+rank 2 starts epoch 2 total batch 3
+4 GPUs
+rank 2 ends signal process 3
+rank 3 starts epoch 2 total batch 3
+4 GPUs
+rank 3 ends signal process 4
+rank 4 starts epoch 2 total batch 3
+4 GPUs
+rank 4 ends signal process 5
+rank 5 starts epoch 2 total batch 4
+4 GPUs
+rank 5 ends signal process 6
+rank 6 starts epoch 2 total batch 3
+4 GPUs
+rank 5 waits from 0 total batch 4
+rank 6 ends signal process 7
+rank 7 starts epoch 2 total batch 3
+4 GPUs
+rank 7 ends signal process 8
+rank 8 starts epoch 2 total batch 3
+4 GPUs
+rank 8 ends signal process 9
+rank 9 starts epoch 2 total batch 3
+4 GPUs
+rank 9 ends signal process 10
+rank 10 starts epoch 2 total batch 4
+4 GPUs
+rank 10 ends signal process 11
+rank 11 starts epoch 2 total batch 3
+4 GPUs
+rank 10 waits from 5 total batch 4
+rank 11 ends signal process 12
+rank 12 starts epoch 2 total batch 3
+4 GPUs
+rank 12 ends signal process 13
+rank 13 starts epoch 2 total batch 3
+4 GPUs
+rank 13 ends signal process 14
+rank 14 starts epoch 2 total batch 3
+4 GPUs
+rank 14 ends signal process 15
+rank 15 starts epoch 2 total batch 4
+4 GPUs
+rank 15 ends signal process 0
+rank 0 starts epoch 3 total batch 4
+4 GPUs
+rank 15 waits from 10 total batch 4
+rank 0 ends signal process 5
+rank 5 starts epoch 3 total batch 4
+4 GPUs
+rank 0 waits from 15 total batch 4
+rank 5 ends signal process 10
+rank 10 starts epoch 3 total batch 4
+4 GPUs
+rank 5 waits from 0 total batch 4
+rank 10 ends signal process 15
+rank 15 starts epoch 3 total batch 4
+4 GPUs
+rank 10 waits from 5 total batch 4
+rank 15 ends signal process 0
+rank 0 starts epoch 3 total batch 4
+4 GPUs
+rank 15 waits from 10 total batch 4
+rank 0 ends signal process 5
+rank 5 starts epoch 3 total batch 4
+4 GPUs
+rank 5 ends signal process 10
+rank 10 starts epoch 3 total batch 4
+4 GPUs
+rank 10 ends signal process 15
+rank 15 starts epoch 3 total batch 4
+4 GPUs
+rank 15 ends signal process -1
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134731
+#nonzeros in C after contained sequences pruning: 21452
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42904 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6464 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 13
+Local Assembly time: 0.00668072
+
+INFO: ELBA completed on Sat May  6 17:11:21 2023
+
+INFO: ELBA runtimes:
+  Main:74831.579662 ms
+  Main:newDFD():97.729810 ms
+  Dfd:PfrReadFasta():74.086532 ms
+  Dfd:newFD():21.800735 ms
+  KmerOp:GenerateA:CardinalityHLL():47.348457 ms
+  KmerOp:GenerateA:FirstPass():2270.739789 ms
+  KmerOp:GenerateA:SecondPass():2717.460908 ms
+  KmerOp:GenerateA:SpMatA():685.784555 ms
+  Main:GenerateA():7538.525857 ms
+  Main:At():566.113597 ms
+  Main:AAt():4956.863597 ms
+  Main:DfdWait():65.432062 ms
+  Dfd:MPI_Waitall(seqs):0.001703 ms
+  Main:DprAlign():61349.725795 ms
+  Main:TransitiveReduction():27.818685 ms
+  Main:ExtractContig():77.760156 ms
+  CreateContig:GetRead2Contigs():54.018958 ms
+  CreateContig:GetRead2ProcAssignments():1.805021 ms
+  CreateContig:InducedSubgraphs2Procs():0.862268 ms
+  CreateContig:BuildContigChains():0.235195 ms
+  CreateContig:ReadExchange():10.028837 ms
+  CreateContig:LocalAssembly():6.682305 ms
+  Main:WriteContigs():9.734037 ms

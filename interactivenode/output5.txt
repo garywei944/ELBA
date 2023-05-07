@@ -1,0 +1,604 @@
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+user input number of GPUS: -1
+number of processes: 9
+
+Process Grid (p x p x t): 3 x 3 x 4
+
+INFO: ELBA started on Sat May  6 17:00:35 2023
+  Input file (-i):                             ../ecoli_hifi_29x.fasta
+  Original sequence count (-c):                8605
+  K-mer length (k):                            31
+  K-mer stride (s):                            1
+  Overlap in bytes (-O):                       100000
+  Top seed count (--sc):                       2
+  Base match score (--ma):                     1
+  Base mismatch score (--mi):                  -1
+  Gap open penalty (-g):                       0
+  Gap extension penalty (-e):                  -1
+  Overlap file (--of):                         None
+  Pairwise alignment file (--af):              ecoli-cpu
+  alignmentlignment write frequency (--afreq): 100000
+  Do not perform alignment (--na):             FALSE
+  GPU alignment (--ga):                        TRUE | X: 15
+  CPU-based alignment (--ca):                  FALSE
+  Read index map (--idxmap):                   ecoli-idxmap
+  Pairwise alignment alphabet (--alph):        1
+  GPU number (--gpu):                          -1
+
+K-mer Counting and 'A' Creation started:
+ProcessFiles: First pass: Table size is: 77960904 bits, 9.29366 MB
+ProcessFiles: First pass: Optimal number of hash functions is : 5
+A (sequences-by-kmer matrix): As a whole: 8605 rows and 3134024 columns and 78110966 nonzeros
+
+Overlap Detection started:
+C (sequences-by-sequences candidate matrix) = AA^T: As a whole: 8605 rows and 8605 columns and 473535 nonzeros
+
+process 4 is responsible for 3 3 1 1
+process 8 is responsible for 3 3 2 2
+process 0 is responsible for 3 3 0 0
+process 7 is responsible for 3 3 1 2
+process 5 is responsible for 3 3 2 1
+process 1 is responsible for 3 3 1 0
+process 6 is responsible for 3 3 0 2
+process 2 is responsible for 3 3 2 0
+process 3 is responsible for 3 3 0 1
+GPU-based LOGAN alignment started:
+my rank 0, process 0 has batch: 6
+my rank 0, process 1 has batch: 6
+my rank 0, process 2 has batch: 6
+my rank 0, process 3 has batch: 6
+my rank 0, process 4 has batch: 6
+my rank 0, process 5 has batch: 6
+my rank 0, process 6 has batch: 6
+my rank 0, process 7 has batch: 6
+my rank 0, process 8 has batch: 6
+my rank 3, process 0 has batch: 6
+my rank 3, process 1 has batch: 6
+my rank 3, process 2 has batch: 6
+my rank 3, process 3 has batch: 6
+my rank 3, process 4 has batch: 6
+my rank 3, process 5 has batch: 6
+my rank 3, process 6 has batch: 6
+my rank 3, process 7 has batch: 6
+my rank 3, process 8 has batch: 6
+my rank 4, process 0 has batch: 6
+my rank 4, process 1 has batch: 6
+my rank 4, process 2 has batch: 6
+my rank 4, process 3 has batch: 6
+my rank 4, process 4 has batch: 6
+my rank 4, process 5 has batch: 6
+my rank 4, process 6 has batch: 6
+my rank 4, process 7 has batch: 6
+my rank 4, process 8 has batch: 6
+my rank 5, process 0 has batch: 6
+my rank 5, process 1 has batch: 6
+my rank 5, process 2 has batch: 6
+my rank 5, process 3 has batch: 6
+my rank 5, process 4 has batch: 6
+my rank 5, process 5 has batch: 6
+my rank 5, process 6 has batch: 6
+my rank 5, process 7 has batch: 6
+my rank 5, process 8 has batch: 6
+my rank 6, process 0 has batch: 6
+my rank 6, process 1 has batch: 6
+my rank 6, process 2 has batch: 6
+my rank 6, process 3 has batch: 6
+my rank 6, process 4 has batch: 6
+my rank 6, process 5 has batch: 6
+my rank 6, process 6 has batch: 6
+my rank 6, process 7 has batch: 6
+my rank 6, process 8 has batch: 6
+my rank 7, process 0 has batch: 6
+my rank 7, process 1 has batch: 6
+my rank 7, process 2 has batch: 6
+my rank 7, process 3 has batch: 6
+my rank 7, process 4 has batch: 6
+my rank 7, process 5 has batch: 6
+my rank 7, process 6 has batch: 6
+my rank 7, process 7 has batch: 6
+my rank 7, process 8 has batch: 6
+my rank 8, process 0 has batch: 6
+my rank 8, process 1 has batch: 6
+my rank 8, process 2 has batch: 6
+my rank 8, process 3 has batch: 6
+my rank 8, process 4 has batch: 6
+my rank 8, process 5 has batch: 6
+my rank 8, process 6 has batch: 6
+my rank 8, process 7 has batch: 6
+my rank 8, process 8 has batch: 6
+my rank 1, process 0 has batch: 6
+my rank 1, process 1 has batch: 6
+my rank 1, process 2 has batch: 6
+my rank 1, process 3 has batch: 6
+my rank 1, process 4 has batch: 6
+my rank 1, process 5 has batch: 6
+my rank 1, process 6 has batch: 6
+my rank 1, process 7 has batch: 6
+my rank 1, process 8 has batch: 6
+my rank 2, process 0 has batch: 6
+my rank 2, process 1 has batch: 6
+my rank 2, process 2 has batch: 6
+my rank 2, process 3 has batch: 6
+my rank 2, process 4 has batch: 6
+my rank 2, process 5 has batch: 6
+my rank 2, process 6 has batch: 6
+my rank 2, process 7 has batch: 6
+my rank 2, process 8 has batch: 6
+rank 4 waits from 3 total batch 6
+rank 8 waits from 7 total batch 6
+rank 7 waits from 6 total batch 6
+rank 0 starts first epoch 0 next one is 1
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 3 waits from 2 total batch 6
+rank 5 waits from 4 total batch 6
+rank 6 waits from 5 total batch 6
+rank 2 waits from 1 total batch 6
+rank 0 ends 
+rank 1 starts epoch 0 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 0 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 0 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 0 total batch 6
+rank 3 waits from 2 total batch 6
+4 GPUs
+rank 4 ends signal process 5
+rank 5 starts epoch 0 total batch 6
+rank 4 waits from 3 total batch 6
+4 GPUs
+rank 5 ends signal process 6
+rank 6 starts epoch 0 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 0 total batch 6
+rank 6 waits from 5 total batch 6
+4 GPUs
+rank 7 ends signal process 8
+rank 8 starts epoch 0 total batch 6
+rank 7 waits from 6 total batch 6
+4 GPUs
+rank 8 ends signal process 0
+rank 0 starts epoch 0 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 0 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 0 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 0 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 0 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 0 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 0 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 0 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 0 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 1 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 1 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 1 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 1 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 1 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 1 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 1 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 1 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 1 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 1 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 1 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 1 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 1 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 1 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 1 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 1 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 1 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 1 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 2 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 2 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 2 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 2 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 2 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 2 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 2 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 2 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 2 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 2 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 2 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 2 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 2 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 2 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 2 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 2 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 2 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 2 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 3 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 3 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 3 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 3 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 3 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 3 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 3 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 3 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 3 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 3 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 3 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 3 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 3 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 3 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 3 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 3 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 3 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 3 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 4 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 4 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 4 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 4 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 4 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 4 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 4 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 4 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 4 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 4 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 4 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 4 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 4 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 4 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 4 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 4 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 4 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 4 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 5 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 5 total batch 6
+4 GPUs
+rank 0 waits from 8 total batch 6
+rank 1 ends signal process 2
+rank 2 starts epoch 5 total batch 6
+4 GPUs
+rank 1 waits from 0 total batch 6
+rank 2 ends signal process 3
+rank 3 starts epoch 5 total batch 6
+4 GPUs
+rank 2 waits from 1 total batch 6
+rank 3 ends signal process 4
+rank 4 starts epoch 5 total batch 6
+4 GPUs
+rank 3 waits from 2 total batch 6
+rank 4 ends signal process 5
+rank 5 starts epoch 5 total batch 6
+4 GPUs
+rank 4 waits from 3 total batch 6
+rank 5 ends signal process 6
+rank 6 starts epoch 5 total batch 6
+4 GPUs
+rank 5 waits from 4 total batch 6
+rank 6 ends signal process 7
+rank 7 starts epoch 5 total batch 6
+4 GPUs
+rank 6 waits from 5 total batch 6
+rank 7 ends signal process 8
+rank 8 starts epoch 5 total batch 6
+4 GPUs
+rank 7 waits from 6 total batch 6
+rank 8 ends signal process 0
+rank 0 starts epoch 5 total batch 6
+4 GPUs
+rank 8 waits from 7 total batch 6
+rank 0 ends signal process 1
+rank 1 starts epoch 5 total batch 6
+4 GPUs
+rank 1 ends signal process 2
+rank 2 starts epoch 5 total batch 6
+4 GPUs
+rank 2 ends signal process 3
+rank 3 starts epoch 5 total batch 6
+4 GPUs
+rank 3 ends signal process 4
+rank 4 starts epoch 5 total batch 6
+4 GPUs
+rank 4 ends signal process 5
+rank 5 starts epoch 5 total batch 6
+4 GPUs
+rank 5 ends signal process 6
+rank 6 starts epoch 5 total batch 6
+4 GPUs
+rank 6 ends signal process 7
+rank 7 starts epoch 5 total batch 6
+4 GPUs
+rank 7 ends signal process 8
+rank 8 starts epoch 5 total batch 6
+4 GPUs
+rank 8 ends signal process -1
+#nonzeros in C before pruning: 473535
+#nonzeros in C after score pruning: 134730
+#nonzeros in C after contained sequences pruning: 21465
+#alignment run (L-D-U): 232474
+R (post-alignment result matrix): As a whole: 8605 rows and 8605 columns and 42930 nonzeros
+
+Transitive Reduction started:
+S (string matrix): As a whole: 8605 rows and 8605 columns and 6476 nonzeros
+
+Contig Generation and Local Assembly started: 
+Creating a new MPI Op for St4plusIdE
+#connected components with size > 1: 16
+Local Assembly time: 0.00563925
+
+INFO: ELBA completed on Sat May  6 17:01:45 2023
+
+INFO: ELBA runtimes:
+  Main:70079.643562 ms
+  Main:newDFD():123.409902 ms
+  Dfd:PfrReadFasta():82.576258 ms
+  Dfd:newFD():29.039736 ms
+  KmerOp:GenerateA:CardinalityHLL():59.967144 ms
+  KmerOp:GenerateA:FirstPass():4026.299266 ms
+  KmerOp:GenerateA:SecondPass():4030.814493 ms
+  KmerOp:GenerateA:SpMatA():998.963538 ms
+  Main:GenerateA():10693.945394 ms
+  Main:At():970.925129 ms
+  Main:AAt():7388.298260 ms
+  Main:DfdWait():72.696112 ms
+  Dfd:MPI_Waitall(seqs):0.001303 ms
+  Main:DprAlign():50549.497845 ms
+  Main:TransitiveReduction():33.921181 ms
+  Main:ExtractContig():59.458258 ms
+  CreateContig:GetRead2Contigs():39.316281 ms
+  CreateContig:GetRead2ProcAssignments():1.722082 ms
+  CreateContig:InducedSubgraphs2Procs():0.684345 ms
+  CreateContig:BuildContigChains():0.193204 ms
+  CreateContig:ReadExchange():9.185776 ms
+  CreateContig:LocalAssembly():5.640655 ms
+  Main:WriteContigs():7.860130 ms
