@@ -154,7 +154,7 @@ GPULoganAligner::apply_batch
 	int gpu_num,
 	int batch_idx,
 	int batch_cnt,
-	vector<int> proc_batch_num,
+	vector<int> send_recv,
     float ratioScoreOverlap, // GGGG: this is my ratioScoreOverlap variable change name later
     int debugThr
 )
@@ -270,287 +270,38 @@ GPULoganAligner::apply_batch
 		start_time = std::chrono::system_clock::now();
 
 		// Call LOGAN only if noAlign is false
-		if(!noAlign&&gpu_num<0) 
-		{ 
-//			if(count == 0)
-//				std::cout << " - 1st k-mer comparison started on ";
-//			else
-//				std::cout << " - 2nd k-mer comparison started on ";
-
-			//todo: add one more argument GPU devide pass MPI id 
-			//in logan : mpi id % number of GPU device
-			// MPI: 0,1,2,3,4,5,6
-			// GPU: 0,1
-			// When MPI process 5 start working, it only assigns to
-			// 5%2=1, GPU 1
-			/*
-			if(myrank == 0){
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+		// one p uses all gpus
+		if(!noAlign){
+			if(gpu_num<0){
+				vector<int> gpu_id;
+				int send_to = send_recv[0];
+				int receive_from = send_recv[1];
 				int completed = 1;
-				if(numprocs > 1){
-					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
-				}
-				
-			}
-			else{
-				int completed;
-				MPI_Recv(&completed,1,MPI_INT,myrank-1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				if(myrank!=numprocs-1){
-					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
-				}
-			}*/
-			if(myrank==0&&count==0&&epoch==0){
-				int completed = 1;
-				int send_to=myrank;
-				if(myrank+1<numprocs){
-					send_to=myrank+1;
-				}
-				else{
-					send_to=0;
-				}
-				std::cout<<"rank "<<myrank<<" starts first epoch "<<epoch<<" next one is "<<send_to<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				std::cout<<"rank "<<myrank<<" ends "<<std::endl;
-				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
-				
-			}
-			else{
-				/*
-				int completed = 1;
-				int receive_from,send_to;
-				receive_from=myrank;
-				send_to=myrank;
-				if(myrank==0&&numprocs>1){
-					receive_from=numprocs-1;
-				}
-				if(myrank-1>=0){
-					receive_from=myrank-1;
-				}
-				if(myrank+1<numprocs){
-					send_to=myrank+1;
-				}
-				else{
-					send_to=0;
-				}
-				MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				std::cout<<"rank "<<myrank<<" starts epoch "<<epoch<<" next one is "<<send_to<<" total batch "<<batch_cnt<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				std::cout<<"rank "<<myrank<<" ends"<<std::endl;
-				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
-				*/
-
-				//find next one to send in the right skip completed proc
-				int completed;
-				int receive_from=-1;
-				int send_to=-1;
-				int offset=1;
-				if(count==seed_count-1&&myrank==numprocs-1){
-					//should send to the left most for next round
-					for(int i=0;i<myrank;i++){
-						if(proc_batch_num[i]>epoch+1){
-							send_to=i;
-							break;
-						}
-					}
-				}
-				else{
-				//iterate from right, find the first proc hasn't completed
-					while(offset<numprocs){
-						int index;
-						if(offset+myrank<numprocs){
-							index=offset+myrank;
-						}
-						else{
-							index=offset+myrank-numprocs;
-						}
-						if(epoch<proc_batch_num[index]){
-							//index has already completed, don't send to it
-							send_to=index;
-							break;
-						}
-						offset++;
-					}
-				}
-				//check if I am the left most process
-				bool left_most=true;
-				for(int i=0;i<myrank;i++){
-					if(epoch<proc_batch_num[i]){
-						left_most=false;
-					}
-				}
-				if(left_most){
-					if(count==0){
-						//if this is the first round, and I am the process at left most, need to wait
-						// for the right most process in previous round
-						/*
-						offset=1;
-						while(offset<numprocs){
-							int index;
-							if(myrank-offset>=0){
-								index=myrank-offset;
-							}
-							else{
-								index=myrank-offset+numprocs;
-							}
-							if(epoch-1<proc_batch_num[index]){
-								receive_from=index;
-								break;
-							}
-							offset++;
-						}*/
-						for(int i=numprocs-1;i>myrank;i--){
-							if(proc_batch_num[i]>epoch-1){
-								receive_from=i;
-								break;
-							}
-						}
-					}
-					else{
-						offset=1;
-						while(offset<numprocs){
-							int index;
-							if(myrank-offset>=0){
-								index=myrank-offset;
-							}
-							else{
-								index=myrank-offset+numprocs;
-							}
-							if(epoch<proc_batch_num[index]){
-								receive_from=index;
-								break;
-							}
-							offset++;
-						}
-					}
-				}
-				else{
-					//if i am not the left most process, just find the left process to me
-					// and receive from its signal
-					for(int i=myrank-1;i>=0;i--){
-						if(epoch<proc_batch_num[i]){
-							receive_from=i;
-							break;
-						}
-					}
-				}
-				std::cout<<"rank "<<myrank<<" waits from "<<receive_from<<" total batch "<<batch_cnt<<std::endl;
-				if(receive_from!=-1){
+				if(receive_from != -1 && count == 0){
 					MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
-				std::cout<<"rank "<<myrank<<" starts epoch "<<epoch<<" total batch "<<batch_cnt<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				std::cout<<"rank "<<myrank<<" ends signal process "<<send_to<<std::endl;
-				if(send_to!=-1){
+				std::cout << "rank " << myrank << " start epoch " << epoch << " count " << count << std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length, gpu_id);
+				std::cout << "rank " << myrank << " ends " << std::endl;
+				if(send_to != -1 && count == 1){
+					std::cout << "rank " << myrank << " signals " << send_to << std::endl;
 					MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				}
-
-			}
-			
-		}
-		else{
-			//run injection mode
-			int target_gpu=myrank%gpu_num;
-			if(myrank<gpu_num&&count==0&&epoch==0){
-				int completed = 1;
-				int send_to=myrank;
-				if(myrank+gpu_num<numprocs){
-					send_to=myrank+gpu_num;
-				}
-				std::cout<<"rank "<<myrank<<" starts first epoch "<<epoch<<" next one is "<<send_to<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				std::cout<<"rank "<<myrank<<" ends "<<std::endl;
-				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
-				
 			}
 			else{
-				int completed;
-				int receive_from=-1;
-				int send_to=-1;
-				
-				//iterate from right, find the first proc hasn't completed
-				if(count==seed_count-1&&myrank+gpu_num>numprocs){
-					//should send to the left most for next round
-					for(int i=0;i<myrank;i++){
-						if((myrank-i)%gpu_num==0&&proc_batch_num[i]>epoch+1){
-							send_to=i;
-							break;
-						}
-					}
-				}
-				else{
-					int offset=1;
-					while(offset<numprocs){
-						int index;
-						if(offset+myrank<numprocs){
-							index=offset+myrank;
-						}
-						else{
-							index=offset+myrank-numprocs;
-						}
-						if((index-myrank)%gpu_num==0&&epoch<proc_batch_num[index]){
-							//index has already completed, don't send to it
-							send_to=index;
-							break;
-						}
-						offset++;
-					}
-				}
-				//check if I am the left most process
-				bool left_most=true;
-				for(int i=0;i<myrank;i++){
-					if((myrank-i)%gpu_num==0&&epoch<proc_batch_num[i]){
-						left_most=false;
-					}
-				}
-				if(left_most){
-					if(count==0){
-						//if this is the first round, and I am the process at left most, need to wait
-						// for the right most process in previous round
-						
-						for(int i=numprocs-1;i>myrank;i--){
-							if((i-myrank)%gpu_num==0&&proc_batch_num[i]>epoch-1){
-								receive_from=i;
-								break;
-							}
-						}
-					}
-					else{
-						int offset=1;
-						while(offset<numprocs){
-							int index;
-							if(myrank-offset>=0){
-								index=myrank-offset;
-							}
-							else{
-								index=myrank-offset+numprocs;
-							}
-							if(((index-myrank)%gpu_num==0)&&epoch<proc_batch_num[index]){
-								receive_from=index;
-								break;
-							}
-							offset++;
-						}
-					}
-				}
-				else if(!left_most){
-					//if i am not the left most process, just find the left process to me
-					// and receive from its signal
-					for(int i=myrank-1;i>=0;i--){
-						if((myrank-i)%gpu_num==0&&epoch<proc_batch_num[i]){
-							receive_from=i;
-							break;
-						}
-					}
-				}
-				std::cout<<"rank "<<myrank<<" waits from "<<receive_from<<" total batch "<<batch_cnt<<std::endl;
-				if(receive_from!=-1){
+				//run injection mode
+				int target_gpu=myrank%gpu_num;
+				int send_to = send_recv[0];
+				int receive_from = send_recv[1];
+				int completed = 1;
+				if(receive_from != -1 && count == 0){
 					MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
-				std::cout<<"rank "<<myrank<<" starts epoch "<<epoch<<" total batch "<<batch_cnt<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
-				std::cout<<"rank "<<myrank<<" ends signal process "<<send_to<<std::endl;
-				if(send_to!=-1){
+				std::cout << "GPU " << target_gpu << " start rank " << myrank << " epoch " << epoch << " count " << count << std::endl;
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length, vector<int>{target_gpu});
+				std::cout << "rank " << myrank << " ends " << std::endl;
+				if(send_to != -1 && count == 1){
+					std::cout << "rank " << myrank << " signals " << send_to << std::endl;
 					MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				}
 			}

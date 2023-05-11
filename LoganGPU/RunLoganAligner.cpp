@@ -2,22 +2,35 @@
 
 #include "RunLoganAligner.hpp"
 #include "logan.hpp"
-
+#include "cassert"
 using namespace std;
 
 void 
 RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs, 
-	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length)
+	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length, vector<int> gpu_id)
 {
+	//TODO: passs a vector of GPU ID
+	//send work to GPU id
+	//
 	ScoringSchemeL sscheme(1, -1, -1, -1);
 	std::vector<ScoringSchemeL> scoring;
 	scoring.push_back(sscheme);
 
-	int deviceCount;
-	cudaGetDeviceCount(&deviceCount); // 1 MPI process to many GPUs 
-
-	std::cout << deviceCount << " GPUs" << std::endl;
-
+	int deviceCount=gpu_id.size();
+	//TODO: add an array of device, only assign to the 
+	// array
+	//cudaGetDeviceCount(&deviceCount); // 1 MPI process to many GPUs 
+	int actual_device;
+	cudaGetDeviceCount(&actual_device);
+	// std::cout<<"actual gpu num: "<<actual_device<<std::endl;
+	// fix for one to all case
+	if(deviceCount == 0){
+		deviceCount = actual_device;
+		for(int g = 0; g < deviceCount; g++){
+			gpu_id.push_back(g);
+		}
+	}
+	// std::cout<<"using gpu num: "<<deviceCount<<std::endl;
 	int AlignmentsToBePerformed = SeedInterfaceSet.size();
 	int numAlignmentsLocal = BATCH_SIZE * deviceCount; 
 
@@ -49,7 +62,7 @@ RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs,
 			bLSeedSet.push_back(lseed); // segfault origin might be around here 
 		}
 
-		extendSeedL(bLSeedSet, EXTEND_BOTHL, bseqHs, bseqVs, scoring, xdrop, seed_length, res, numAlignmentsLocal, deviceCount, GPU_THREADS);
+		extendSeedL(bLSeedSet, EXTEND_BOTHL, bseqHs, bseqVs, scoring, xdrop, seed_length, res, numAlignmentsLocal, deviceCount, GPU_THREADS,gpu_id);
 
 		for(int j = 0; j < numAlignmentsLocal; j++)
 		{
@@ -65,6 +78,4 @@ RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs,
 		free(res);
 	}
 }
-
-
 

@@ -222,6 +222,7 @@ DistributedPairwiseRunner::run_batch
 	uint64_t	nalignments		= 0;
 	//do a all to all communication
 	vector<int> proc_batch_num;
+	int max_job = batch_cnt; // max batch_size in my pipeline
 	proc_batch_num.resize(numprocs);
 	for(int i=0;i<numprocs;i++){
 		if(myrank==i){
@@ -240,9 +241,56 @@ DistributedPairwiseRunner::run_batch
 		}
 	}
 
-	for(int i=0;i<numprocs;i++){
+	for(int i = 0; i < numprocs; i++){
+		if(myrank % gpu_num == i % gpu_num && proc_batch_num[i] > batch_cnt){
+			max_job = proc_batch_num[i];
+		}
 		std::cout<<"my rank "<<myrank<<", process "<<i<<" has batch: "<<proc_batch_num[i]<<std::endl;
 	}
+
+	// construct order of using gpu
+	vector<int> total_order;
+	vector<int> my_recv;
+	vector<int> my_send;
+
+	for(int i = 0; i < max_job; i++){
+		for(int p = 0; p < numprocs; p++){
+			if((gpu_num < 0 || myrank % gpu_num == p % gpu_num) && i < proc_batch_num[p]){
+				total_order.push_back(p);
+			}
+		}
+	}
+	std::cout << "total order for gpu " << myrank % gpu_num << ": ";
+	for (int i = 0; i < total_order.size(); i++){
+		std::cout << total_order[i] << ' ';
+		if(total_order[i] == myrank){
+			if(i - 1 < 0 || total_order[i - 1] == myrank){
+				my_recv.push_back(-1);
+			}
+			else{
+				my_recv.push_back(total_order[i - 1]);
+			}
+			if(i + 1 >= total_order.size() || total_order[i + 1] == myrank){
+				my_send.push_back(-1);
+			}
+			else{
+				my_send.push_back(total_order[i + 1]);
+			}
+		}
+	}
+	std::cout << std::endl;
+
+	std::cout << "send order for rank " << myrank << ": ";
+	for (int i: my_send){
+		std::cout << i << " ";
+	}
+	std::cout << std::endl;
+	std::cout << "recv order for rank " << myrank << ": ";
+	for (int i: my_recv){
+		std::cout << i << " ";
+	}
+	std::cout << std::endl;
+
 
 	// PSpMat<elba::CommonKmers>::Tuples mattuples(*spSeq);
 	// @TODO threaded
@@ -396,7 +444,8 @@ DistributedPairwiseRunner::run_batch
 			<< std::endl;
 
 		// GGGG: fill ContainedSeqPerBatch
-		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx],gpu_num,batch_idx,batch_cnt,proc_batch_num);
+		vector<int> send_recv{my_send[batch_idx], my_recv[batch_idx]};
+		pf->apply_batch(seqsh, seqsv, lids, col_offset, row_offset, mattuples, lfs, noAlign, k, nreads, ContainedSeqPerBatch[batch_idx],gpu_num,batch_idx,batch_cnt,send_recv);
 		
 		delete [] lids;
 		++batch_idx;
