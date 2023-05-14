@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -C gpu
+#SBATCH -G 2
+#SBATCH -q regular
+#SBATCH -J ecoli-cpu-gpu
+#SBATCH -t 45:00
+#SBATCH -A m4341
+#SBATCH --error=ecoli-elba-%j
+#SBATCH --output=ecoli-elba-%j
+#OpenMP settings:
+export OMP_NUM_THREADS=1
+export OMP_PLACES=threads
+export OMP_PROC_BIND=true
+
+srun -n 4 -c 4 --cpu_bind=cores -G 2 --gpu-bind=none \
+    ../build_release/elba -i ../ecoli_hifi_29x.fasta -k 31 \
+    --idxmap ecoli-idxmap -c 8605 --alph dna --af ecoli-cpu -s 1 -O 100000 \
+    --afreq 100000 --ga 15
