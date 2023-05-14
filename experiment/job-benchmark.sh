@@ -15,15 +15,15 @@ export OMP_PROC_BIND=true
 
 # salloc --nodes 1 --gpus 4 --qos interactive --time 02:00:00 --constraint gpu --account=m4341
 
-# 29x dataset
-DATA=../ecoli_hifi_29x.fasta
-NAME=ecoli29x
-SEQUENCE_COUNT=8605
+# # 29x dataset
+# DATA=../ecoli_hifi_29x.fasta
+# NAME=ecoli29x
+# SEQUENCE_COUNT=8605
 
-# # 100x dataset
-# DATA=../ecoli100x.fa
-# NAME=ecoli100x
-# SEQUENCE_COUNT=91394
+# 100x dataset
+DATA=../ecoli100x.fa
+NAME=ecoli100x
+SEQUENCE_COUNT=91394
 
 mkdir -p outputs/$NAME
 
@@ -46,7 +46,7 @@ for n in 25 16 9 4 1; do
         tee outputs/"$NAME"/one2all_N_1_n_"$n"_gpu_4.out
 done
 
-for gpu in {1..3}; do
+for gpu in {1..2}; do
     # injection
     srun -N 1 -n 16 -c 4 --cpu_bind=cores -G "$gpu" --gpu-bind=none \
         ../build_release/elba -i \

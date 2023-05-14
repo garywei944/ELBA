@@ -10,7 +10,7 @@ cd $COMBBLAS_HOME
 rm -rf build_release
 mkdir build_release # elba executable in here
 cd build_release
-cmake -DLOWER_KMER_FREQ=20 -DUPPER_KMER_FREQ=30 -DDELTACHERNOFF=0.1 ..
+cmake -DLOWER_KMER_FREQ=20 -DUPPER_KMER_FREQ=50 -DDELTACHERNOFF=0.1 ..
 make -j$(nproc)
 
 echo ""
