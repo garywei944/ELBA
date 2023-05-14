@@ -7,15 +7,15 @@ using namespace std;
 
 void 
 RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs, 
-	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length)
+	vector<SeedInterface>& SeedInterfaceSet, vector<LoganResult>& xscores, int& xdrop, ushort& seed_length, vector<int> gpu)
 {
 	ScoringSchemeL sscheme(1, -1, -1, -1);
 	std::vector<ScoringSchemeL> scoring;
 	scoring.push_back(sscheme);
 
 	int deviceCount;
-	cudaGetDeviceCount(&deviceCount); // 1 MPI process to many GPUs 
-
+	//cudaGetDeviceCount(&deviceCount); // 1 MPI process to many GPUs 
+	deviceCount=gpu.size();
 	std::cout << deviceCount << " GPUs" << std::endl;
 
 	int AlignmentsToBePerformed = SeedInterfaceSet.size();
@@ -49,7 +49,7 @@ RunLoganAlign(vector<string>& seqHs, vector<string>& seqVs,
 			bLSeedSet.push_back(lseed); // segfault origin might be around here 
 		}
 
-		extendSeedL(bLSeedSet, EXTEND_BOTHL, bseqHs, bseqVs, scoring, xdrop, seed_length, res, numAlignmentsLocal, deviceCount, GPU_THREADS);
+		extendSeedL(bLSeedSet, EXTEND_BOTHL, bseqHs, bseqVs, scoring, xdrop, seed_length, res, numAlignmentsLocal, deviceCount, GPU_THREADS,gpu);
 
 		for(int j = 0; j < numAlignmentsLocal; j++)
 		{

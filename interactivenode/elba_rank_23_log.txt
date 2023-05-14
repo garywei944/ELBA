@@ -1,0 +1,8 @@
+Local nnz count: 18587
+calling aligner for batch idx 0 cur #algnments 2814 overall 2814
+processing batch of size 2814 with 4 threads 
+calling aligner for batch idx 1 cur #algnments 6597 overall 9411
+processing batch of size 6597 with 4 threads 
+Post concatenation ContainedSeqPerBatch, readcount 509
+Removed duplicates and sorted, contained readcount 438 out of 8605 sequences
+#alignments run 9411

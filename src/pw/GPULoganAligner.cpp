@@ -270,7 +270,7 @@ GPULoganAligner::apply_batch
 		start_time = std::chrono::system_clock::now();
 
 		// Call LOGAN only if noAlign is false
-		if(!noAlign&&gpu_num<0) 
+		if(gpu_num<0) 
 		{ 
 //			if(count == 0)
 //				std::cout << " - 1st k-mer comparison started on ";
@@ -300,6 +300,11 @@ GPULoganAligner::apply_batch
 					MPI_Send(&completed, 1, MPI_INT, myrank+1, 0, MPI_COMM_WORLD);
 				}
 			}*/
+			vector<int> gpu;
+			gpu.resize(-gpu_num);
+			for(int i=0;i<-gpu_num;i++){
+				gpu[i]=i;
+			}
 			if(myrank==0&&count==0&&epoch==0){
 				int completed = 1;
 				int send_to=myrank;
@@ -310,7 +315,7 @@ GPULoganAligner::apply_batch
 					send_to=0;
 				}
 				std::cout<<"rank "<<myrank<<" starts first epoch "<<epoch<<" next one is "<<send_to<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu);
 				std::cout<<"rank "<<myrank<<" ends "<<std::endl;
 				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				
@@ -439,7 +444,7 @@ GPULoganAligner::apply_batch
 					MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				std::cout<<"rank "<<myrank<<" starts epoch "<<epoch<<" total batch "<<batch_cnt<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu);
 				std::cout<<"rank "<<myrank<<" ends signal process "<<send_to<<std::endl;
 				if(send_to!=-1){
 					MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
@@ -450,7 +455,9 @@ GPULoganAligner::apply_batch
 		}
 		else{
 			//run injection mode
+			
 			int target_gpu=myrank%gpu_num;
+			vector<int> gpu{target_gpu};
 			if(myrank<gpu_num&&count==0&&epoch==0){
 				int completed = 1;
 				int send_to=myrank;
@@ -458,7 +465,7 @@ GPULoganAligner::apply_batch
 					send_to=myrank+gpu_num;
 				}
 				std::cout<<"rank "<<myrank<<" starts first epoch "<<epoch<<" next one is "<<send_to<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu);
 				std::cout<<"rank "<<myrank<<" ends "<<std::endl;
 				MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);
 				
@@ -548,7 +555,7 @@ GPULoganAligner::apply_batch
 					MPI_Recv(&completed,1,MPI_INT,receive_from,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				std::cout<<"rank "<<myrank<<" starts epoch "<<epoch<<" total batch "<<batch_cnt<<std::endl;
-				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length);
+				RunLoganAlign(seqHs, seqVs, seeds, xscores, xdrop, seed_length,gpu);
 				std::cout<<"rank "<<myrank<<" ends signal process "<<send_to<<std::endl;
 				if(send_to!=-1){
 					MPI_Send(&completed, 1, MPI_INT, send_to, 0, MPI_COMM_WORLD);

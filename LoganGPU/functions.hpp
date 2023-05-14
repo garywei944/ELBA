@@ -427,7 +427,8 @@ void extendSeedL(std::vector<LSeed> &seeds,
 			int *res,
 			int numAlignments,
 			int ngpus,
-			int n_threads
+			int n_threads,
+			std::vector<int> gpu
 			)
 {
 
@@ -600,7 +601,7 @@ void extendSeedL(std::vector<LSeed> &seeds,
 		if(i==ngpus-1)
 			dim = nSequencesLast;
 		//set gpu device
-		cudaSetDevice(i);
+		cudaSetDevice(gpu[i]);
 		//create streams
 		cudaStreamCreateWithFlags(&stream_r[i],cudaStreamNonBlocking);
 		cudaStreamCreateWithFlags(&stream_l[i],cudaStreamNonBlocking);
@@ -645,7 +646,7 @@ void extendSeedL(std::vector<LSeed> &seeds,
 #pragma omp parallel for num_threads(ngpus)
 	for(int i = 0; i < ngpus;i++)
 	{
-		cudaSetDevice(i);
+		cudaSetDevice(gpu[i]);
 
 		int dim = nSequences;
 		if(i==ngpus-1)
@@ -658,7 +659,7 @@ void extendSeedL(std::vector<LSeed> &seeds,
 #pragma omp parallel for num_threads(ngpus)
 	for(int i = 0; i < ngpus; i++)
 	{
-		cudaSetDevice(i);
+		cudaSetDevice(gpu[i]);
 		int dim = nSequences;
 
 		if(i==ngpus-1)
@@ -674,7 +675,7 @@ void extendSeedL(std::vector<LSeed> &seeds,
 #pragma omp parallel for num_threads(ngpus)
 	for(int i = 0; i < ngpus; i++)
 	{
-		cudaSetDevice(i);
+		cudaSetDevice(gpu[i]);
 		cudaDeviceSynchronize();
 	}
 
@@ -687,7 +688,7 @@ void extendSeedL(std::vector<LSeed> &seeds,
 #pragma omp parallel for num_threads(ngpus)
 	for(int i = 0; i < ngpus; i++)
 	{
-		cudaSetDevice(i);
+		cudaSetDevice(gpu[i]);
 
 		cudaStreamDestroy(stream_l[i]);
 		cudaStreamDestroy(stream_r[i]);
