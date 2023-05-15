@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 1
+#SBATCH -N 2
 #SBATCH -C gpu
 #SBATCH -G 4
 #SBATCH -q regular
@@ -27,41 +27,47 @@ SEQUENCE_COUNT=91394
 
 mkdir -p outputs/$NAME
 
-# MPI processes scale
-for n in 25 16 9 4 1; do
-    # injection
-    srun -N 1 -n "$n" -c 4 --cpu_bind=cores -G 4 --gpu-bind=none \
-        ../build_release/elba -i \
-        "$DATA" \
-        -k 31 --idxmap ecoli-idxmap -c "$SEQUENCE_COUNT" --alph dna \
-        --af ecoli-gpu -s 1 -O 100000 --afreq 100000 --ga 15 --gpu_num 4 |&
-        tee outputs/"$NAME"/injection_N_1_n_"$n"_gpu_4.out
+run() {
+    if [[ $job == one2all ]]; then
+        gpu_num=-$gpu
+    elif [[ $job == injection ]]; then
+        gpu_num=$gpu
+    fi
 
-    # one-to-all
-    srun -N 1 -n "$n" -c 4 --cpu_bind=cores -G 4 --gpu-bind=none \
-        ../build_release/elba -i \
-        "$DATA" \
-        -k 31 --idxmap ecoli-idxmap -c "$SEQUENCE_COUNT" --alph dna \
-        --af ecoli-gpu -s 1 -O 100000 --afreq 100000 --ga 15 --gpu_num -4 |&
-        tee outputs/"$NAME"/one2all_N_1_n_"$n"_gpu_4.out
-done
-
-for gpu in {1..2}; do
-    # injection
-    srun -N 1 -n 16 -c 4 --cpu_bind=cores -G "$gpu" --gpu-bind=none \
-        ../build_release/elba -i \
-        "$DATA" \
+    srun -N "$N" --ntasks-per-node "$n" \
+        -c 4 --cpu_bind=cores \
+        --gpus-per-node "$gpu" --gpu-bind=none \
+        ../build_release/elba -i "$DATA" \
         -k 31 --idxmap ecoli-idxmap -c "$SEQUENCE_COUNT" --alph dna \
         --af ecoli-gpu -s 1 -O 100000 --afreq 100000 --ga 15 \
-        --gpu_num "$gpu" |&
-        tee outputs/"$NAME"/injection_N_1_n_16_gpu_"$gpu".out
+        --gpu_num "$gpu_num" |&
+        tee outputs/"$NAME"/"$job"_N_"$N"_n_"$n"_gpu_"$gpu".out
+}
 
-    # one-to-all
-    srun -N 1 -n 16 -c 4 --cpu_bind=cores -G "$gpu" --gpu-bind=none \
-        ../build_release/elba -i \
-        "$DATA" \
-        -k 31 --idxmap ecoli-idxmap -c "$SEQUENCE_COUNT" --alph dna \
-        --af ecoli-gpu -s 1 -O 100000 --afreq 100000 --ga 15 \
-        --gpu_num -"$gpu" |&
-        tee outputs/"$NAME"/one2all_N_1_n_16_gpu_"$gpu".out
+for job in one2all injection; do
+    # N=1
+    # for n in 25 16 9 4 1; do
+    #     gpu=4
+    #     run
+    # done
+    # for gpu in 1 2; do
+    #     n=16
+    #     run
+    # done
+
+    N=2
+    for n in 2 8 18; do
+        gpu=4
+        run
+    done
+    for gpu in 1 2; do
+        n=8
+        run
+    done
+
 done
+
+rm *.txt
+rm elba.contigs.fa
+rm *.mtx
+rm ecoli-gpu-readnamemap*
