@@ -5,7 +5,8 @@
 CombBLAS
 build*
 ecoli_hifi_29x.fasta
-
+*.fa
+LOGAN
 # User-specific files
 *.suo
 *.user
